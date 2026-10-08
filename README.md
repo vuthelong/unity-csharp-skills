@@ -1,6 +1,6 @@
 # Unity C# Skills
 
-Curated, categorized [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for **Unity 6 (6000.x)** and C# development, packaged as a Claude Code plugin marketplace.
+Curated, categorized [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for **Unity 6 (6000.x)** and C# development, packaged as a Claude Code plugin marketplace. 71 skills in 10 plugins.
 
 Skills are merged, deduplicated and updated from Unity-Technologies/skills, Unity-Open-MCP, a5c-ai/babysitter and original work. Third-party library skills are grounded in each library's source code; where an upstream README disagrees with its source, the skill follows the source.
 
@@ -48,6 +48,7 @@ URP, Render Graph, post-processing, Shader Graph, VFX Graph, lighting.
 | Skill | License | Summary |
 |---|---|---|
 | [`migrate-birp-to-urp`](plugins/rendering-vfx/skills/migrate-birp-to-urp/SKILL.md) | Unity Companion | Plans, executes, and troubleshoots moving a Unity project from the Built-in Render Pipeline (BiRP) to URP on Unity 6 in safe, verified phases - URP asset and renderer setup,… |
+| [`optimize-3d-rendering`](plugins/rendering-vfx/skills/optimize-3d-rendering/SKILL.md) | MIT | Diagnoses and reduces 3D rendering cost in Unity 6 URP (URP 17+) - CPU vs GPU triage with the Frame Debugger, Rendering Debugger, Profiler GPU module, Stats and Render Graph… |
 | [`shader-graph-create-custom-node`](plugins/rendering-vfx/skills/shader-graph-create-custom-node/SKILL.md) | Unity Companion | Turns HLSL into reusable Shader Graph nodes for URP on Unity 6 - Custom Function nodes (File or String mode, _float/_half suffixes, UnityTexture2D/UnitySamplerState,… |
 | [`unity-lighting`](plugins/rendering-vfx/skills/unity-lighting/SKILL.md) | MIT | Sets up, scripts, bakes, and debugs lighting in Unity 6 URP scenes. |
 | [`unity-particle-system`](plugins/rendering-vfx/skills/unity-particle-system/SKILL.md) | MIT | Creates, tunes, scripts, and optimizes Unity's built-in CPU Particle System (Shuriken) on Unity 6 with URP particle shaders. |
@@ -88,6 +89,7 @@ Physics, navigation, animation, cameras, input, terrain, splines.
 | Skill | License | Summary |
 |---|---|---|
 | [`animation-authoring`](plugins/gameplay-systems/skills/animation-authoring/SKILL.md) | MIT | Authors and drives Unity Mecanim animation in Unity 6 - AnimationClip curves and events (AnimationUtility, EditorCurveBinding), AnimatorController state machines, parameters,… |
+| [`character-controller-3d`](plugins/gameplay-systems/skills/character-controller-3d/SKILL.md) | MIT | Builds and debugs 3D player character movement in Unity 6 - choosing between CharacterController, kinematic Rigidbody and dynamic Rigidbody; CharacterController.Move vs… |
 | [`cinemachine-cameras`](plugins/gameplay-systems/skills/cinemachine-cameras/SKILL.md) | MIT | Builds and scripts gameplay and cutscene cameras with Cinemachine 3.x (com.unity.cinemachine, namespace Unity.Cinemachine) in Unity 6 - CinemachineBrain, CinemachineCamera… |
 | [`initialize-ai-navigation`](plugins/gameplay-systems/skills/initialize-ai-navigation/SKILL.md) | Unity Companion | Sets up, scripts and troubleshoots Unity AI Navigation (com.unity.ai.navigation 2.x) in Unity 6 - NavMeshSurface baking (editor and runtime BuildNavMesh / UpdateNavMesh),… |
 | [`input-system-actions`](plugins/gameplay-systems/skills/input-system-actions/SKILL.md) | MIT | Sets up, scripts and tests the Unity Input System 1.x (com.unity.inputsystem) in Unity 6 - Active Input Handling, project-wide actions (InputSystem.actions), .inputactions… |
@@ -102,7 +104,9 @@ Audio import and mixers, web build optimization, memory profiling.
 
 | Skill | License | Summary |
 |---|---|---|
+| [`audio-playback-system`](plugins/audio-performance/skills/audio-playback-system/SKILL.md) | MIT | Builds a runtime audio playback layer for Unity 6 built-in audio - an AudioService (VContainer singleton or MonoBehaviour fallback) with pooled AudioSources, AudioCue… |
 | [`audio-setup-mixers`](plugins/audio-performance/skills/audio-setup-mixers/SKILL.md) | Unity Companion | Inventories a project's AudioMixers and routes scene AudioSources into the right AudioMixerGroup (Music, SFX, Foley, Voice, UI, Ambience) by classifying what each source plays,… |
+| [`fmod-unity`](plugins/audio-performance/skills/fmod-unity/SKILL.md) | MIT | Integrates FMOD Studio into Unity 6 with the FMOD for Unity plugin (2.03/2.04) - install and Studio version matching, Setup Wizard, FMOD Settings (Source Type, Import Type,… |
 | [`memory-snapshot-profiling`](plugins/audio-performance/skills/memory-snapshot-profiling/SKILL.md) | MIT | Captures, compares, and interprets Unity Memory Profiler snapshots (.snap) to find leaks, duplicate or oversized assets, and runtime memory growth in Unity 6. |
 | [`optimize-audio`](plugins/audio-performance/skills/optimize-audio/SKILL.md) | Unity Companion | Audits and optimizes Unity 6 audio memory, DSP CPU cost, and playback quality through AudioImporter settings, per-platform overrides, and AudioMixer topology. |
 | [`optimize-web`](plugins/audio-performance/skills/optimize-web/SKILL.md) | Unity Companion | Audits and optimizes Unity 6 WebGL and WebGPU builds for download size, startup time, browser memory, and runtime smoothness. |
@@ -121,12 +125,18 @@ Unity Gaming Services, multiplayer, Vivox, IAP, LevelPlay ads.
 
 ### Third-party Libraries — `unity-libraries`
 
-Third-party libraries: UniTask, R3, MessagePipe, VContainer, ZString, UIEffect, Animation Sequencer, ZBase CSV Reader, PubSub, Pooling.
+Third-party libraries: UniTask, R3, ObservableCollections, MessagePipe, VContainer, ZString, ZLogger, MemoryPack, MasterMemory, NativeMemoryArray, MessagePack, MagicOnion, UIEffect, Animation Sequencer, ZBase CSV Reader, PubSub, Pooling.
 
 | Skill | License | Summary |
 |---|---|---|
 | [`animation-sequencer`](plugins/libraries/skills/animation-sequencer/SKILL.md) | MIT | Sets up and uses brunomikoski/Animation-Sequencer (com.brunomikoski.animationsequencer), a DOTween-based inspector tool for authoring and previewing UI/object animation… |
+| [`magiconion`](plugins/libraries/skills/magiconion/SKILL.md) | MIT | Builds client-server networking for Unity with Cysharp MagicOnion (gRPC + MessagePack RPC over HTTP/2): a shared C# interface project, an ASP.NET Core server and a Unity client. |
+| [`mastermemory`](plugins/libraries/skills/mastermemory/SKILL.md) | MIT | Builds read-only, source-generated master-data databases in Unity 6 with Cysharp MasterMemory v3 (NuGet MasterMemory, on MessagePack-CSharp). |
+| [`memorypack`](plugins/libraries/skills/memorypack/SKILL.md) | MIT | Serializes C# objects to a compact binary format in Unity 6 with Cysharp MemoryPack (source-generated, reflection-free, IL2CPP-safe). |
+| [`messagepack-csharp`](plugins/libraries/skills/messagepack-csharp/SKILL.md) | MIT | Writes and reviews binary serialization in Unity and .NET with MessagePack-CSharp v3 (NuGet MessagePack, UPM com.github.messagepack-csharp). |
 | [`messagepipe`](plugins/libraries/skills/messagepipe/SKILL.md) | MIT | Sets up and reviews Cysharp MessagePipe (com.cysharp.messagepipe) for DI-first pub/sub in Unity. |
+| [`native-memory-array`](plugins/libraries/skills/native-memory-array/SKILL.md) | MIT | Uses Cysharp NativeMemoryArray (Cysharp.Collections.NativeMemoryArray<T>) in Unity 6 for native-memory buffers that bypass the managed heap and the 2 GB array limit, exposed as… |
+| [`observable-collections`](plugins/libraries/skills/observable-collections/SKILL.md) | MIT | Builds data-driven Unity UI on Cysharp ObservableCollections - generic, low-allocation observable collections (ObservableList, ObservableDictionary, ObservableHashSet,… |
 | [`r3`](plugins/libraries/skills/r3/SKILL.md) | MIT | Writes and reviews reactive code in Unity with Cysharp R3 (NuGet R3 + UPM com.cysharp.r3), the successor to UniRx. |
 | [`ui-effect`](plugins/libraries/skills/ui-effect/SKILL.md) | MIT | Applies and configures mob-sakai UIEffect v5 (com.coffee.ui-effect, namespace Coffee.UIEffects) on uGUI Image, RawImage, Text and TextMeshProUGUI - grayscale, sepia, blur,… |
 | [`unitask`](plugins/libraries/skills/unitask/SKILL.md) | MIT | Writes and reviews allocation-free async/await code in Unity with Cysharp UniTask (com.cysharp.unitask, namespace Cysharp.Threading.Tasks). |
@@ -134,13 +144,26 @@ Third-party libraries: UniTask, R3, MessagePipe, VContainer, ZString, UIEffect, 
 | [`zbase-csv-reader`](plugins/libraries/skills/zbase-csv-reader/SKILL.md) | MIT | Sets up and uses ZBase.Csv-Reader (com.zbase.csv-reader, Zitga-Tech) to bake CSV files into strongly typed ScriptableObjects at edit time, with optional Google Sheets download. |
 | [`zbase-pooling`](plugins/libraries/skills/zbase-pooling/SKILL.md) | MIT | Sets up and reviews Zitga-Tech ZBase.Foundation.Pooling (com.zbase.foundation.pooling) for pooling C# objects, collections, GameObjects and Components in Unity, and chooses… |
 | [`zbase-pubsub`](plugins/libraries/skills/zbase-pubsub/SKILL.md) | MIT | Sets up and reviews Zitga-Tech ZBase.Foundation.PubSub (com.zbase.foundation.pubsub, namespace ZBase.Foundation.PubSub), a DI-free, UniTask-based messenger for Unity. |
+| [`zlogger`](plugins/libraries/skills/zlogger/SKILL.md) | MIT | Sets up Cysharp ZLogger v2 (Microsoft.Extensions.Logging provider with zero-allocation UTF-8 interpolated logging) in Unity 6. |
 | [`zstring`](plugins/libraries/skills/zstring/SKILL.md) | MIT | Builds strings without GC garbage in Unity using Cysharp ZString (com.cysharp.zstring, namespace Cysharp.Text). |
+
+### Asset Pipeline — `unity-asset-pipeline`
+
+Blender to Unity import, Spine runtime, Addressables, CSV to ScriptableObject game data pipeline.
+
+| Skill | License | Summary |
+|---|---|---|
+| [`addressables-asset-loading`](plugins/asset-pipeline/skills/addressables-asset-loading/SKILL.md) | MIT | Sets up, loads, releases and ships content with Unity Addressables (com.unity.addressables 2.x-4.x) in Unity 6. |
+| [`blender-to-unity-pipeline`](plugins/asset-pipeline/skills/blender-to-unity-pipeline/SKILL.md) | MIT | Sets up and audits the Blender to Unity 6 URP model pipeline. |
+| [`game-data-pipeline`](plugins/asset-pipeline/skills/game-data-pipeline/SKILL.md) | MIT | Builds and maintains an end-to-end game data pipeline in Unity 6 - CSV or Google Sheets baked by ZBase.Csv-Reader into ScriptableObject tables, auto-marked Addressable in a… |
+| [`spine-unity`](plugins/asset-pipeline/skills/spine-unity/SKILL.md) | MIT | Integrates Esoteric Software Spine 2D skeletal animation into Unity 6 with the spine-unity runtime and Spine URP Shaders. |
 
 ## Accuracy notes
 
 - Targets Unity 6000.0 to 6000.6. APIs that changed across minors are flagged in the skills, e.g. `Object.GetInstanceID()` is a CS0619 error on 6000.5+.
 - Snippets have not all been compiled against every 6000.x minor. Where a skill could not verify an API it says so in place; check those against your installed package version.
 - `zbase-pubsub` and `zbase-pooling` upstream packages call `GetInstanceID()` and may not compile on 6000.5+ until patched.
+- `zlogger` v2 needs `-langVersion:10` via `csc.rsp` in every assembly that logs; Unity 6 compiles C# 9 by default.
 
 ## License
 

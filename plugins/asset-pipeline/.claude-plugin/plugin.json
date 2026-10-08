@@ -1,0 +1,7 @@
+{
+  "name": "unity-asset-pipeline",
+  "description": "Unity 6 asset pipeline: Blender FBX/glTF export and ModelImporter rules enforced by folder, Spine 2D skeletons in 3D URP scenes, Addressables loading, lifetime and content builds, and CSV game data baked to ScriptableObjects.",
+  "version": "0.1.0",
+  "author": { "name": "vuthelong" },
+  "license": "MIT"
+}
