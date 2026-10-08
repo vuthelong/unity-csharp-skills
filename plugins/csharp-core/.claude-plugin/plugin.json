@@ -1,0 +1,7 @@
+{
+  "name": "unity-csharp-core",
+  "description": "Unity 6 C# fundamentals: house-style authoring with Unity 6 API changes, async, serialization and testing; bug and leak review; and Editor safety for compile errors, domain reload and scene/asset YAML with GUID preservation.",
+  "version": "0.1.0",
+  "author": { "name": "vuthelong" },
+  "license": "MIT"
+}

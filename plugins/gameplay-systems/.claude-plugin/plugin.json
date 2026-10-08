@@ -1,0 +1,7 @@
+{
+  "name": "unity-gameplay-systems",
+  "description": "Unity 6 gameplay systems skills: 3D physics collision diagnosis, AI Navigation, Mecanim animation and constraints, Cinemachine 3 cameras, Timeline cutscenes, Splines paths, Input System actions and testing, and Terrain / ProBuilder / LOD level geometry.",
+  "version": "0.1.0",
+  "author": { "name": "vuthelong" },
+  "license": "Unity Companion License"
+}

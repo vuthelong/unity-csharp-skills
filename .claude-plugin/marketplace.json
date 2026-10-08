@@ -1,0 +1,57 @@
+{
+  "name": "unity-csharp-skills",
+  "owner": {
+    "name": "vuthelong"
+  },
+  "metadata": {
+    "description": "Curated, categorized Agent Skills for Unity 6 and C# development.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "unity-csharp-core",
+      "source": "./plugins/csharp-core",
+      "description": "C# and Unity coding standards, code review, editor safety."
+    },
+    {
+      "name": "unity-editor-tooling",
+      "source": "./plugins/editor-tooling",
+      "description": "Unity CLI, packages, project bootstrap, search, auditing, builds."
+    },
+    {
+      "name": "unity-rendering-vfx",
+      "source": "./plugins/rendering-vfx",
+      "description": "URP, Render Graph, post-processing, Shader Graph, VFX Graph, lighting."
+    },
+    {
+      "name": "unity-ui",
+      "source": "./plugins/ui",
+      "description": "UI Toolkit, uGUI, IMGUI, TextMeshPro, localization, screen navigation."
+    },
+    {
+      "name": "unity-2d",
+      "source": "./plugins/2d",
+      "description": "Pixel perfect, sprites, sprite atlases, tilemaps and rule tiles."
+    },
+    {
+      "name": "unity-gameplay-systems",
+      "source": "./plugins/gameplay-systems",
+      "description": "Physics, navigation, animation, cameras, input, terrain, splines."
+    },
+    {
+      "name": "unity-audio-performance",
+      "source": "./plugins/audio-performance",
+      "description": "Audio import and mixers, web build optimization, memory profiling."
+    },
+    {
+      "name": "unity-services-monetization",
+      "source": "./plugins/services-monetization",
+      "description": "Unity Gaming Services, multiplayer, Vivox, IAP, LevelPlay ads."
+    },
+    {
+      "name": "unity-libraries",
+      "source": "./plugins/libraries",
+      "description": "Third-party libraries: UniTask, R3, MessagePipe, VContainer, ZString, UIEffect, Animation Sequencer, ZBase CSV Reader, PubSub, Pooling."
+    }
+  ]
+}

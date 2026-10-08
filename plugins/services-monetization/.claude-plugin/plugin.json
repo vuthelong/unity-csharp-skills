@@ -1,0 +1,7 @@
+{
+  "name": "unity-services-monetization",
+  "description": "Unity Gaming Services and monetization skills for Unity 6: live-ops backend (Authentication, Cloud Save, Cloud Code, Remote Config, Economy, Leaderboards, deployment), Multiplayer Services sessions and matchmaking, Vivox voice and text chat, Unity In-App Purchasing 5 with D2C and migrations, and LevelPlay ad mediation.",
+  "version": "0.1.0",
+  "author": { "name": "vuthelong" },
+  "license": "Unity Companion License"
+}

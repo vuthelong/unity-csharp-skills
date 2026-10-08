@@ -1,0 +1,7 @@
+{
+  "name": "unity-editor-tooling",
+  "description": "Unity 6 Editor and project tooling: the unity CLI (live Editor control, Editor installs, projects, builds, tests, source control), headless UPM package management, guided new-project bootstrap, Unity Search query generation, Project Auditor fix loops, Graph Toolkit node/state-machine editors, and Asset Transformer Toolkit (Pixyz) imports and RuleSets.",
+  "version": "0.1.0",
+  "author": { "name": "vuthelong" },
+  "license": "Unity Companion License"
+}

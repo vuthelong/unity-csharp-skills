@@ -1,0 +1,9 @@
+{
+  "name": "unity-2d",
+  "description": "Unity 6 2D skills: pixel-perfect rendering, sprite slicing and metadata editing, Sprite Atlas V2 authoring and late binding, and Tilemap levels, palettes, and auto-tiling Rule Tiles.",
+  "version": "0.1.0",
+  "author": {
+    "name": "vuthelong"
+  },
+  "license": "Unity Companion License"
+}

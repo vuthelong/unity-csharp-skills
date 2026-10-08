@@ -1,0 +1,7 @@
+{
+  "name": "unity-audio-performance",
+  "description": "Unity 6 audio and runtime performance skills: AudioClip import and mixer CPU optimization, mixer routing and runtime volume control, WebGL/WebGPU build size and browser performance, and Memory Profiler snapshot workflows.",
+  "version": "0.1.0",
+  "author": { "name": "vuthelong" },
+  "license": "Unity Companion License"
+}

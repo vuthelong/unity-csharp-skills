@@ -1,0 +1,9 @@
+{
+  "name": "unity-rendering-vfx",
+  "description": "Unity 6 URP rendering and VFX skills: VFX Graph, Particle System, lighting and baking, URP post-processing Volumes, Render Graph renderer feature review, Built-in to URP migration, custom Shader Graph nodes, and texture import settings.",
+  "version": "0.1.0",
+  "author": {
+    "name": "vuthelong"
+  },
+  "license": "Unity Companion License"
+}
