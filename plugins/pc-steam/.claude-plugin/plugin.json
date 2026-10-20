@@ -1,0 +1,7 @@
+{
+  "name": "unity-pc-steam",
+  "description": "Shipping Unity 6 games on Steam: Steamworks.NET integration (init, achievements, stats, Steam Cloud, rich presence, overlay, DLC), friends-only lobbies and invites over Steam P2P for Netcode for GameObjects co-op, SteamPipe builds and CI uploads, and Steam Deck and controller readiness.",
+  "version": "0.1.0",
+  "author": { "name": "vuthelong" },
+  "license": "MIT"
+}

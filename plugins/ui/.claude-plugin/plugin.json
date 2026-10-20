@@ -1,6 +1,6 @@
 {
   "name": "unity-ui",
-  "description": "Unity 6 UI skills: framework routing, uGUI Canvas UI, UI Toolkit (UXML/USS, data binding, custom controls, editor UI), IMGUI, UnityScreenNavigator page/modal/sheet navigation, TextMeshPro optimization, and Unity Localization.",
+  "description": "Unity 6 UI skills: framework routing, uGUI Canvas UI, UI Toolkit (UXML/USS, data binding, custom controls, editor UI), IMGUI, UnityScreenNavigator page/modal/sheet navigation, TextMeshPro optimization, Unity Localization, PC settings menus (display, graphics, key rebinding), and accessibility options.",
   "version": "0.1.0",
   "author": {
     "name": "vuthelong"

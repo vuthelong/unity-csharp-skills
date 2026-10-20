@@ -1,6 +1,6 @@
 ---
 name: ui
-description: Routes ambiguous Unity UI requests to the right skill. Use when a UI request names no framework (a menu, HUD, popup or editor window with no UI Toolkit, uGUI or IMGUI signal), when choosing between UI Toolkit and uGUI, or for framework comparison questions. Picks ui-uitk, ui-ugui or ui-imgui from project context and layers screen-navigator, optimize-text-mesh-pro or localization on top. Skip it when the request already names a framework.
+description: Routes ambiguous Unity UI requests to the right skill. Use when a UI request names no framework (a menu, HUD, popup or editor window with no UI Toolkit, uGUI or IMGUI signal), when choosing between UI Toolkit and uGUI, or for framework comparison questions. Picks ui-uitk, ui-ugui or ui-imgui from project context and layers screen-navigator, pc-settings-menu, accessibility, optimize-text-mesh-pro or localization on top. Skip it when the request already names a framework.
 license: Unity Companion License
 metadata:
   category: ui

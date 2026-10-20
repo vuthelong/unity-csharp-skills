@@ -1,6 +1,6 @@
 # Unity C# Skills
 
-Curated, categorized [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for **Unity 6 (6000.x)** and C# development, packaged as a Claude Code plugin marketplace. 71 skills in 10 plugins.
+Curated, categorized [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for **Unity 6 (6000.x)** and C# development, packaged as a Claude Code plugin marketplace. 86 skills in 11 plugins.
 
 Skills are merged, deduplicated and updated from Unity-Technologies/skills, Unity-Open-MCP, a5c-ai/babysitter and original work. Third-party library skills are grounded in each library's source code; where an upstream README disagrees with its source, the skill follows the source.
 
@@ -47,10 +47,11 @@ Unity CLI, packages, project bootstrap, search, auditing, builds.
 
 ### Rendering & VFX — `unity-rendering-vfx`
 
-URP, Render Graph, post-processing, Shader Graph, VFX Graph, lighting.
+URP, Render Graph, post-processing, Shader Graph, VFX Graph, lighting, day-night and weather.
 
 | Skill | License | Summary |
 |---|---|---|
+| [`day-night-weather`](plugins/rendering-vfx/skills/day-night-weather/SKILL.md) | MIT | Builds a dynamic day-night cycle and weather system for Unity 6 URP - a normalized time-of-day clock with day length, time scale and sunrise/sunset/new-day events, sun and… |
 | [`migrate-birp-to-urp`](plugins/rendering-vfx/skills/migrate-birp-to-urp/SKILL.md) | Unity Companion | Plans and runs a phased, verified migration of a Unity 6 project from the Built-in Render Pipeline to URP - URP asset setup, Render Pipeline Converter, material and particle… |
 | [`optimize-3d-rendering`](plugins/rendering-vfx/skills/optimize-3d-rendering/SKILL.md) | MIT | Diagnoses and reduces the frame cost of 3D URP scenes on Unity 6 - CPU vs GPU triage with the Frame Debugger and Profiler, SRP Batcher and GPU Resident Drawer batching… |
 | [`shader-graph-create-custom-node`](plugins/rendering-vfx/skills/shader-graph-create-custom-node/SKILL.md) | Unity Companion | Turns HLSL into reusable Shader Graph nodes for URP on Unity 6 - Custom Function nodes (File or String mode, _float/_half suffixes, SHADERGRAPH_PREVIEW guards), Sub Graphs… |
@@ -63,12 +64,14 @@ URP, Render Graph, post-processing, Shader Graph, VFX Graph, lighting.
 
 ### UI — `unity-ui`
 
-UI Toolkit, uGUI, IMGUI, TextMeshPro, localization, screen navigation.
+UI Toolkit, uGUI, IMGUI, TextMeshPro, localization, screen navigation, PC settings menu, accessibility.
 
 | Skill | License | Summary |
 |---|---|---|
+| [`accessibility`](plugins/ui/skills/accessibility/SKILL.md) | MIT | Adds player-facing accessibility options to a Unity 6 PC/Steam game - subtitles and sound captions with speaker names, size, background opacity and reading-speed timing… |
 | [`localization`](plugins/ui/skills/localization/SKILL.md) | Unity Companion | Sets up and drives Unity Localization (com.unity.localization) - Locales, String and Asset Tables, Smart Strings, LocalizeStringEvent wiring, runtime locale switching… |
 | [`optimize-text-mesh-pro`](plugins/ui/skills/optimize-text-mesh-pro/SKILL.md) | Unity Companion | Optimizes TextMeshPro font assets in Unity 6 for memory, quality, CPU and build size - static main font plus dynamic fallback chains, atlas sizing, padding and sampling… |
+| [`pc-settings-menu`](plugins/ui/skills/pc-settings-menu/SKILL.md) | MIT | Builds the logic behind a PC game settings menu in Unity 6 - a settings model saved as JSON under Application.persistentDataPath separately from save games, display options… |
 | [`screen-navigator`](plugins/ui/skills/screen-navigator/SKILL.md) | MIT | Sets up and uses Haruma-K/UnityScreenNavigator (uGUI only) for screen routing - PageContainer push/pop history, ModalContainer popups with backdrops, SheetContainer tabs… |
 | [`ui`](plugins/ui/skills/ui/SKILL.md) | Unity Companion | Routes ambiguous Unity UI requests to the right skill. |
 | [`ui-imgui`](plugins/ui/skills/ui-imgui/SKILL.md) | Unity Companion | Maintains and writes Unity IMGUI code - EditorWindow OnGUI, OnInspectorGUI custom editors, IMGUI PropertyDrawers, ScriptableWizards, Handles scene GUI and runtime OnGUI debug… |
@@ -88,28 +91,34 @@ Pixel perfect, sprites, sprite atlases, tilemaps and rule tiles.
 
 ### Gameplay Systems — `unity-gameplay-systems`
 
-Physics, navigation, animation, cameras, input, terrain, splines.
+Physics, navigation, animation, cameras, input, terrain, splines, save system, boot flow, interaction, enemy AI, combat.
 
 | Skill | License | Summary |
 |---|---|---|
 | [`animation-authoring`](plugins/gameplay-systems/skills/animation-authoring/SKILL.md) | MIT | Authors and drives Mecanim animation in Unity 6 - AnimationClip curves and events, AnimatorController state machines, blend trees and layers built from editor scripts… |
 | [`character-controller-3d`](plugins/gameplay-systems/skills/character-controller-3d/SKILL.md) | MIT | Builds and debugs 3D player movement in Unity 6 with CharacterController or a kinematic or dynamic Rigidbody - ground probes, gravity, slopes and steps, jump buffering and… |
 | [`cinemachine-cameras`](plugins/gameplay-systems/skills/cinemachine-cameras/SKILL.md) | MIT | Builds and scripts gameplay and cutscene cameras with Cinemachine 3.x in Unity 6 - CinemachineBrain, CinemachineCamera priority and blends, follow, orbit, third-person and… |
+| [`combat-damage-system`](plugins/gameplay-systems/skills/combat-damage-system/SKILL.md) | MIT | Builds health and damage for Unity 6 3D games - Health with a DamageInfo pipeline (amount, type, source, team, hit point), resistances, invulnerability frames, death… |
+| [`enemy-ai-behavior`](plugins/gameplay-systems/skills/enemy-ai-behavior/SKILL.md) | MIT | Builds enemy and NPC combat AI for Unity 6 3D games - choosing a finite state machine, Unity Behavior graphs (com.unity.behavior) or utility AI, perception (vision cone with… |
+| [`game-bootstrap-flow`](plugins/gameplay-systems/skills/game-bootstrap-flow/SKILL.md) | MIT | Builds the startup and top-level flow of a Unity 6 game - a persistent services prefab created by RuntimeInitializeOnLoadMethod (or a Boot scene) and kept with… |
 | [`initialize-ai-navigation`](plugins/gameplay-systems/skills/initialize-ai-navigation/SKILL.md) | Unity Companion | Sets up, scripts and troubleshoots Unity AI Navigation (com.unity.ai.navigation 2.x) in Unity 6 - NavMeshSurface baking at edit time or runtime, NavMeshAgent, obstacle… |
 | [`input-system-actions`](plugins/gameplay-systems/skills/input-system-actions/SKILL.md) | MIT | Sets up, scripts and tests the Unity Input System 1.x in Unity 6 - Active Input Handling, project-wide actions, .inputactions assets, bindings and composites, control… |
+| [`interaction-system`](plugins/gameplay-systems/skills/interaction-system/SKILL.md) | MIT | Builds a player interaction system for Unity 6 3D games - an IInteractable interface, target detection by camera SphereCast or OverlapSphereNonAlloc with distance, angle… |
 | [`level-geometry-authoring`](plugins/gameplay-systems/skills/level-geometry-authoring/SKILL.md) | MIT | Generates and edits level geometry by script in Unity 6 - Terrain heightmaps, splat painting, tree and detail placement, holes and multi-tile stitching, ProBuilder greybox… |
 | [`physics-3d-collision`](plugins/gameplay-systems/skills/physics-3d-collision/SKILL.md) | Unity Companion | Diagnoses and fixes 3D PhysX collision, trigger and query problems in Unity 6 MonoBehaviour projects - Rigidbody body types, Layer Collision Matrix, MeshCollider rules… |
+| [`save-system`](plugins/gameplay-systems/skills/save-system/SKILL.md) | MIT | Builds a crash-safe save game system for Unity 6 - plain C# save DTOs serialized with Newtonsoft Json.NET (com.unity.nuget.newtonsoft-json), a version envelope with a tested… |
 | [`splines-paths`](plugins/gameplay-systems/skills/splines-paths/SKILL.md) | MIT | Creates, edits and samples Unity Splines 2.x in Unity 6 - SplineContainer and knots, world vs local evaluation, arc-length and nearest-point queries, NativeSpline for jobs… |
 | [`timeline-sequencing`](plugins/gameplay-systems/skills/timeline-sequencing/SKILL.md) | MIT | Builds, binds and controls Unity Timeline sequences in Unity 6 - TimelineAsset creation by script, Animation, Activation, Audio, Signal and Control tracks, markers and… |
 
 ### Audio & Performance — `unity-audio-performance`
 
-Audio import and mixers, web build optimization, memory profiling.
+Audio import and mixers, web build optimization, memory and CPU profiling.
 
 | Skill | License | Summary |
 |---|---|---|
 | [`audio-playback-system`](plugins/audio-performance/skills/audio-playback-system/SKILL.md) | MIT | Builds the runtime playback layer for Unity built-in audio - a pooled AudioService with AudioCue ScriptableObjects, voice limits and stealing, a crossfading MusicPlayer with… |
 | [`audio-setup-mixers`](plugins/audio-performance/skills/audio-setup-mixers/SKILL.md) | Unity Companion | Routes scene AudioSources into the right AudioMixerGroup (Music, SFX, Foley, Voice, UI, Ambience) by classifying what each plays, and covers runtime mixer control - exposed… |
+| [`cpu-performance-profiling`](plugins/audio-performance/skills/cpu-performance-profiling/SKILL.md) | MIT | Triages CPU-bound frames and hitches in Unity 6 with the Unity Profiler - profiling a development player instead of the Editor (Autoconnect Profiler, targeted Deep Profile)… |
 | [`fmod-unity`](plugins/audio-performance/skills/fmod-unity/SKILL.md) | MIT | Integrates FMOD Studio into Unity 6 with the FMOD for Unity plugin - setup and Studio version matching, settings and banks, EventInstance lifecycle, EventReference, 3D… |
 | [`memory-snapshot-profiling`](plugins/audio-performance/skills/memory-snapshot-profiling/SKILL.md) | MIT | Captures, compares and interprets Unity Memory Profiler snapshots (.snap) in Unity 6 to find leaks, duplicate or oversized assets, and memory growth, and reads live memory… |
 | [`optimize-audio`](plugins/audio-performance/skills/optimize-audio/SKILL.md) | Unity Companion | Audits and fixes the cost of audio assets in Unity 6 - AudioImporter Load Type, compression format, sample rate, Force To Mono and per-platform overrides, plus DSP cost from… |
@@ -117,13 +126,15 @@ Audio import and mixers, web build optimization, memory profiling.
 
 ### Services & Monetization — `unity-services-monetization`
 
-Unity Gaming Services, multiplayer, Vivox, IAP, LevelPlay ads.
+Unity Gaming Services, Netcode for GameObjects, network debugging, multiplayer, Vivox, IAP, LevelPlay ads.
 
 | Skill | License | Summary |
 |---|---|---|
 | [`build-live-game`](plugins/services-monetization/skills/build-live-game/SKILL.md) | Unity Companion | Builds live-service backends on Unity Gaming Services - sign-in, Cloud Save, Cloud Code C# modules for server-authoritative writes, Remote Config and Game Overrides, Economy… |
 | [`implement-in-app-purchases`](plugins/services-monetization/skills/implement-in-app-purchases/SKILL.md) | Unity Companion | Implements, debugs and migrates real-money purchases with Unity IAP 5.x (StoreController) - store connection, product catalog, consumables, non-consumables, subscriptions… |
 | [`levelplay-unity-integration`](plugins/services-monetization/skills/levelplay-unity-integration/SKILL.md) | Unity Companion | Integrates LevelPlay ad mediation into Unity through the Ads Mediation package (com.unity.services.levelplay, SDK 9.x) - install/upgrade, Android Gradle and iOS CocoaPods… |
+| [`netcode-for-gameobjects`](plugins/services-monetization/skills/netcode-for-gameobjects/SKILL.md) | MIT | Builds host-client co-op multiplayer with Netcode for GameObjects 2.x (com.unity.netcode.gameobjects) in Unity 6 - NetworkManager and UnityTransport setup, NetworkObject… |
+| [`network-debugging`](plugins/services-monetization/skills/network-debugging/SKILL.md) | MIT | Diagnoses and reproduces online co-op problems in Netcode for GameObjects 2.x on Unity 6 - Network Simulator presets, lag spikes and disconnects… |
 | [`setup-multiplayer-services`](plugins/services-monetization/skills/setup-multiplayer-services/SKILL.md) | Unity Companion | Designs and implements session-based online multiplayer with the Unity Multiplayer Services SDK - topology choice, lobbies, parties and rooms, join codes, session browsing… |
 | [`setup-vivox-voice-chat`](plugins/services-monetization/skills/setup-vivox-voice-chat/SKILL.md) | Unity Companion | Adds in-game voice and text chat with Unity Vivox 16+ (VivoxService) - init and login with Unity Authentication, party, team or lobby channels, positional proximity voice… |
 
@@ -162,6 +173,17 @@ Blender to Unity import, Spine runtime, Addressables, CSV to ScriptableObject ga
 | [`game-data-pipeline`](plugins/asset-pipeline/skills/game-data-pipeline/SKILL.md) | MIT | Builds an end-to-end game data pipeline in Unity 6 - CSV or Google Sheets baked into ScriptableObject tables, auto-registered as Addressables, loaded by label into id lookups… |
 | [`spine-unity`](plugins/asset-pipeline/skills/spine-unity/SKILL.md) | MIT | Integrates Spine 2D skeletal animation into Unity 6 with spine-unity 4.2 or 4.3 and the Spine URP Shaders - install, export settings, texture workflow, SkeletonAnimation /… |
 
+### PC & Steam — `unity-pc-steam`
+
+Steamworks.NET, Steam lobbies and P2P co-op, SteamPipe builds and uploads, Steam Deck and controllers.
+
+| Skill | License | Summary |
+|---|---|---|
+| [`steam-build-release`](plugins/pc-steam/skills/steam-build-release/SKILL.md) | MIT | Builds a Unity 6 game for Steam and uploads it with SteamPipe - a batch-mode Editor build script (BuildPipeline.BuildPlayer or a Build Profile, nonzero exit on failure… |
+| [`steam-deck-controller`](plugins/pc-steam/skills/steam-deck-controller/SKILL.md) | MIT | Makes a Unity 6 Steam game work well on Steam Deck and with gamepads - Deck detection through Steamworks.NET (IsSteamRunningOnSteamDeck on SDK 1.64, IsRunningOnSteamHardware… |
+| [`steam-lobbies-p2p`](plugins/pc-steam/skills/steam-lobbies-p2p/SKILL.md) | MIT | Builds friends-only Steam lobbies, invites and join flows for host-client co-op in Unity 6 with Steamworks.NET, and connects them to Netcode for GameObjects over Steam P2P… |
+| [`steamworks-integration`](plugins/pc-steam/skills/steamworks-integration/SKILL.md) | MIT | Integrates Steamworks into a Unity 6 PC game with Steamworks.NET (com.rlabrecque.steamworks.net) - UPM git install, steam_appid.txt, SteamAPI.RestartAppIfNecessary… |
+
 ## Third-party SDKs and tools
 
 Skills that target software outside Unity's own packages. Each one is installed separately and carries its own license; these skills don't bundle it.
@@ -193,6 +215,9 @@ Skills that target software outside Unity's own packages. Each one is installed 
 | FMOD for Unity | [fmod.com/unity](https://www.fmod.com/unity), [download](https://www.fmod.com/download), [licensing](https://www.fmod.com/licensing) | FMOD EULA (per-title license) | `fmod-unity` |
 | LevelPlay (ironSource) | `com.unity.services.levelplay` (Unity Registry), [dashboard](https://platform.ironsrc.com/) | Unity / ironSource terms | `levelplay-unity-integration` |
 | Blender | [blender.org](https://www.blender.org) | GPL-3.0-or-later (exported files are yours) | `blender-to-unity-pipeline` |
+| Steamworks.NET | [rlabrecque/Steamworks.NET](https://github.com/rlabrecque/Steamworks.NET) | MIT | `steamworks-integration`, `steam-lobbies-p2p`, `steam-deck-controller` |
+| Steamworks SDK, SteamCMD | [partner.steamgames.com](https://partner.steamgames.com/doc/sdk) | Steamworks SDK Access Agreement | `steamworks-integration`, `steam-build-release` |
+| Netcode SteamNetworkingSockets transport | [Unity-Technologies/multiplayer-community-contributions](https://github.com/Unity-Technologies/multiplayer-community-contributions) | MIT | `steam-lobbies-p2p` |
 
 ## Accuracy notes
 

@@ -1,6 +1,6 @@
 ---
 name: audio-playback-system
-description: Builds the runtime playback layer for Unity built-in audio - a pooled AudioService with AudioCue ScriptableObjects, voice limits and stealing, a crossfading MusicPlayer with sample-accurate intro-to-loop, code-side music ducking, occlusion, Addressables clip loading, and persisting volume settings. Use when writing a sound manager, SFX pooling, music crossfades or seamless loops, pause handling, or WebGL audio unlock. Not for FMOD (fmod-unity), import settings (optimize-audio), or mixer routing, exposed parameters, dB volume sliders and snapshot ducking (audio-setup-mixers).
+description: Builds the runtime playback layer for Unity built-in audio - a pooled AudioService with AudioCue ScriptableObjects, voice limits and stealing, a crossfading MusicPlayer with sample-accurate intro-to-loop, code-side music ducking, occlusion, Addressables clip loading, and persisting volume levels via the settings model (pc-settings-menu). Use when writing a sound manager, SFX pooling, music crossfades or seamless loops, audio pause handling, or WebGL audio unlock. Not for FMOD (fmod-unity), import settings (optimize-audio), or mixer routing, exposed parameters, dB volume sliders and snapshot ducking (audio-setup-mixers).
 license: MIT
 metadata:
   category: audio-performance

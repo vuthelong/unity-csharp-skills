@@ -1,6 +1,6 @@
 ---
 name: memory-snapshot-profiling
-description: Captures, compares and interprets Unity Memory Profiler snapshots (.snap) in Unity 6 to find leaks, duplicate or oversized assets, and memory growth, and reads live memory counters with ProfilerRecorder. Use when memory climbs across scene loads, an asset seems to stay loaded after release, the user works with com.unity.memoryprofiler or .snap files, or needs device memory numbers. Not for per-frame GC.Alloc hunting in the CPU Profiler.
+description: Captures, compares and interprets Unity Memory Profiler snapshots (.snap) in Unity 6 to find leaks, duplicate or oversized assets, and memory growth, and reads live memory counters with ProfilerRecorder. Use when memory keeps growing or climbs across scene loads, an asset seems to stay loaded after release, the user works with com.unity.memoryprofiler or .snap files, or needs device memory numbers. Not for per-frame GC.Alloc hunting (cpu-performance-profiling).
 license: MIT
 metadata:
   category: audio-performance

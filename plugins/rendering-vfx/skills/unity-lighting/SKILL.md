@@ -1,6 +1,6 @@
 ---
 name: unity-lighting
-description: Sets up, scripts, bakes, and debugs lighting in Unity 6 URP scenes - Light components and modes, shadows, ambient and skybox, fog, reflection and light probes, Adaptive Probe Volumes, and lightmap baking with LightingSettings. Use for shadow acne, light leaking, scenes that are too dark, lights not affecting objects, baked GI or lightmap problems, or time-of-day setups. For the frame cost of lights and shadows, use optimize-3d-rendering.
+description: Sets up, scripts, bakes, and debugs lighting in Unity 6 URP scenes - Light components and modes, shadows, ambient and skybox, fog, reflection and light probes, Adaptive Probe Volumes, and lightmap baking with LightingSettings. Use for shadow acne, light leaking, scenes that are too dark, lights not affecting objects, baked GI or lightmap problems. Runtime day-night cycles go to day-night-weather. For the frame cost of lights and shadows, use optimize-3d-rendering.
 license: MIT
 metadata:
   category: rendering-vfx

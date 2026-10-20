@@ -1,6 +1,6 @@
 ---
 name: input-system-actions
-description: Sets up, scripts and tests the Unity Input System 1.x in Unity 6 - Active Input Handling, project-wide actions, .inputactions assets, bindings and composites, control schemes, interactions and processors, generated C# wrappers, PlayerInput, rebinding and simulated input in tests. Use for movement, look, jump or fire actions, key rebinding, local multiplayer join or input tests, or when the legacy Input class throws, actions never fire, presses are missed in FixedUpdate or UI ignores clicks.
+description: Sets up, scripts and tests the Unity Input System 1.x in Unity 6 - Active Input Handling, project-wide actions, .inputactions assets, bindings and composites, control schemes, interactions and processors, generated C# wrappers, PlayerInput, rebinding and simulated input in tests. Use for movement, look, jump or fire actions, key rebinding, local multiplayer join or input tests, or when the legacy Input class throws, actions never fire, presses are missed in FixedUpdate or UI ignores clicks. Not for a player-facing rebind screen or saving overrides (pc-settings-menu).
 license: MIT
 metadata:
   category: gameplay-systems

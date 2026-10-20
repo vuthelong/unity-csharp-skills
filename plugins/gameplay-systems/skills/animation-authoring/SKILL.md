@@ -1,6 +1,6 @@
 ---
 name: animation-authoring
-description: Authors and drives Mecanim animation in Unity 6 - AnimationClip curves and events, AnimatorController state machines, blend trees and layers built from editor scripts, runtime Animator control with hashed parameters, root motion, override controllers and runtime constraints. Use when creating .anim or .controller assets by code, wiring locomotion blend trees, adding footstep events, attaching props to bones, or debugging transitions that never fire, clips that do not loop or root motion fighting physics.
+description: Authors and drives Mecanim animation in Unity 6 - AnimationClip curves and events, AnimatorController state machines, blend trees and layers built from editor scripts, runtime Animator control with hashed parameters, root motion, override controllers and runtime constraints. Use when creating .anim or .controller assets by code, wiring locomotion blend trees, adding footstep animation events, attaching props to bones, or debugging transitions that never fire, clips that do not loop or root motion fighting physics.
 license: MIT
 metadata:
   category: gameplay-systems

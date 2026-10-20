@@ -1,6 +1,6 @@
 ---
 name: review-unity-csharp
-description: "Reviews existing Unity C# for correctness bugs, lifecycle mistakes, memory and native-resource leaks and Unity 6 obsolete APIs, reporting file:line findings with severity and minimal fixes. Use to review a script, diff or branch, or to vet AI-generated Unity code. Triggers: \"review this script\", \"check for leaks\", \"why does memory keep growing\", \"works the first Play but not the second\". Style is checked only against the project's own conventions. Not for writing new code (use csharp-unity)."
+description: "Reviews existing Unity C# for correctness bugs, lifecycle mistakes, memory and native-resource leaks and Unity 6 obsolete APIs, reporting file:line findings with severity and minimal fixes. Use to review a script, diff or branch, or to vet AI-generated Unity code. Triggers: \"review this script\", \"check for leaks\", \"works the first Play but not the second\". Style is checked only against the project's own conventions. Not for writing new code (use csharp-unity)."
 license: MIT
 metadata:
   category: csharp-core

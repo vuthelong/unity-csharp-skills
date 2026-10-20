@@ -1,6 +1,6 @@
 ---
 name: optimize-3d-rendering
-description: Diagnoses and reduces the frame cost of 3D URP scenes on Unity 6 - CPU vs GPU triage with the Frame Debugger and Profiler, SRP Batcher and GPU Resident Drawer batching, culling and LOD, shader variant stripping, and per-platform URP quality tiers. Use for low FPS, high draw or SetPass calls, GPU-bound or overheating mobile frames, or long variant builds. To set up lights, texture imports, or post effects themselves, use unity-lighting, unity-texture-import, or urp-postprocessing.
+description: Diagnoses and reduces the frame cost of 3D URP scenes on Unity 6 - CPU vs GPU triage with the Frame Debugger and Profiler, SRP Batcher and GPU Resident Drawer batching, culling and LOD, shader variant stripping, and per-platform URP quality tiers. Use for low FPS, high draw or SetPass calls, GPU-bound or overheating mobile frames, or long variant builds. To set up lights, texture imports, or post effects themselves, use unity-lighting, unity-texture-import, or urp-postprocessing. Script, GC and main-thread CPU hotspots go to cpu-performance-profiling.
 license: MIT
 metadata:
   category: rendering-vfx
