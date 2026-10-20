@@ -1,6 +1,6 @@
 ---
 name: urp-postprocessing
-description: Sets up, configures, scripts, and debugs URP post-processing with the Volume framework on Unity 6 (URP 17). Covers global/local Volumes, VolumeProfile overrides (Bloom, Tonemapping, ColorAdjustments, DepthOfField, Vignette, MotionBlur, FilmGrain, ChromaticAberration, LensDistortion, WhiteBalance, LiftGammaGain, ColorCurves, Screen Space Lens Flare), overrideState, profile vs sharedProfile, the Default Volume Profile, camera renderPostProcessing and volume layer masks, Volume Update Mode, HDR and grading mode, and anti-aliasing. Use when the user asks about bloom, glow, tonemapping, color grading, exposure, depth of field, vignette, motion blur, "post-processing not showing", PostProcessVolume/PPv2 replacements, or animating post effects from C#. For custom fullscreen passes use `validate-urp-render-graph-renderer-feature`.
+description: Sets up, scripts, and debugs URP post-processing with the Volume framework on Unity 6 - global and local Volumes, VolumeProfile overrides such as Bloom, Tonemapping, Color Adjustments, Depth of Field, and Vignette, profile vs sharedProfile, and camera post-processing flags. Use for bloom, color grading, exposure, 'post-processing not showing', PPv2 replacements, or animating effects from C#. Custom fullscreen passes go to validate-urp-render-graph-renderer-feature.
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: rendering-vfx
@@ -16,22 +16,13 @@ Goal: a visible result in the Game view with zero Console errors.
 
 1. Run the pre-flight checks below and fix failures first.
 2. Create or reuse a Volume and a `VolumeProfile` asset.
-3. Add overrides with `profile.Add<T>()`, setting `overrideState = true` on every parameter you change.
+3. Add overrides with `profile.Add<T>()`, setting `overrideState = true` on every parameter you change. In Editor code on a saved profile, also persist each override with `AssetDatabase.AddObjectToAsset` (see code-templates.md).
 4. Enable post-processing on the rendering camera and include the Volume's layer in the camera's Volume Mask.
 5. Verify in the Game view, then save assets and the scene.
 
 ## Running C# in the Editor
 
-Editor-side checks and edits run as C# in a live Editor. The `unity-cli` skill owns getting there (CLI install, connected Editor, `com.unity.pipeline`, Safe Mode, command catalog). You need the `eval` command specifically; if the catalog lacks it, say so and stop. Inline form: `unity command eval --code '<snippet>'` (30 s default timeout; check the catalog before assuming `eval_file` exists).
-
-`eval` compiles a **statement block, not a file**:
-
-- No `using` directives (`using UnityEngine;` becomes CS0210).
-- Fully qualify every type (`UnityEngine.Rendering.Volume`); a bare `Object` is ambiguous (CS0104).
-- Extension methods are unavailable; use `GetComponent<UniversalAdditionalCameraData>()` instead of `GetUniversalAdditionalCameraData()`.
-- `return` a string to get results back; `throw` for hard stops.
-
-Code saved as a `.cs` file in the project keeps normal `using` directives.
+Editor-side checks and edits run as C# in a live Editor via `unity command eval`. Eval syntax and prerequisites: see the `unity-cli` skill (unity-editor-tooling plugin) → Eval syntax. Here that means `GetComponent<UniversalAdditionalCameraData>()` instead of `GetUniversalAdditionalCameraData()`. Without `eval` (Unity 6000.0-6000.2, or no Pipeline package), save the same code as an Editor script and have the user run it; code saved as a `.cs` file keeps normal `using` directives.
 
 ## Pre-flight checks
 

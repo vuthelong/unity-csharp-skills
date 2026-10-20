@@ -279,9 +279,9 @@ public sealed class AudioService : IDisposable
             }
 
             var current = this._active[victim];
-            if (voice.Stopping && !current.Stopping)
+            if (voice.Stopping != current.Stopping)
             {
-                victim = i;
+                if (voice.Stopping) victim = i;
                 continue;
             }
 

@@ -120,7 +120,7 @@ Design rules:
 
 Two independent versions matter:
 
-1. **Schema version** (shape of the row type). Bump `CodeSchemaVersion` on the table when you add, remove, rename or change the meaning of a column. `GameDataAddressables.SyncAll` stamps the value into the asset's serialized `schemaVersion`; `GameDataService` logs an error and `GameDataValidator` fails when they differ. This catches data baked against old code and, with remote content, data built for a different app version.
+1. **Schema version** (shape of the row type). Bump `CodeSchemaVersion` on the table when you add, remove, rename or change the meaning of a column. `GameDataAddressables.SyncAll` stamps the value into the asset's serialized `schemaVersion`; `GameDataService` logs an error and skips that table (its rows are absent and `GetTable` throws "not loaded") and `GameDataValidator` fails when they differ. This catches data baked against old code and, with remote content, data built for a different app version.
 2. **Content version** (balance numbers). Tracked by git history of the CSVs plus the Addressables catalog for remote data. If you need it at runtime (analytics, support tickets), add a one-row `GameDataInfoTable` with `version` and `exported_at` columns and bake it like any other table.
 
 Changing a row type safely:

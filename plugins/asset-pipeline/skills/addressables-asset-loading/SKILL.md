@@ -1,6 +1,6 @@
 ---
 name: addressables-asset-loading
-description: Sets up, loads, releases and ships content with Unity Addressables (com.unity.addressables 2.x-4.x) in Unity 6. Covers groups and schemas, packing modes, labels, addresses vs AssetReference / AssetReferenceT<T> / AssetLabelReference, LoadAssetAsync, LoadAssetsAsync, InstantiateAsync, Release / ReleaseInstance, AsyncOperationHandle reference counting, awaiting with UniTask ToUniTask, Task, Awaitable and 4.x ToAwaitable, LoadSceneAsync / UnloadSceneAsync, profiles, local vs remote content, catalogs, content update builds, CCD, Analyze duplicate dependencies, Play Mode Scripts, building with the Player, the Addressables Report and Profiler module (Event Viewer removed in 2.0), and pitfalls (leaked or double-released handles, sub-assets, ScriptableObjects duplicating assets, Resources mixed with Addressables). Use when the user mentions Addressables, AssetReference, AsyncOperationHandle, labels, remote content, catalog updates, "memory not freed after Release", or duplicated assets in bundles.
+description: Loads, releases and ships content with Unity Addressables in Unity 6 - groups and packing, addresses vs AssetReference vs labels, async loading and scenes, handle ownership and Release, remote content, catalogs, content updates, CCD, Analyze and memory profiling. Use when the user mentions Addressables, AssetReference, AsyncOperationHandle, remote bundles or catalog updates, "memory not freed after Release", or duplicated assets in bundles. For CSV/config data tables use game-data-pipeline.
 license: MIT
 metadata:
   category: asset-pipeline
@@ -10,9 +10,9 @@ metadata:
 
 # Addressables asset loading
 
-Verified against the package sources of `com.unity.addressables` 2.11.2 and 4.1.1 (both declare `"unity": "6000.0"`). The runtime API below is the same in 2.x and 4.x unless marked. Use the version Package Manager recommends for your editor; upgrade majors deliberately.
+Core guidance targets Addressables 2.x, the version Unity 6.0 Package Manager installs by default; the runtime API below is the same in later majors unless marked. Check `com.unity.addressables` in `Packages/manifest.json` (or `packages-lock.json`) before writing code. Use the 3.x/4.x-only APIs in the table below only when the installed package actually has them (confirm in `Library/PackageCache/com.unity.addressables@*/`); otherwise use the 2.x patterns (`handle.Task`, `ToUniTask`, `WaitForCompletion`). The newer-major notes come from reading package sources and have not been checked against every release; verify before relying on them, and upgrade majors deliberately.
 
-| Version | Notable for Unity 6 |
+| Version | Notable for Unity 6 (verify against the installed package) |
 |---|---|
 | 2.x | Event Viewer removed (since 2.0), replaced by the Profiler module and Addressables Report. Binary catalogs. Auto Group Generator (2.10) |
 | 3.x | Warning when Addressables is used outside Play Mode |

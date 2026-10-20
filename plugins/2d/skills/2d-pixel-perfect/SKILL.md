@@ -1,6 +1,6 @@
 ---
 name: 2d-pixel-perfect
-description: Sets up, diagnoses, and fixes pixel-perfect 2D rendering with the Pixel Perfect Camera in URP (UnityEngine.Rendering.Universal.PixelPerfectCamera) or Built-in (com.unity.2d.pixel-perfect, UnityEngine.U2D.PixelPerfectCamera). Use when a retro or pixel-art 2D game looks blurry, shimmers, jitters while the camera moves, shows tilemap seams, scales by non-integer factors, or when choosing a reference resolution, assets PPU, grid snapping, crop frame, or Cinemachine pixel-perfect setup. Not for HD 2D, high-resolution art, UI-only scenes, or HDRP.
+description: Sets up, diagnoses, and fixes pixel-perfect 2D rendering with the Pixel Perfect Camera in URP or the Built-in pipeline, plus point-filtered, uncompressed sprite import. Use when a pixel-art 2D game looks blurry, shimmers, jitters while the camera moves, shows tilemap seams or non-integer scaling, or when choosing a reference resolution, PPU, or a Cinemachine pixel-perfect setup. Not for HD 2D art, UI-only scenes, or HDRP.
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: 2d
@@ -33,7 +33,7 @@ Read [references/api-reference.md](references/api-reference.md) when writing or 
 **Sprite import (the usual culprit)**
 - Filter Mode = `Point (no filter)` on every in-scope sprite. Bilinear is Unity's default and is the #1 cause of blur.
 - Generate Mip Maps off.
-- Compression = None (RGBA32). Block compression smears pixel edges.
+- Compression = None (RGBA32), including any Android, iPhone, WebGL, and Standalone overrides. Block compression smears pixel edges.
 - Pixels Per Unit identical across the scene and equal to the camera's `assetsPPU`.
 - Pivot in Custom/Pixels mode on whole pixels. A Center pivot on an odd-sized sprite (15x15) lands on 7.5 px and misaligns by half a pixel.
 
@@ -116,7 +116,7 @@ Screen is not an integer multiple of the reference resolution. Pick a reference 
 
 ## Fallbacks (HDRP or custom SRP)
 
-The Pixel Perfect Camera is unsupported in HDRP. Render the scene into a low-res `RenderTexture` with `filterMode = FilterMode.Point`, then upscale by an integer factor (a fullscreen pass or a UI `RawImage`). `OnRenderImage` and `Graphics.Blit` in camera callbacks do not run under SRP render graph. Set `UnityEngine.U2D.PixelPerfectRendering.pixelSnapSpacing` manually (see `CameraSetupURP.SetManualPixelSnapSpacing`) if you still want sprite snapping.
+The Pixel Perfect Camera is unsupported in HDRP. Render the scene into a low-res `RenderTexture` with `filterMode = FilterMode.Point`, then upscale by an integer factor (a fullscreen pass or a UI `RawImage`). `OnRenderImage` and `Graphics.Blit` in camera callbacks do not run under SRP render graph. If you still want sprite snapping, set `UnityEngine.U2D.PixelPerfectRendering.pixelSnapSpacing = camera.orthographicSize * 2f / camera.pixelHeight` yourself; do not reuse `CameraSetupURP` (it imports `UnityEngine.Rendering.Universal` and will not compile without URP). This HDRP path is untested by this skill's scripts.
 
 ## Rules
 

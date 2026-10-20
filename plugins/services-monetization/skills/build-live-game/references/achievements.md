@@ -646,7 +646,7 @@ public class AchievementRecord
 
 ### Package Setup -- `manifest.json`
 
-Add these entries to your Unity project's `Packages/manifest.json` dependencies:
+Add these entries to your Unity project's `Packages/manifest.json` dependencies. Versions below are known-good examples, not requirements; verify current versions (Package Manager / NuGet / UGS docs) and keep what the project already has if newer.
 
 ```json
 {

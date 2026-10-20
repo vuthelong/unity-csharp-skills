@@ -7,7 +7,7 @@
 - [Binding from C#](#binding-from-c)
 - [Binding in UXML](#binding-in-uxml)
 - [Binding modes and update triggers](#binding-modes-and-update-triggers)
-- [PanelRenderer (6000.6+)](#panelrenderer-60006)
+- [PanelRenderer (newer Unity 6 releases)](#panelrenderer-newer-unity-6-releases)
 - [Pitfalls](#pitfalls)
 
 ## When to bind
@@ -113,9 +113,9 @@ A `data-source` asset reference lets UI Builder preview bound values; UI Builder
 
 Type conversion: register converters with `ConverterGroups` or add per-binding converters (`binding.sourceToUiConverters.AddConverter((ref int v) => $"{v} HP")`).
 
-## PanelRenderer (6000.6+)
+## PanelRenderer (newer Unity 6 releases)
 
-Unity 6000.6 adds `PanelRenderer`, a runtime component alternative to `UIDocument` with `RegisterUIReloadCallback`, which re-runs your setup whenever the UI is (re)built, keeping bindings alive across live reload:
+Newer Unity 6 releases (reportedly 6000.6; check your version's scripting reference) add `PanelRenderer`, a runtime component alternative to `UIDocument` with `RegisterUIReloadCallback`, which re-runs your setup whenever the UI is (re)built, keeping bindings alive across live reload:
 
 ```csharp
 private void OnEnable()
@@ -134,7 +134,7 @@ private void OnUIReload(PanelRenderer renderer, VisualElement root)
 }
 ```
 
-Use it only when the project targets 6000.6+; otherwise use `UIDocument` with setup in `OnEnable`. If you mutate a ScriptableObject data source at runtime in the Editor, bind to a copy (`Instantiate(asset)`) to avoid persisting play-mode changes into the asset.
+Use it only when the project's Unity version exposes `PanelRenderer`; otherwise use `UIDocument` with setup in `OnEnable`. If you mutate a ScriptableObject data source at runtime in the Editor, bind to a copy (`Instantiate(asset)`) to avoid persisting play-mode changes into the asset.
 
 ## Pitfalls
 

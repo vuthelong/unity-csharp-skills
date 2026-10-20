@@ -1,6 +1,6 @@
 ---
 name: review-unity-csharp
-description: Reviews existing Unity C# code for correctness bugs, lifecycle mistakes, memory and native-resource leaks, Unity 6 obsolete APIs, and violations of the csharp-unity house style, reporting findings with file:line, severity and minimal fixes. Use when asked to review, audit, deep-analyze or find bugs/leaks in Unity scripts, a diff or a branch; for "why does memory keep growing", "check for leaks", "is this code correct", "works the first time I press Play but not the second", "check coding conventions"; or to vet AI-generated Unity code. Covers event subscription leaks, undisposed NativeArray/RenderTexture/Material/Mesh, Addressables handles, destroyed-object access via ?., async lifetime, static state with domain reload disabled, serialization data loss. Not for writing new code (use csharp-unity).
+description: "Reviews existing Unity C# for correctness bugs, lifecycle mistakes, memory and native-resource leaks and Unity 6 obsolete APIs, reporting file:line findings with severity and minimal fixes. Use to review a script, diff or branch, or to vet AI-generated Unity code. Triggers: \"review this script\", \"check for leaks\", \"why does memory keep growing\", \"works the first Play but not the second\". Style is checked only against the project's own conventions. Not for writing new code (use csharp-unity)."
 license: MIT
 metadata:
   category: csharp-core
@@ -32,7 +32,7 @@ Details and before/after code: [references/bug-checklist.md](references/bug-chec
 - Mutating a copy of a struct (`foreach` variable, property getter returning a struct, `List<struct>[i].x = ...`)
 - Collection modified while iterating with `foreach`
 - Cross-object `Awake`/`Start` ordering assumptions without `[DefaultExecutionOrder]` or explicit init
-- `async void` outside Unity messages/UI handlers; discarded `Task`; awaits without a lifetime token; same `Awaitable` awaited twice
+- `async void` other than a `try/catch`-wrapped UI handler with a fixed `void` signature (Unity messages should be `async Awaitable` or call a `UniTaskVoid`); discarded `Task`; awaits without a lifetime token; same `Awaitable` awaited twice
 - `UnityEngine` API from a background thread (`Task.Run`, thread callbacks, `Awaitable.BackgroundThreadAsync` sections, job `Execute`)
 - Singleton without duplicate guard, or not cleared in `OnDestroy`
 - `StopCoroutine("Name")` for a coroutine started by `IEnumerator`; coroutine expected to stop when only the component is disabled
@@ -44,7 +44,7 @@ Details and before/after code: [references/bug-checklist.md](references/bug-chec
 - Magic tag/layer/scene/animator strings instead of constants or cached hashes
 - `UnityEngine.Input` used while the project is Input System only (throws)
 - Runtime script referencing `UnityEditor` without `#if UNITY_EDITOR` (breaks player builds)
-- Obsolete Unity 6 APIs: `FindObjectOfType`, `FindObjectsOfType`, `Rigidbody.velocity`/`drag`, `GetInstanceID` (CS0619 on 6000.5+). Full list: `csharp-unity` reference `unity6-api-changes.md`
+- Obsolete Unity 6 APIs: `FindObjectOfType`, `FindObjectsOfType`, `Rigidbody.velocity`/`drag`, `GetInstanceID` (newer Unity 6 releases deprecate it in favor of `EntityId`; check the Console/API docs for the exact version). Full list: `csharp-unity` reference `unity6-api-changes.md`
 - C# 10+ syntax (file-scoped namespace, `global using`, `record struct`, `required`) that Unity 6's C# 9 compiler rejects
 
 ## Checklist 2: memory and resource leaks
@@ -65,17 +65,19 @@ Details, pairing table, grep sweep and profiler confirmation: [references/leak-c
 
 ## Checklist 3: conventions
 
-Authoritative rules live in the `csharp-unity` skill; load it before flagging so fixes match exactly. Enforce them unconditionally, even if the project's `.editorconfig` or surrounding code uses a different style.
+Report style findings only against the project's own conventions (`.editorconfig`, `CLAUDE.md`/`AGENTS.md`, the dominant style of surrounding files), or against the `csharp-unity` house style when the user asks for it or the project has no established convention. Load `csharp-unity` before flagging house-style issues so fixes match exactly. Style findings are always Low/info.
+
+The table below shows violations of the house style:
 
 | Rule | Violation looks like |
 |---|---|
-| Naming | `_camelCase` private fields; camelCase without `_` on `[SerializeField] private`; PascalCase public members and statics |
-| `this.` | Missing on instance-field access, or present on properties/locals/params/statics |
-| `var` | Explicit `int`/`float`/`string`/`bool` where the right-hand side is obvious |
+| Naming | `private int currentHealth;` (no `_`); `[SerializeField] private float _moveSpeed;` (has `_`); `public int maxHealth;` or `static int count;` (not PascalCase) |
+| `this.` | `_health -= amount;` (missing on a field); `this.MaxHealth` (on a property) |
+| `var` | `int count = list.Count;`, `Vector3 dir = new Vector3(...)` where the right-hand side makes the type obvious |
 | `#region` | Missing, misnamed, out of order, empty, or nested. Order: Fields, Properties, Unity Lifecycle, Public Methods, Private Methods, Unity Callbacks |
-| LINQ | Any LINQ, in runtime, editor, build or test code |
+| LINQ | LINQ in `Update`, per-frame or allocation-sensitive runtime code (editor tooling, build scripts, tests and one-off init are fine) |
 | Comments | "What" comments, commented-out code; missing *why* on a real workaround |
-| Async | `async void` instead of `UniTaskVoid`/`Awaitable`; missing cancellation token |
+| Async | `async void Start()` instead of `async Awaitable Start()` or a `UniTaskVoid` call; missing cancellation token |
 | `[SerializeField]` | Missing `private`, or `public` field used for Inspector exposure |
 | Caching | `GetComponent`/`Find*` in per-frame code |
 
@@ -85,7 +87,7 @@ Authoritative rules live in the `csharp-unity` skill; load it before flagging so
 |---|---|
 | High | Crash, data loss, unbounded growth, native leak, wrong behavior in builds |
 | Medium | Leak or bug with limited blast radius, perf issue in hot path, obsolete API that will become an error |
-| Low | Conventions, minor perf, style |
+| Low | Conventions, minor perf, style (style findings are never higher than Low/info) |
 
 Never bury a leak under a list of convention nits; order findings by severity.
 

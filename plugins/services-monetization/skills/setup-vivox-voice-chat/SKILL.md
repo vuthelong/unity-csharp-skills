@@ -1,6 +1,6 @@
 ---
 name: setup-vivox-voice-chat
-description: Adds in-game voice and text chat with Unity Vivox v16+ (com.unity.services.vivox, VivoxService.Instance) - init and login with Unity Authentication, group (party, team, lobby, guild) and positional 3D proximity channels, echo test channels, push-to-talk, self and per-player mute, input/output volume and VAD tuning, speaking indicators, channel and direct text messages, chat history, and Android/iOS/WebGL microphone permissions. Use when the user asks for voice chat, mic support, mute buttons, proximity voice, team or party chat, whispers/DMs, or mentions Vivox, JoinGroupChannelAsync, JoinPositionalChannelAsync, LoginAsync, or migrating from legacy Vivox v15 (Client.Instance, ILoginSession, AccountId).
+description: Adds in-game voice and text chat with Unity Vivox 16+ (VivoxService) - init and login with Unity Authentication, party, team or lobby channels, positional proximity voice, push-to-talk, mute and volume controls, VAD tuning, speaking indicators, direct messages, chat history, and mobile/WebGL mic permissions. Use when the user asks for voice chat, mic support, proximity or team voice, mute buttons or DMs, or is migrating from legacy Vivox v15 (Client.Instance, ILoginSession).
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: services-monetization
@@ -51,8 +51,8 @@ When in doubt about a signature, consult the Vivox documentation map at `https:/
 
 - **Subscribe before you call.** `LoggedIn` and `ChannelJoined` can fire before the awaited call returns and re-fire on auto-reconnect. Drive UI state from events and keep handlers idempotent.
 - **Unsubscribe in `OnDestroy`.** `VivoxService.Instance` outlives scenes; leaked handlers on destroyed MonoBehaviours throw `MissingReferenceException` after a scene load.
-- **Init once.** A second `InitializeAsync()` throws `5041 VxErrorAlreadyInitialized`; keep the bootstrap on a `DontDestroyOnLoad` object or guard with a static flag.
-- **Limits:** 10 non-positional channels per user, 200 participants per channel; exceeding either fails with `20502`. Larger positional channels need the Large 3D Channels setting.
+- **Init once.** A second `InitializeAsync()` throws `5041 VxErrorAlreadyInitialized` (code per Vivox 16 docs; verify); keep the bootstrap on a `DontDestroyOnLoad` object or guard with a static flag.
+- **Limits (as of the Vivox 16 docs; verify against current Vivox documentation and the installed package):** 10 non-positional channels per user, 200 participants per channel; exceeding either has been reported to fail with `20502`. Larger positional channels need the Large 3D Channels setting.
 - **Spelling asymmetry:** send with `SendDirectTextMessageAsync` (not `SendDirected...`); receive with the `DirectedMessageReceived` event.
 - **Identity:** directed messages and participants are addressed by UGS `PlayerId`, never display name. Without Unity Authentication, identity is a per-session GUID.
 - **Per-participant events** (`ParticipantMuteStateChanged`, `ParticipantSpeechDetected`, `ParticipantAudioEnergyChanged`) live on `VivoxParticipant`, not on the service.

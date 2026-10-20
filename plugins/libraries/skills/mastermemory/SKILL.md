@@ -1,6 +1,6 @@
 ---
 name: mastermemory
-description: Builds read-only, source-generated master-data databases in Unity 6 with Cysharp MasterMemory v3 (NuGet MasterMemory, on MessagePack-CSharp). Covers install via NuGetForUnity (no UPM package, no MasterMemory.Generator CLI in v3), the Roslyn source generator and [assembly: MasterMemoryGeneratorOptions], C# 9 limits (init shim, no required), [MemoryTable], [PrimaryKey], [SecondaryKey(indexNo, keyOrder)], [NonUnique], composite keys, [StringComparisonOption], generated MemoryDatabase / DatabaseBuilder.Append / Build / ImmutableBuilder.Diff, FindBy / TryFindBy / FindClosestBy / FindRangeBy / All / Count / RangeView, IValidatable<T> with Validate(), CSV to .bytes at edit time, TextAsset or Addressables loading, Editor hot reload, MasterMemoryResolver IL2CPP registration, and pitfalls. Use when the user mentions MasterMemory, MemoryTable, master data, static game data lookups, KeyNotFoundException from FindBy, or large config tables shared between client and server.
+description: "Builds read-only, indexed master-data databases with Cysharp MasterMemory v3 (source-generated tables over MessagePack): [MemoryTable] schemas, primary/secondary/composite keys, CSV to .bytes at edit time, validation, runtime loading and hot reload. Use for large static game-data tables needing fast zero-GC lookups or sharing with a .NET server, or when seeing KeyNotFoundException from FindBy, empty tables after a rename, or a missing MemoryDatabase type."
 license: MIT
 metadata:
   category: libraries
@@ -10,7 +10,7 @@ metadata:
 
 # MasterMemory
 
-Embedded, typed, read-only in-memory database for master data (write once at build time, read many times at runtime). A Roslyn source generator turns every `[MemoryTable]` class into a table type with binary-search lookups. Data is stored as LZ4-compressed MessagePack. Verified against MasterMemory 3.0.4 (`src/MasterMemory`, `src/MasterMemory.Annotations`, `src/MasterMemory.SourceGenerator`, `src/MasterMemory.Unity`, `README.md`). MasterMemory 3.0.x references MessagePack 3.1.3.
+Embedded, typed, read-only in-memory database for master data (write once at build time, read many times at runtime). A Roslyn source generator turns every `[MemoryTable]` class into a table type with binary-search lookups. Data is stored as LZ4-compressed MessagePack. Verified against MasterMemory 3.0.4 (`src/MasterMemory`, `src/MasterMemory.Annotations`, `src/MasterMemory.SourceGenerator`, `src/MasterMemory.Unity`, `README.md`). MasterMemory 3.0.x references MessagePack 3.1.3 as a minimum; the project-wide pin is 3.1.11 (see `messagepack-csharp`), with the MessagePack.Unity UPM tag matching the NuGet `MessagePack` version.
 
 Reference files, read when needed:
 
@@ -20,7 +20,7 @@ Reference files, read when needed:
 
 ## Workflow
 
-1. **Install (NuGet only).** Add NuGetForUnity (`https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity`), open `NuGet > Manage NuGet Packages`, search `MasterMemory`, Install. This pulls `MessagePack`, `MessagePack.Annotations` and `MessagePackAnalyzer`. Minimum Unity is 2022.3.12f1 (Roslyn 4.3 incremental generators); Unity 6 is fine.
+1. **Install (NuGet only).** Install NuGet `MasterMemory` with NuGetForUnity (setup in `r3` -> "NuGetForUnity setup"). This pulls `MessagePack`, `MessagePack.Annotations` and `MessagePackAnalyzer`. Minimum Unity is 2022.3.12f1 (Roslyn 4.3 incremental generators); Unity 6 is fine.
    - There is no public UPM / git-URL package for v3. The repo's Unity project only uses a local `file:` package for development. The README states the library is "only available through NuGet for Unity".
    - The v2 code generator (MSBuild task, .NET global/local tool `MasterMemory.Generator`) was removed in v3. Do not install it. Generation now happens at compile time. Old CLI flags map to `[assembly: MasterMemoryGeneratorOptions]`. `-addImmutableConstructor` was dropped, so use `record` / `init` instead.
    - Check that `MasterMemory.SourceGenerator.dll` was imported as an analyzer (no platforms ticked, `RoslynAnalyzer` label). NuGetForUnity normally sets this. If `MemoryDatabase` does not exist after a recompile, set it by hand.
@@ -39,7 +39,7 @@ Reference files, read when needed:
 3. **Declare tables.** Each table is a `[MemoryTable("name"), MessagePackObject(true)]` class or record with exactly one primary key (single or composite).
 4. **Build data at edit time.** Read CSV / JSON / Sheets, `new DatabaseBuilder(resolver).Append(rows)...Build()`, run `Validate()`, write `master.bytes`. Use `scripts/MasterMemoryCsvBuilder.cs`.
 5. **Ship the bytes** as a `.bytes` `TextAsset` (direct reference or Addressables). See `addressables-asset-loading`.
-6. **Register resolvers before first use** (IL2CPP), then load with `new MemoryDatabase(bytes, formatterResolver: ...)` once at startup. Keep it in a singleton or DI container (`vcontainer`).
+6. **Add `MasterMemoryResolver` to the shared resolver bootstrap** (`messagepack-csharp`, IL2CPP), then load with `new MemoryDatabase(bytes, formatterResolver: ...)` once at startup. Keep it in a singleton or DI container (`vcontainer`).
 7. **Build an IL2CPP player** and run a lookup on device. The Editor can fall back to dynamic formatters and hide missing registration.
 
 ## C# 9 limits in Unity
@@ -113,13 +113,10 @@ using System;
 using MessagePack;
 using MessagePack.Resolvers;
 using MyGame.MasterData;
-using UnityEngine;
 
 public static class MasterDataService
 {
     #region Fields
-    private static bool _registered;
-
     public static event Action<MemoryDatabase> Reloaded;
     #endregion
 
@@ -135,20 +132,13 @@ public static class MasterDataService
         Reloaded?.Invoke(Database);
     }
     #endregion
-
-    #region Private Methods
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    private static void RegisterResolvers()
-    {
-        if (_registered) return;
-
-        StaticCompositeResolver.Instance.Register(
-            MasterMemoryResolver.Instance,
-            StandardResolver.Instance);
-        _registered = true;
-    }
-    #endregion
 }
+```
+
+**Resolver registration:** do not call `StaticCompositeResolver.Instance.Register` here. Each `Register` call replaces the whole list, so a second bootstrap (MessagePack, MagicOnion) silently drops `MasterMemoryResolver` and IL2CPP fails with "formatter not found". Add your resolver to the single bootstrap in `messagepack-csharp` -> "Resolver bootstrap", ahead of `StandardResolver`:
+
+```csharp
+MyGame.MasterData.MasterMemoryResolver.Instance,
 ```
 
 ```csharp
@@ -166,7 +156,7 @@ var band = MasterDataService.Database.ItemTable.FindRangeByLevel(10, 19);
 var total = MasterDataService.Database.ItemTable.Count;
 ```
 
-- `MasterMemoryResolver` (prefixed by `PrefixClassName` if set) is generated in your namespace. It only supplies `T[]` formatters for the tables. Row formatters come from the MessagePack v3 source generator through `StandardResolver`. Register it **before** the first serializer call, because `StaticCompositeResolver.Register` throws after first use. If MessagePack.Unity or MagicOnion also set `DefaultOptions`, compose everything in one place. See `messagepack-csharp`.
+- `MasterMemoryResolver` (prefixed by `PrefixClassName` if set) is generated in your namespace. It only supplies `T[]` formatters for the tables. Row formatters come from the MessagePack v3 source generator through `StandardResolver`. It must be in the shared bootstrap before the first serializer call (`Register` throws after first use).
 - Pass the resolver explicitly (`formatterResolver:`) instead of relying on `MessagePackSerializer.DefaultOptions`. The constructor falls back to `DefaultOptions.Resolver` when it is null.
 - Unique `FindBy...` throws `KeyNotFoundException` on a miss. Use `TryFindBy...`, or set `IsReturnNullIfKeyNotFound = true` so `FindBy...` returns `null`. Non-unique `FindBy...` returns an empty `RangeView<T>`.
 - `FindClosestBy...` on a unique key returns `T?` (null when the table is empty). `FindRangeBy...(min, max, ascendant)` is inclusive on both ends.

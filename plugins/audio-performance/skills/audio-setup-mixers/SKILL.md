@@ -1,11 +1,11 @@
 ---
 name: audio-setup-mixers
-description: Inventories a project's AudioMixers and routes scene AudioSources into the right AudioMixerGroup (Music, SFX, Foley, Voice, UI, Ambience) by classifying what each source plays, then covers runtime mixer control through exposed parameters, snapshots, and dB-correct volume sliders. Use when the user asks to clean up or set mixer assignments, route audio through a mixer, decide which group a sound belongs in, set outputAudioMixerGroup, wire a settings-menu volume slider to AudioMixer.SetFloat, or switch snapshots. Creating mixers, groups, and effects is left to the user in the Audio Mixer window because no public API exists.
+description: Routes scene AudioSources into the right AudioMixerGroup (Music, SFX, Foley, Voice, UI, Ambience) by classifying what each plays, and covers runtime mixer control - exposed parameters, snapshots, ducking, and dB-correct volume sliders. Use when cleaning up or setting outputAudioMixerGroup, deciding which group a sound belongs in, or wiring a settings slider to AudioMixer.SetFloat. Mixer and group creation stay manual (no public API).
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: audio-performance
   sources: "Unity-Technologies/skills/skills/audio-setup-mixers, AlexeyPerov/Unity-Open-MCP/skills/extensions/audio"
-  unity: "6000.0+"
+  unity: "6000.0+ (live eval path needs com.unity.pipeline)"
 ---
 
 # Audio Mixer Setup
@@ -23,9 +23,12 @@ Handed back to the user: creating a mixer, creating or re-parenting groups, addi
 
 ## Step 0: Execution path
 
-Follow `unity-cli` to reach a connected Editor and confirm `eval` is in the command catalog (it ships with the `com.unity.pipeline` package). If it is missing, say so and stop. Some Pipeline versions also register `eval_file`; check the catalog before using it.
+Preferred: a live Editor with `unity command eval`. Eval syntax and prerequisites: see the `unity-cli` skill (unity-editor-tooling plugin) → Eval syntax. Every snippet in [references/api.md](references/api.md) is already in eval form.
 
-`eval` compiles a statement block: no `using` directives (CS0210), fully qualified types (CS0246/CS0103), and `UnityEngine.Object` spelled out (CS0104). Every snippet in [references/api.md](references/api.md) is already in that form.
+When `eval` is unavailable, continue without it:
+
+- Inventory and classify read-only: `.mixer` YAML lists groups (`AudioMixerGroupController` entries with `m_Name`) and exposed parameters; scene and prefab YAML give each `AudioSource`'s `OutputAudioMixerGroup` reference and clip GUID. Report from that; never write `.mixer`, scene, or prefab files by hand.
+- Routing: wrap the assign snippet in a static `[UnityEditor.MenuItem("Tools/Audio/Route Sources")]` method for the user to save under `Assets/Editor/` and run; it logs every routed, missing-group, and unmapped source.
 
 ## Step 1: Pre-flight
 
@@ -85,4 +88,4 @@ Volume sliders, mute toggles, snapshot switches, and ducking are runtime code, n
 ## See also
 
 - `optimize-audio` — import settings, mixer CPU audit, DSP buffer.
-- `unity-cli` — connecting to the Editor and running `eval`.
+- `unity-cli` (unity-editor-tooling plugin) — connecting to the Editor, `eval` syntax and prerequisites.

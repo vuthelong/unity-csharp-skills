@@ -26,7 +26,8 @@ Each exposed Blackboard type has a `Has*`, `Get*`, and `Set*` triple. All accept
 | Vector2 / Vector3 / Vector4 | `SetVector2` / `SetVector3` / `SetVector4` |
 | Color | `SetVector4` (Color converts implicitly) |
 | Position / Direction / Vector (spaceable types) | `SetVector3` (the space is set in the graph) |
-| Matrix4x4 / Transform | `SetMatrix4x4` |
+| Matrix4x4 | `SetMatrix4x4` |
+| Transform | No single setter: `SetVector3` on the sub-properties `<name>_position`, `<name>_angles`, `<name>_scale` (what the Transform property binder does) |
 | Texture2D / Texture3D / Cubemap / Texture2DArray | `SetTexture` |
 | Mesh | `SetMesh` |
 | SkinnedMeshRenderer | `SetSkinnedMeshRenderer` |
@@ -40,6 +41,8 @@ Each exposed Blackboard type has a `Has*`, `Get*`, and `Set*` triple. All accept
 [SerializeField] ExposedProperty _spawnRate = "SpawnRate";
 _vfx.SetFloat(_spawnRate, 120f);
 ```
+
+Other compound types (Sphere, AABox, Plane, and in some package versions Position/Direction/Vector) follow the same `<name>_<field>` pattern; if `HasVector3("Name")` is false, check `HasVector3("Name_position")`.
 
 `ResetOverride(id)` returns a property to the asset default. `HasFloat` and friends return false for a wrong name *or* a wrong type.
 

@@ -1,6 +1,6 @@
 ---
 name: r3
-description: Writes and reviews reactive code in Unity with Cysharp R3 (NuGet R3 + UPM com.cysharp.r3), the successor to UniRx. Covers install through NuGetForUnity plus the R3.Unity git URL, Observable / Subject / BehaviorSubject / ReplaySubject / ReactiveProperty / ReadOnlyReactiveProperty / SerializableReactiveProperty, Subscribe with OnErrorResume and OnCompleted(Result), subscription disposal (AddTo(this), AddTo(ref DisposableBuilder), DisposableBag, CompositeDisposable, Disposable.Combine, RegisterTo(destroyCancellationToken)), UnityFrameProvider / UnityTimeProvider, EveryUpdate / EveryValueChanged / Interval / Timer, operators (ThrottleFirst, Debounce, Chunk, CombineLatest, Merge, Switch), SubscribeAwait with AwaitOperation, FirstAsync / LastAsync, uGUI OnClickAsObservable / SubscribeToText, MonoBehaviour triggers, Observable Tracker, and UniRx migration. Use when the user mentions R3, UniRx, Rx, Observable<T>, ReactiveProperty, Subject, AddTo, subscription leaks, or reactive UI binding in Unity.
+description: "Writes and reviews reactive code with Cysharp R3, the UniRx successor: Observable, Subject, ReactiveProperty, operators, frame/time providers, subscription disposal, uGUI bindings, UniRx migration. Also hosts the shared NuGetForUnity setup used by the Cysharp NuGet libraries. Use for event streams and single reactive values; prefer observable-collections when binding a whole collection to UI. Triggers: R3, ReactiveProperty, AddTo(this), UniRx port, leaked subscriptions."
 license: MIT
 metadata:
   category: libraries
@@ -17,15 +17,25 @@ Reference files, read when needed:
 - `references/operators.md` - read when choosing a factory or operator, or checking an exact overload (time, frame and async variants).
 - `references/unirx-migration.md` - read when porting UniRx code or explaining how R3 differs from System.Reactive.
 
+## NuGetForUnity setup (shared)
+
+Canonical setup for every Cysharp library that ships its core as a NuGet DLL (`r3`, `observable-collections`, `memorypack`, `messagepack-csharp`, `mastermemory`, `magiconion`, `zlogger`). Other skills point here.
+
+1. Install NuGetForUnity once: Package Manager > Add package from git URL `https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity` (or from OpenUPM).
+2. **NuGet > Manage NuGet Packages**, search the package id, Install. Dependencies resolve automatically into `Assets/Packages`.
+3. Source generators / analyzers (`MemoryPack.Generator`, `MessagePackAnalyzer`, `MasterMemory.SourceGenerator`, the MagicOnion client generator): the DLL must have no platforms ticked and the `RoslynAnalyzer` asset label. NuGetForUnity normally sets this; set it by hand if generated code is missing.
+4. If Unity reports assembly version conflicts, clear **Project Settings > Player > Other Settings > Assembly Version Validation**.
+5. A UPM companion package (R3.Unity, MemoryPack.Unity, MessagePack.Unity, ZLogger.Unity) precompile-references the NuGet DLLs, so install the NuGet package first and pin the UPM tag to the same version.
+
+**System.Runtime.CompilerServices.Unsafe:** install once via NuGetForUnity (package `System.Runtime.CompilerServices.Unsafe` 6.0.0, usually pulled in as a dependency); if the project already has it from another route (a `.unitypackage` DLL, the `org.nuget.system.runtime.compilerservices.unsafe` UPM package), keep that one and don't add a second copy (duplicate-assembly errors).
+
 ## Install
 
 R3 ships in two parts: the core is a NuGet DLL, and the Unity layer is a UPM package.
 
-1. Install NuGetForUnity, for example from the git URL `https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity` or from OpenUPM.
-2. Open **NuGet > Manage NuGet Packages**, search for `R3`, and install it. This also brings in `Microsoft.Bcl.TimeProvider` and `Microsoft.Bcl.AsyncInterfaces`.
-3. If Unity reports assembly version conflicts, clear **Project Settings > Player > Other Settings > Assembly Version Validation**.
-4. In Package Manager, choose **Add package from git URL**: `https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity`. Pin a release with `#1.3.1`. Tags use plain `x.y.z`.
-5. The `R3.Unity` asmdef is auto-referenced and precompiles against `R3.dll`. Add `using R3;`, plus `using R3.Triggers;` for MonoBehaviour message observables.
+1. NuGet package `R3` via the NuGetForUnity setup above (also brings `Microsoft.Bcl.TimeProvider`, `Microsoft.Bcl.AsyncInterfaces`).
+2. Package Manager > Add package from git URL: `https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity#1.3.1` (tags are plain `x.y.z`).
+3. The `R3.Unity` asmdef is auto-referenced and precompiles against `R3.dll`. Add `using R3;`, plus `using R3.Triggers;` for MonoBehaviour message observables.
 
 What gets enabled is controlled by asmdef versionDefines. uGUI helpers need `com.unity.ugui` (`R3_UGUI_SUPPORT`). Physics triggers need the physics modules. TextMeshPro helpers (`SubscribeToText(TMP_Text)`, `TMP_InputField` and `TMP_Dropdown` observables) live under `Runtime/External/TextMeshPro`.
 

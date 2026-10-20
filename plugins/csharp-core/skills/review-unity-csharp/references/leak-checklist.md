@@ -86,7 +86,7 @@ private static readonly HashSet<Enemy> Active = new();
 private void OnEnable() => Active.Add(this);
 ```
 
-Without a matching `Remove` in `OnDisable`, destroyed enemies stay in the set forever. Pair `Add`/`Remove` in `OnEnable`/`OnDisable`, not `Awake`/`OnDestroy`, so pooled and deactivated objects are handled too. Use the object reference as the key; do not key by `GetInstanceID()` (compile error on 6000.5+). Clear static collections in a `SubsystemRegistration` reset hook.
+Without a matching `Remove` in `OnDisable`, destroyed enemies stay in the set forever. Pair `Add`/`Remove` in `OnEnable`/`OnDisable`, not `Awake`/`OnDestroy`, so pooled and deactivated objects are handled too. Use the object reference as the key; do not key by `GetInstanceID()` (newer Unity 6 releases deprecate it in favor of `EntityId`). Clear static collections in a `SubsystemRegistration` reset hook.
 
 ### 6. Closures capturing `this` in long-lived owners
 

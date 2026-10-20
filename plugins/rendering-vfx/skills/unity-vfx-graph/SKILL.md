@@ -1,6 +1,6 @@
 ---
 name: unity-vfx-graph
-description: Builds, drives, and debugs GPU particle effects with Visual Effect Graph (com.unity.visualeffectgraph 17.x) on Unity 6 URP. Covers .vfx assets, Spawn/Initialize/Update/Output contexts and blocks, exposed properties, the VisualEffect C# API (SetFloat, SetVector3, SetGraphicsBuffer, SendEvent, VFXEventAttribute, Reinit), property binders and custom VFXBinderBase, GraphicsBuffer and Point Cache/SDF data, GPU and output events, capacity, bounds and culling pitfalls, URP compatibility, and GPU performance. Use when the user mentions VFX Graph, Visual Effect Graph, VisualEffect, .vfx, VFXEventAttribute, VFXPropertyBinder, pCache, SDF Bake Tool, MeshToSDFBaker, millions of particles, or particles that vanish off-screen. For CPU Shuriken particles use `unity-particle-system`.
+description: Builds, drives, and debugs GPU particle effects with Visual Effect Graph on Unity 6 URP - contexts and blocks, exposed properties and the VisualEffect C# API, events, property binders, GraphicsBuffer, Point Cache and SDF data, bounds, and GPU cost. Use when the user mentions VFX Graph, VisualEffect, .vfx assets, SendEvent, pCache, SDF baking, millions of particles, or effects that vanish off-screen. For CPU Shuriken particles use unity-particle-system.
 license: MIT
 metadata:
   category: rendering-vfx

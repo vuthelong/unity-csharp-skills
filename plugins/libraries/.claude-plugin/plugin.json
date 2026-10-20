@@ -1,7 +1,9 @@
 {
   "name": "unity-libraries",
-  "description": "Third-party Unity 6 libraries: UniTask async/await, R3 reactive extensions, ZBase CSV Reader data import with Google Sheets download, UIEffect v5 uGUI/TMP effects, and Animation Sequencer DOTween timelines.",
+  "description": "Third-party Unity 6 libraries (17 skills): async and reactive (UniTask, R3, ObservableCollections), DI and messaging (VContainer, MessagePipe, ZBase PubSub), serialization and data (MessagePack-CSharp, MemoryPack, MasterMemory, ZBase CSV Reader with Google Sheets download), networking (MagicOnion), memory and strings (NativeMemoryArray, ZString, ZBase Pooling), logging (ZLogger), and UI/animation (UIEffect v5, Animation Sequencer DOTween timelines).",
   "version": "0.1.0",
-  "author": { "name": "vuthelong" },
+  "author": {
+    "name": "vuthelong"
+  },
   "license": "MIT"
 }

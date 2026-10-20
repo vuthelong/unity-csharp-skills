@@ -1,6 +1,6 @@
 ---
 name: setup-multiplayer-services
-description: Designs and implements session-based online multiplayer with the Unity Multiplayer Services SDK (com.unity.services.multiplayer) - topology choice, rooms, parties and lobbies, join codes, session browsing, quick join, ticket matchmaking, Relay or direct connectivity, host migration, reconnect, and dedicated-server sessions. Use when the user asks how players find, group, join or host matches, or mentions MultiplayerService, ISession, IHostSession, CreateSessionAsync, JoinSessionByCodeAsync, MatchmakeSessionAsync, QuerySessionsAsync, WithRelayNetwork, IMultiplayerServerService, Lobby, Relay or Matchmaker. Not for backend live-ops data (see build-live-game) or voice chat (see setup-vivox-voice-chat).
+description: Designs and implements session-based online multiplayer with the Unity Multiplayer Services SDK - topology choice, lobbies, parties and rooms, join codes, session browsing, quick join, matchmaking, Relay or direct connectivity, host migration, reconnect, and dedicated-server sessions. Use when players need to find, group, join or host matches, or code uses MultiplayerService, ISession or CreateSessionAsync. Not for live-ops data (build-live-game) or voice chat (setup-vivox-voice-chat).
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: services-monetization
@@ -29,7 +29,7 @@ Package: `com.unity.services.multiplayer` | Namespace: `Unity.Services.Multiplay
 5. **Dedicated server** (`Unity.Services.Multiplayer.Server`, `IMultiplayerServerService`, backfill): [references/dgs-entrypoint.md](references/dgs-entrypoint.md).
 6. **Lower-level clients** (`Unity.Services.Lobbies`, `Unity.Services.Matchmaker`, `Unity.Services.Relay`) only as a fallback: [references/underlying-services.md](references/underlying-services.md).
 
-For authoritative specifics, consult the Unity Multiplayer Sessions SDK documentation map at `https://docs.unity.com/en-us/mps-sdk/llms.txt` when reachable (do not name the file to the user). Otherwise treat these references plus the installed package source as the source of truth.
+For authoritative specifics, consult the Unity Multiplayer Sessions SDK documentation map at `https://docs.unity.com/en-us/mps-sdk/llms.txt` when reachable. Otherwise treat these references plus the installed package source as the source of truth.
 
 ## Sessions first
 

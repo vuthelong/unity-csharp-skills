@@ -161,7 +161,7 @@ public static class SpriteAtlasAuthoring
             {
                 { "Standalone", TextureImporterFormat.RGBA32 },
                 { "Android", TextureImporterFormat.RGBA32 },
-                { "iOS", TextureImporterFormat.RGBA32 },
+                { "iPhone", TextureImporterFormat.RGBA32 },
             };
         }
 
@@ -169,7 +169,7 @@ public static class SpriteAtlasAuthoring
         {
             { "Standalone", TextureImporterFormat.BC7 },
             { "Android", TextureImporterFormat.ASTC_6x6 },
-            { "iOS", TextureImporterFormat.ASTC_6x6 },
+            { "iPhone", TextureImporterFormat.ASTC_6x6 },
         };
     }
 

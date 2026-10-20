@@ -1,6 +1,6 @@
 ---
 name: new-unity-project
-description: Runs a guided, step-by-step flow from a game idea to a running, version-controlled Unity 6 project — gathers concept, target platforms and monetization; starts the Editor + platform-module install in the background while asking; creates the project from a URP template (urp-blank / universal-2d); sets up Git/GitHub/GitLab/UVCS; installs packages via the C# PackageManager API; applies a visual baseline (tonemapping volume, quality tier, UI stack, URP shaders); makes the first commit; and hands off monetization. Use for "make/start/create a new game", "bootstrap a Unity project", "I want to build a <genre> game", "scaffold/prototype a game", game jam, greenfield or blank project setup. Delegates commands to `unity-cli` and `unity-package-management`. Does not scaffold gameplay code.
+description: "Guides a brand-new Unity 6 game from idea to a running, version-controlled project: asks concept, platforms and monetization while the Editor installs in the background, creates a URP project, sets up Git or UVCS, installs packages, applies a visual baseline and makes the first commit. Use for \"make a new game\", \"bootstrap a Unity project\", \"I want to build a <genre> game\", game jams or greenfield setup. Delegates mechanics to unity-cli and unity-package-management; writes no gameplay code."
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: editor-tooling
@@ -17,13 +17,19 @@ to other skills.
 
 **Delegates to (read these for the actual commands — don't reinvent them):**
 - **`unity-cli`** — CLI install, auth/license, Editor install, project creation, source control,
-  opening the project. Its "Bootstrap a new project from scratch" workflow is the backbone here.
+  opening the project. Its "Bootstrap a new project from scratch" recipe
+  (`references/new-project-bootstrap.md`) is the backbone here.
 - **`unity-package-management`** — installing packages via the C# PackageManager Client API, and
   choosing packages by genre / platform / monetization.
 - **`urp-postprocessing`**, **`ui`**, **`2d-pixel-perfect`** — the visual baseline (Step 6):
   post-processing volume setup, HUD framework choice, pixel-perfect 2D.
 - **`implement-in-app-purchases`**, **`levelplay-unity-integration`**, **`build-live-game`** —
   monetization / backend *integration* (invoked at the end).
+
+The visual-baseline and monetization skills (and `migrate-birp-to-urp`) live in other plugins of this
+marketplace — `ui` in unity-ui, `2d-pixel-perfect` in unity-2d, `urp-postprocessing` and
+`migrate-birp-to-urp` in unity-rendering-vfx, the IAP/ads/live-game skills in
+unity-services-monetization. If one isn't installed, proceed without it and do that step directly.
 
 **Work one step at a time.** Ask only the current step's questions and wait for the user before
 moving on — platform and monetization answers change what you install, so don't gather everything
@@ -102,7 +108,8 @@ works without an Editor.
 
 ## Step 4 — Create the project + source control
 
-Follow the **`unity-cli`** "Bootstrap a new project from scratch" workflow verbatim:
+Follow the **`unity-cli`** "Bootstrap a new project from scratch" recipe
+(`references/new-project-bootstrap.md`) verbatim:
 
 - List the **real** template ids the Editor offers (`unity templates list --type core`) and pick by
   **render pipeline**, not just 2D/3D — don't guess ids. **Default to URP:**

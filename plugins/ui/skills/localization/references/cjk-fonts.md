@@ -14,27 +14,7 @@ Western fonts (Arial, Liberation Sans) have no CJK glyphs and render tofu (□).
 
 ## Prerequisite: TMP Essential Resources
 
-If `TMPro.TMP_Settings.instance == null`, TMP Essential Resources were never imported and TMP calls (including `TMP_FontAsset.CreateFontAsset`) throw a bare `NullReferenceException`. Import non-interactively:
-
-```csharp
-TMPro.TMP_PackageResourceImporter.ImportResources(importEssentials: true, importExamples: false, interactive: false);
-```
-
-If that API is unavailable in the project's uGUI version, import the package file directly. TMP ships inside `com.unity.ugui` in Unity 6 and the cache folder name carries a hash, so search for it:
-
-```csharp
-string package = null;
-var cache = System.IO.Path.GetFullPath(System.IO.Path.Combine(
-    UnityEngine.Application.dataPath, "..", "Library", "PackageCache"));
-foreach (var dir in System.IO.Directory.GetDirectories(cache))
-{
-    var candidate = System.IO.Path.Combine(dir, "Package Resources", "TMP Essential Resources.unitypackage");
-    if (System.IO.File.Exists(candidate)) { package = candidate; break; }
-}
-UnityEditor.AssetDatabase.ImportPackage(package, false);
-```
-
-Then poll `TMP_Settings.instance != null` in a **later** call. Never use `EditorApplication.ExecuteMenuItem("Window/TextMeshPro/Import TMP Essential Resources")` in automation: it opens a dialog that waits for a human. The import lands in `Assets/TextMesh Pro` within a few seconds.
+If `TMPro.TMP_Settings.instance == null`, TMP Essential Resources were never imported and `TMP_FontAsset.CreateFontAsset` throws a bare `NullReferenceException`. Import them non-interactively first: see `optimize-text-mesh-pro` → TMP Essential Resources.
 
 ## Choosing fonts
 

@@ -1,6 +1,6 @@
 ---
 name: messagepipe
-description: Sets up and reviews Cysharp MessagePipe (com.cysharp.messagepipe) for DI-first pub/sub in Unity. Covers install via UPM git URLs (core, MessagePipe.VContainer, MessagePipe.Zenject) plus UniTask, RegisterMessagePipe / RegisterMessageBroker / RegisterRequestHandler (VContainer), BindMessagePipe / BindMessageBroker (Zenject), BuiltinContainerBuilder, GlobalMessagePipe.SetProvider, MessagePipeOptions, IPublisher / ISubscriber, keyed IPublisher<TKey, TMessage>, IBufferedPublisher, IAsyncPublisher / IAsyncSubscriber with AsyncPublishStrategy, IRequestHandler / IAsyncRequestHandler / IRequestAllHandler, EventFactory, MessageHandlerFilter, DisposableBag, AddTo(destroyCancellationToken), the MessagePipe Diagnostics window and EnableCaptureStackTrace. Use when the user mentions MessagePipe, IPublisher<T>, ISubscriber<T>, GlobalMessagePipe, RegisterMessageBroker, "No such registration of type: MessagePipe.IPublisher", subscription leaks, or event aggregator/mediator patterns.
+description: "Sets up Cysharp MessagePipe for DI-integrated, typed pub/sub and request/response in Unity (VContainer, Zenject or built-in container): IPublisher/ISubscriber, keyed, buffered and async messages, request handlers, filters, subscription disposal. Choose it over zbase-pubsub when the project already uses a DI container and wants brokers injected per scope. Triggers: MessagePipe, RegisterMessageBroker, GlobalMessagePipe, leaked subscriptions, unregistered message types."
 license: MIT
 metadata:
   category: libraries
@@ -30,9 +30,8 @@ MessagePipe for Unity ships as UPM packages inside the repo. The NuGet package `
    - VContainer: `https://github.com/Cysharp/MessagePipe.git?path=src/MessagePipe.Unity/Assets/Plugins/MessagePipe.VContainer#1.8.2`
    - Zenject/Extenject: `https://github.com/Cysharp/MessagePipe.git?path=src/MessagePipe.Unity/Assets/Plugins/MessagePipe.Zenject#1.8.2`
    - Neither: use the built-in `BuiltinContainerBuilder` from the core package.
-4. OpenUPM also mirrors all three: `openupm add com.cysharp.messagepipe com.cysharp.messagepipe.vcontainer` (or `com.cysharp.messagepipe.zenject`). The README only documents git URLs and unitypackages.
-5. Alternatively import `MessagePipe.1.8.2.unitypackage` (+ `MessagePipe.VContainer` / `MessagePipe.Zenject` unitypackages) from the GitHub releases page.
-6. Optional: `MessagePipe.Analyzer.dll` from the releases page, labelled `RoslynAnalyzer`, flags `Subscribe` calls whose `IDisposable` is discarded.
+4. Alternative: OpenUPM `openupm add com.cysharp.messagepipe com.cysharp.messagepipe.vcontainer` (or `com.cysharp.messagepipe.zenject`).
+5. Optional: `MessagePipe.Analyzer.dll` from the releases page, labelled `RoslynAnalyzer`, flags `Subscribe` calls whose `IDisposable` is discarded.
 
 Package ids: `com.cysharp.messagepipe`, `com.cysharp.messagepipe.vcontainer`, `com.cysharp.messagepipe.zenject`. Runtime asmdefs: `MessagePipe`, `MessagePipe.VContainer`, `MessagePipe.Zenject`.
 

@@ -1,10 +1,10 @@
 ---
 name: level-geometry-authoring
-description: Generates and edits level geometry by script in Unity 6 - Terrain (TerrainData heightmaps, SetHeights / GetHeights, TerrainLayer splat painting with SetAlphamaps, tree and detail placement, holes, neighbor stitching, SampleHeight), ProBuilder meshes (com.unity.probuilder ShapeGenerator, ProBuilderMesh, Extrude, DeleteFaces, SetMaterial, ToMesh / Refresh), and LODGroup setup (SetLODs, transition heights, cross-fade). Use when the user wants a procedural or scripted terrain, hills, rivers or flattened areas, slope-based texturing, tree scattering, multi-tile terrain worlds, greybox / blockout geometry, platforms, ramps and stairs, or LOD levels, or reports terrain seams between tiles, a TerrainCollider not matching the visual, heights written in the wrong axis, pink terrain in URP, ProBuilder edits not showing, or LODs popping.
+description: Generates and edits level geometry by script in Unity 6 - Terrain heightmaps, splat painting, tree and detail placement, holes and multi-tile stitching, ProBuilder greybox meshes, and LODGroup setup. Use for procedural or scripted terrain, slope-based texturing, tree scattering, blockout platforms, ramps and stairs, or LOD levels, or when terrain tiles show seams, the TerrainCollider mismatches the visual, terrain renders pink in URP, ProBuilder edits do not show or LODs pop.
 license: MIT
 metadata:
   category: gameplay-systems
-  sources: "AlexeyPerov/Unity-Open-MCP/skills/extensions/terrain, AlexeyPerov/Unity-Open-MCP/skills/extensions/probuilder, AlexeyPerov/Unity-Open-MCP/skills/extensions/constraints"
+  sources: "AlexeyPerov/Unity-Open-MCP/skills/extensions/terrain, AlexeyPerov/Unity-Open-MCP/skills/extensions/probuilder"
   unity: "6000.0+"
 ---
 

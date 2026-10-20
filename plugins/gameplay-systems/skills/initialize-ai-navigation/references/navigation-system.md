@@ -3,7 +3,7 @@
 Game-script recipes below keep their `using` directives; save them into the project as-is.
 
 ## Table of Contents
-- [Information Gathering Checklist](#information-gathering-checklist)
+- [Agent Defaults](#agent-defaults)
 - [Component Setup Guide](#component-setup-guide)
 - [Common Recipes](#common-recipes)
 - [Important API Notes](#important-api-notes)
@@ -21,19 +21,10 @@ Game-script recipes below keep their `using` directives; save them into the proj
 - [Common Mistakes to Avoid](#common-mistakes-to-avoid)
 
 
-## Information Gathering Checklist
+## Agent Defaults
 
-Before creating components, ensure the following details exist. If not, ask the user:
+What to ask the user is in SKILL.md step 2. NavMeshAgent defaults for reference:
 
-### Core Questions
-* **What needs a NavMesh?** Which GameObjects or areas represent walkable surfaces? (floor, terrain, platforms)
-* **Agent type:** What kind of characters navigate? (humanoid, large vehicle, small creature) — determines radius, height, step height, slope
-* **Agent behavior:** What should agents do? (move to target, patrol, follow player, click-to-move)
-* **Obstacles:** Are there dynamic obstacles agents must avoid? (crates, doors, vehicles)
-* **Links:** Are there gaps, jumps, or disconnected areas that agents must cross?
-* **Areas and costs:** Are there different terrain types with different traversal costs? (water, mud, roads)
-
-### Per-Agent Details
 * **Speed:** Maximum movement speed (default: 3.5 units/sec)
 * **Angular Speed:** Maximum rotation speed (default: 120 deg/sec)
 * **Acceleration:** How quickly the agent reaches max speed (default: 8 units/sec²)
@@ -286,6 +277,10 @@ using UnityEngine.AI;
 [RequireComponent(typeof(Animator))]
 public class NavAgentAnimator : MonoBehaviour
 {
+    static readonly int MoveId = Animator.StringToHash("move");
+    static readonly int VelXId = Animator.StringToHash("velx");
+    static readonly int VelYId = Animator.StringToHash("vely");
+
     Animator anim;
     NavMeshAgent agent;
     Vector2 smoothDeltaPosition;
@@ -313,9 +308,9 @@ public class NavAgentAnimator : MonoBehaviour
 
         bool shouldMove = velocity.magnitude > 0.5f && agent.remainingDistance > agent.radius;
 
-        anim.SetBool("move", shouldMove);
-        anim.SetFloat("velx", velocity.x);
-        anim.SetFloat("vely", velocity.y);
+        anim.SetBool(MoveId, shouldMove);
+        anim.SetFloat(VelXId, velocity.x);
+        anim.SetFloat(VelYId, velocity.y);
     }
 
     void OnAnimatorMove()
@@ -400,7 +395,7 @@ UnityEditor.PackageManager.Client.Add("com.unity.ai.navigation");
 
 ## Important API Notes
 
-0. **Namespace:** All navigation components are in `UnityEngine.AI`. The package components (NavMeshSurface, NavMeshLink, NavMeshModifier, NavMeshModifierVolume) are in `Unity.AI.Navigation`.
+0. **Namespace:** The AI Navigation package components (`NavMeshSurface`, `NavMeshLink`, `NavMeshModifier`, `NavMeshModifierVolume`) are in `Unity.AI.Navigation`. The engine runtime types (`NavMeshAgent`, `NavMeshObstacle`, `NavMesh`, `NavMeshPath`) are in `UnityEngine.AI`.
 
 1. **Setting destination:** Use `agent.destination = position;` or `agent.SetDestination(position);`. Both trigger pathfinding. `SetDestination` returns `bool` indicating if the path request was submitted.
 
@@ -770,50 +765,28 @@ Use `Animator.SetLookAtPosition()` in `OnAnimatorIK()` to have the character loo
 
 ## Common Mistakes to Avoid
 
-### 1. No NavMesh Baked
-**Problem:** Adding a NavMeshAgent but forgetting to bake a NavMesh. The agent has nowhere to navigate.
-**Solution:** Always ensure at least one NavMeshSurface exists and has been baked.
+Setup errors already covered by the Troubleshooting Decision Tree (no bake, agent-type mismatch, Agent + Obstacle on one GameObject, non-kinematic Rigidbody, uncarved static blockers, link ends off the NavMesh) are not repeated here.
 
-### 2. Agent Type Mismatch
-**Problem:** NavMeshAgent's agent type doesn't match any NavMeshSurface's agent type. The agent cannot find any NavMesh.
-**Solution:** Ensure the agent type on both the NavMeshSurface and NavMeshAgent match.
-
-### 3. Setting transform.position Directly
+### 1. Setting transform.position Directly
 **Problem:** Moving a NavMeshAgent by setting `transform.position` desyncs it from the NavMesh.
 **Solution:** Use `agent.Warp(position)` to teleport, or `agent.destination` / `agent.SetDestination()` for pathfinding.
 
-### 4. NavMeshAgent + NavMeshObstacle on Same GameObject
-**Problem:** The agent tries to avoid itself, causing erratic movement or getting stuck.
-**Solution:** Only have one active at a time. Toggle between them based on state (alive vs. dead).
-
-### 5. Non-Kinematic Rigidbody with NavMeshAgent
-**Problem:** Both the physics engine and the navigation system try to move the transform each frame.
-**Solution:** If you need both, set `Rigidbody.isKinematic = true`.
-
-### 6. Checking remainingDistance While Path Is Pending
+### 2. Checking remainingDistance While Path Is Pending
 **Problem:** `agent.remainingDistance` returns unreliable values while `agent.pathPending` is true.
 **Solution:** Always guard with `if (!agent.pathPending && agent.remainingDistance < threshold)`.
 
-### 7. Forgetting Auto Braking for Patrol
+### 3. Forgetting Auto Braking for Patrol
 **Problem:** Agent slows to a crawl at each patrol waypoint because Auto Braking is on.
 **Solution:** Set `agent.autoBraking = false` for continuous patrol movement.
 
-### 8. Obstacles Without Carve for Static Blockers
-**Problem:** A stationary obstacle blocks a corridor but agents walk into it because only local avoidance is used (no carving).
-**Solution:** Enable **Carve** on stationary obstacles that block paths so the global pathfinder routes around them.
-
-### 9. NavMesh Link Ends Not on NavMesh
-**Problem:** Link gizmo shows disconnected ends (gray lines). Agents can't use the link.
-**Solution:** Position link start and end points directly over baked NavMesh surfaces. Check with NavMesh debug visualization.
-
-### 10. Using Deprecated OffMeshLink Instead of NavMeshLink
+### 4. Using Deprecated OffMeshLink Instead of NavMeshLink
 **Problem:** `OffMeshLink` is the legacy component. `NavMeshLink` from the AI Navigation package is the modern replacement with more features (width, transforms, auto-update).
 **Solution:** Always use `NavMeshLink` (from `Unity.AI.Navigation` namespace) for new setups. Migrate existing `OffMeshLink` components.
 
-### 11. Not Re-Baking After Scene Changes
+### 5. Not Re-Baking After Scene Changes
 **Problem:** NavMesh doesn't reflect newly added or moved geometry.
 **Solution:** Re-bake the NavMesh after modifying scene geometry, modifiers, or surface settings. For runtime changes, call `NavMeshSurface.BuildNavMesh()` or `UpdateNavMesh()`.
 
-### 12. Voxel Size Too Large for Narrow Passages
+### 6. Voxel Size Too Large for Narrow Passages
 **Problem:** Doorways or narrow corridors are missing from the NavMesh because the voxel grid is too coarse.
 **Solution:** Reduce voxel size (or use the default 3 voxels per agent radius). For tight spaces, use 4–6 voxels per radius.

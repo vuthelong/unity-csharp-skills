@@ -1,6 +1,6 @@
 ---
 name: unity-texture-import
-description: Configures and audits Unity 6 texture import settings through TextureImporter, platform overrides, Presets, and AssetPostprocessor rules. Covers texture types (Default, Normal map, Sprite, Single Channel, Cookie, Lightmap), sRGB vs linear data, compression formats per platform (ASTC, BC7, BC5, BC6H, ETC2), max size, mipmaps, mipmap streaming and mipmap limit groups, Read/Write cost, wrap/filter/aniso, and textures for VFX, flipbooks, LUTs, HDRIs, and masks. Use when the user mentions TextureImporter, import settings, texture compression, texture memory, ASTC, BC7, crunch, mipmaps, "normal map looks wrong", "texture is blurry", "texture uses too much memory", or wants import rules enforced automatically by folder.
+description: Configures and audits Unity 6 texture import settings with TextureImporter, per-platform overrides, Presets, and AssetPostprocessor rules - texture type, sRGB vs linear data, ASTC/BC compression, max size, mipmaps, and Read/Write cost. Use when a normal map looks wrong, a texture is blurry or uses too much memory, or import rules should be enforced by folder. Pixel-art import belongs to 2d-pixel-perfect and atlas compression to manage-sprite-atlas.
 license: MIT
 metadata:
   category: rendering-vfx

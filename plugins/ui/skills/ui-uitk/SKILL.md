@@ -1,6 +1,6 @@
 ---
 name: ui-uitk
-description: Understands, edits, and generates Unity 6 UI Toolkit UI — UXML layouts, USS stylesheets (flexbox, variables, transitions, 9-slice), UIDocument and PanelSettings setup, runtime data binding (`[CreateProperty]`, `DataBinding`, `SetBinding`), custom controls (`[UxmlElement]`, `[UxmlAttribute]`), PointerManipulators and drag-and-drop, Painter2D gradients and shapes, SVG icons, and editor UI via `CreateGUI`/`CreateInspectorGUI`/`CreatePropertyGUI`. Use for `.uxml`, `.uss`, `.tss` files, UI Toolkit, UIElements, UI Builder, UIDocument, PanelSettings, or a new EditorWindow, custom inspector, or PropertyDrawer.
+description: Understands, edits and generates Unity 6 UI Toolkit UI - UXML layouts, USS styling, UIDocument and PanelSettings, runtime data binding, custom controls, manipulators, Painter2D and SVG icons, plus editor UI via CreateGUI and CreateInspectorGUI. Use for .uxml, .uss or .tss files, UI Builder, UIElements, binding questions, or any new EditorWindow, custom inspector or PropertyDrawer (the default for new editor tools).
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: ui
@@ -144,7 +144,7 @@ Present generated files with a filename on the fence:
 1. Find an existing PanelSettings asset; create `Assets/UI/PanelSettings.asset` only if none exists (it needs a Theme Style Sheet — create one via **Create > UI Toolkit > Default Runtime Theme File** if the project has none).
 2. Add a `UIDocument`, assign Panel Settings and the Source Asset (UXML).
 3. Set PanelSettings **Scale Mode = Scale With Screen Size** with a reference resolution for game UI.
-4. On 6000.6+, `PanelRenderer` is the newer runtime component; see `references/runtime-binding.md`.
+4. Newer Unity 6 releases may offer `PanelRenderer` as a runtime component (check your version's docs); see `references/runtime-binding.md`.
 
 Editor UI (EditorWindow, inspectors, drawers) needs no PanelSettings.
 

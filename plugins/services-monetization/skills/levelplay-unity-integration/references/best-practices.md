@@ -566,6 +566,19 @@ guidance. This allows you to provide targeted fixes rather than generating new c
 - Explain where/how to integrate each snippet
 - Note any dependencies between snippets
 
+**Option 4: Existing ad manager code (review)**
+- Ask for the code and review it before generating anything; skip the bid-floor prompt until new formats are added
+- Check: current Ad Unit API (`LevelPlayRewardedAd`, `LevelPlayInterstitialAd`, `LevelPlayBannerAd`) vs deprecated `IronSource.Agent` calls; callback subscription/unsubscription; error handling; leaks (missing `DestroyAd()`/unsubscribe)
+- Deprecated APIs: migrate per `migration-sdk-9.md` (Scenario B for init, Scenario C per ad format, then the C5 completeness checklist)
+- Current APIs with issues: give targeted fixes. Correct code: offer to add more formats
+- When adding formats after review, match the existing organization pattern unless the user wants a new one, and scope the bid-floor prompt to the new formats only
+
+### Adding More Ad Formats Later
+
+Skip setup; confirm initialization still logs success, then add the new format following the same
+organization pattern (new `XxxAdManager.cs` next to existing managers, a new section in the unified
+`AdManager`, or matching snippets) and the same rules below. Existing formats keep working.
+
 ### Regardless of Chosen Approach, Always Include
 - All manager classes must inherit from `MonoBehaviour` — required for Unity lifecycle methods (`Start()`, `OnDestroy()`) and to attach the script to a GameObject
 - After generating any manager script, instruct the user to attach it to a persistent GameObject in their scene (the same one as the initializer, with `DontDestroyOnLoad`)
@@ -578,6 +591,7 @@ guidance. This allows you to provide targeted fixes rather than generating new c
 - Error handling and graceful degradation
 
 ### Bid Floor Handling (per-format)
+- Optional; most publishers skip it until they have dashboard data. Starting ranges (USD): Rewarded $0.50–$2.00, Interstitial $0.20–$1.00, Banner $0.05–$0.20. Offer ranges only for the formats being implemented.
 - If the user provided a bid floor value for a format, wrap construction in `Config.Builder().SetBidFloor(value).Build()` and pass the config to the constructor.
 - If the user said 'skip' for that format, use the basic constructor (`new LevelPlayRewardedAd(adUnitId)`).
 - Apply per-format: a publisher may set a floor on rewarded but skip banner.
@@ -598,6 +612,7 @@ rewardedAd = new LevelPlayRewardedAd(adUnitId);
 ## Additional Resources
 
 For detailed API implementation, see:
+- `ad-format-common.md`: Shared ad unit lifecycle, events, data types, retry, cleanup
 - `rewarded-api.md`: Rewarded ad implementation
 - `interstitial-api.md`: Interstitial ad implementation
 - `banner-api.md`: Banner ad implementation

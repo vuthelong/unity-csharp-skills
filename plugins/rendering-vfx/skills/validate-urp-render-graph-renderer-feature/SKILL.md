@@ -1,6 +1,6 @@
 ---
 name: validate-urp-render-graph-renderer-feature
-description: Reviews and corrects Unity 6 URP ScriptableRendererFeature / ScriptableRenderPass code that uses the Render Graph API (RecordRenderGraph, ContextContainer, UniversalResourceData, AddRasterRenderPass, AddBlitPass, TextureHandle, PassData). Checks material and texture binding, read/write resource wiring, static render functions and stale PassData, texture descriptors, blit/copy simplification, global texture exposure, ConfigureInput declarations, pass culling, and leftover Compatibility Mode code (Execute, OnCameraSetup, RTHandle allocation). Use when the user wants a renderer feature reviewed, validated, debugged, ported from Execute() to Render Graph, or written correctly for URP 17, or reports a custom pass that renders black, does nothing, or errors in the Render Graph Viewer.
+description: Writes, reviews, and fixes Unity 6 URP ScriptableRendererFeature and ScriptableRenderPass code built on the Render Graph API (RecordRenderGraph, AddRasterRenderPass, AddBlitPass, TextureHandle, PassData). Use when the user wants to author a custom renderer feature or fullscreen pass, port Execute() code to Render Graph, or review an existing feature, or reports a custom pass that renders black, does nothing, or errors in the Render Graph Viewer.
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: rendering-vfx

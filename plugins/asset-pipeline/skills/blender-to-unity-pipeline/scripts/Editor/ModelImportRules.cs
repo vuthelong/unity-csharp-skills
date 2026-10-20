@@ -110,7 +110,7 @@ public sealed class ModelImportRules : AssetPostprocessor
         }
     }
 
-    private static void ApplyInvariants(ModelImporter importer)
+    private static void ApplyFirstImportDefaults(ModelImporter importer)
     {
         importer.globalScale = 1f;
         importer.useFileScale = true;
@@ -224,12 +224,16 @@ public sealed class ModelImportRules : AssetPostprocessor
     {
         if (assetImporter is not ModelImporter importer) return;
 
-        if (importer.importSettingsMissing) ApplyNearestPreset(importer, assetPath);
-
         var rule = FindRule(assetPath);
+
+        if (importer.importSettingsMissing)
+        {
+            if (rule != null) ApplyFirstImportDefaults(importer);
+            ApplyNearestPreset(importer, assetPath);
+        }
+
         if (rule == null) return;
 
-        ApplyInvariants(importer);
         ApplyRule(importer, rule);
     }
 

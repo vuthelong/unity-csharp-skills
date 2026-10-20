@@ -1,6 +1,6 @@
 ---
 name: build-gtk
-description: Builds node-based Editor tools with Unity Graph Toolkit (GTK, the built-in `Unity.GraphToolkit.Editor` module) — `Graph`/`Node` subclasses, port and option builders, context/block nodes, subgraphs, blackboard variables, `OnGraphChanged` validation, `GraphDatabase` editing with undo, and compiling graphs into runtime assets through a `ScriptedImporter`; plus the State Machine API (`StateMachine`, `State`, `Condition<T>`, transitions) on 6000.7+. Use for custom graph editors, dialogue/quest/behaviour graphs, node-based content tools, Animator-like state machine editors, migrating a `UnityEditor.Experimental.GraphView` tool, or errors like an empty Add menu or missing node types. Targets 6000.6+ (partial on 6000.4–6000.5). Not for Shader Graph, VFX Graph or Animator Controllers.
+description: "Builds node-based Editor tools with Unity Graph Toolkit (Unity.GraphToolkit.Editor): Graph and Node subclasses, ports and options, subgraphs, blackboard variables, validation, and ScriptedImporters that compile graphs into runtime assets, plus the State Machine API on 6000.7+. Use for dialogue, quest or behaviour graph editors, node-based content tools, or migrating a GraphView tool. Triggers: \"make a node editor\", \"empty Add menu\". Targets 6000.6+; not for Shader Graph, VFX Graph or Animator."
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: editor-tooling
@@ -104,9 +104,14 @@ there, not from memory. Read `references/runtime-and-visualization.md` as well w
    ```csharp
    var graph = GraphDatabase.LoadGraphForImporter<MyGraph>(ctx.assetPath);   // never LoadGraph here
    if (graph == null) return;                                                 // bad path or type: log and stop
-   var start = graph.GetNodes().OfType<StartNode>().FirstOrDefault();
+   StartNode start = null;
+   foreach (var node in graph.GetNodes())
+   {
+       if (node is StartNode candidate) { start = candidate; break; }
+   }
    if (start == null) return;                                                 // OnGraphChanged already reported it
    var next = start.GetOutputPortByName("Next").FirstConnectedPort?.GetNode(); // null when unconnected
+   if (next == null) return;
    var titlePort = next.GetInputPortByName("Title");
    titlePort.TryGetValue<string>(out var title);                              // the value typed on the node
    if (titlePort.IsConnected) { /* resolve titlePort.FirstConnectedPort.GetNode() upstream instead */ }

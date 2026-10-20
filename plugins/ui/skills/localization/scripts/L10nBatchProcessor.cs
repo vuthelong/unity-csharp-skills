@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
-using UnityEngine.UI;
 using UnityEditor.Events;
 using UnityEngine.Events;
 using UnityEngine.Localization.Components;
@@ -115,33 +114,30 @@ public static class L10nBatchProcessor
 
         // Both component families. TMP_Text is abstract and covers TextMeshProUGUI and TextMeshPro.
         var labels = new List<Component>();
-        labels.AddRange(Object.FindObjectsByType<Text>(
+        labels.AddRange(Object.FindObjectsByType<UnityEngine.UI.Text>(
             FindObjectsInactive.Include, FindObjectsSortMode.None));
         labels.AddRange(Object.FindObjectsByType<TMP_Text>(
             FindObjectsInactive.Include, FindObjectsSortMode.None));
 
-        // Longest key first. A label reading "NO ITEMS FOUND" must bind to that key rather
-        // than to a shorter "NO" that is a substring of it -- the case SKILL.md's mapping
-        // guidance calls out. Dictionary enumeration order is unspecified, so without this
-        // the binding is not just wrong but irreproducible; and because the loop below breaks
-        // on the first hit and marks the label matched, a mis-binding never surfaces in the
-        // unmatched report. Sorted once here rather than once per label.
-        var ordered = mapping.OrderByDescending(e => e.Key.Length).ToList();
+        var exact = new Dictionary<string, string>(System.StringComparer.Ordinal);
+        foreach (var entry in mapping)
+        {
+            exact[entry.Key.Trim()] = entry.Value;
+        }
 
         foreach (var label in labels)
         {
             // Read the current string from whichever family this component belongs to.
-            var current = label is Text legacy ? legacy.text : ((TMP_Text)label).text;
+            var current = label is UnityEngine.UI.Text legacy ? legacy.text : ((TMP_Text)label).text;
             if (string.IsNullOrEmpty(current)) continue;
 
             var matched = false;
-            foreach (var kvp in ordered)
+            if (exact.TryGetValue(current.Trim(), out var entryKey))
             {
-                if (!current.Contains(kvp.Key)) continue;
 
                 if (!label.gameObject.TryGetComponent<LocalizeStringEvent>(out var lse))
                     lse = label.gameObject.AddComponent<LocalizeStringEvent>();
-                lse.StringReference = new UnityEngine.Localization.LocalizedString(table, kvp.Value);
+                lse.StringReference = new UnityEngine.Localization.LocalizedString(table, entryKey);
 
                 // Wire the listener through the public UnityEventTools API. The persistent-call
                 // fields could be written directly through SerializedObject instead, but those
@@ -174,7 +170,6 @@ public static class L10nBatchProcessor
 
                 EditorUtility.SetDirty(lse);
                 matched = true;
-                break;
             }
 
             // A label the mapping never covered is a coverage gap the caller has to see.

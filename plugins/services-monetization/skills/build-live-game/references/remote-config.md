@@ -28,19 +28,19 @@ Server-side game configuration. Store game definitions (achievement lists, battl
 ```csharp
 struct UserAttributes {}
 struct AppAttributes {}
-var result = await RemoteConfigService.Instance.FetchConfigsAsync(
+await RemoteConfigService.Instance.FetchConfigsAsync(
     new UserAttributes(), new AppAttributes());
-// Access values:
-string val = result.config.GetString("key");
-int num = result.config.GetInt("key");
-bool flag = result.config.GetBool("key");
-// For JSON values:
-var token = result.config["key"]; // JToken
+var config = RemoteConfigService.Instance.appConfig;
+string val = config.GetString("key");
+int num = config.GetInt("key");
+bool flag = config.GetBool("key");
+var token = config.config["key"];
 var obj = token.ToObject<MyType>();
 ```
 
+- Read values from `RemoteConfigService.Instance.appConfig` (a `RuntimeConfig`) after the fetch completes. `RuntimeConfig` exposes the typed getters (`GetString`, `GetInt`, `GetBool`, `GetFloat`, `GetLong`, `GetJson`, each with an optional default); its `config` property is the raw `JObject`, so JSON entries are read with `appConfig.config["key"]`.
 - `UserAttributes` and `AppAttributes` are empty structs unless you use Game Overrides (audience targeting).
-- Results are cached locally; subsequent calls return cached data unless you call with different attributes.
+- Every `FetchConfigsAsync` call sends a request; it does not short-circuit on unchanged attributes. `appConfig` holds the last successfully fetched values, which are also cached on device so they are available offline or when a fetch fails (check `appConfig.origin`: `Default`, `Cached`, or `Remote`). Verify these details against the installed `com.unity.remote-config` version.
 
 ## .rc File Format
 
@@ -88,9 +88,9 @@ struct AppAttributes {}
 
 async Task<List<T>> LoadJsonConfigAsync<T>(string key)
 {
-    var result = await RemoteConfigService.Instance.FetchConfigsAsync(
+    await RemoteConfigService.Instance.FetchConfigsAsync(
         new UserAttributes(), new AppAttributes());
-    var token = result.config[key];
+    var token = RemoteConfigService.Instance.appConfig.config[key];
     return token.ToObject<List<T>>();
 }
 ```

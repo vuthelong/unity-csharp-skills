@@ -1,6 +1,6 @@
 ---
 name: spine-unity
-description: Integrates Esoteric Software Spine 2D skeletal animation into Unity 6 with the spine-unity runtime and Spine URP Shaders. Covers install via unitypackage or UPM git URLs, the runtime/editor major.minor version rule, export settings (.skel.bytes vs .json, .atlas.txt, straight alpha vs PMA), SkeletonDataAsset / SpineAtlasAsset, the 4.3 split components (SkeletonAnimation or SkeletonMecanim plus SkeletonRenderer or SkeletonGraphic), AnimationState SetAnimation / AddAnimation, tracks, mixing, TrackEntry and Spine event callbacks, skins and Skin.AddSkin mix-and-match, attachments, BoneFollower and SkeletonUtility, 2D Spine in a 3D URP scene (sorting, SortingGroup, billboarding, lit shaders, normals, shadows, z-spacing), performance, pooling and licensing. Use when the user mentions Spine, spine-unity, SkeletonAnimation, SkeletonGraphic, SkeletonDataAsset, .skel.bytes, .atlas.txt, AnimationState, TrackEntry, or Spine characters in a 3D game.
+description: Integrates Spine 2D skeletal animation into Unity 6 with spine-unity 4.2 or 4.3 and the Spine URP Shaders - install, export settings, texture workflow, SkeletonAnimation / SkeletonGraphic setup, AnimationState tracks, mixing and events, skins, bone following, Spine in a 3D URP scene, pooling, and the 4.2 to 4.3 upgrade. Use when the user mentions Spine, spine-unity, SkeletonAnimation, .skel.bytes or .atlas.txt, or Spine characters rendering wrong.
 license: MIT
 metadata:
   category: asset-pipeline
@@ -16,6 +16,23 @@ Verified against the spine-runtimes `4.3` branch: spine-unity 4.3.114, spine-csh
 
 The Spine Runtimes are distributed under the Spine Runtimes License Agreement. You may integrate them into a game for free, but anyone who uses the Spine Editor to create or modify the animations needs their own Spine Editor license. Studios distributing software that contains the runtimes to people without a license need a license at the time of integration. Read esotericsoftware.com/spine-runtimes-license before shipping.
 
+## Detect the runtime version first
+
+Many shipping projects are still on 4.2, and 4.2 and 4.3 differ in component layout and core API names. Before writing any code, find the installed version: `Packages/manifest.json` (the `#4.x` suffix or commit of the spine git URLs, or a `com.esotericsoftware.spine.*` version), `Packages/packages-lock.json`, or, for the unitypackage install, `Assets/Spine/version.txt`. Write code for that version only; never mix names. If it cannot be determined, ask.
+
+| Concept | 4.2 | 4.3 |
+|---|---|---|
+| Components | `SkeletonAnimation : SkeletonRenderer` (one component); `SkeletonGraphic` has its own `AnimationState` | `SkeletonAnimation` + `SkeletonRenderer` (or `SkeletonGraphic`) as two components |
+| Current track entry | `state.GetCurrent(i)` | `state.GetTrack(i)` |
+| Reset pose | `SetToSetupPose()` / `SetBonesToSetupPose()` / `SetSlotsToSetupPose()` | `SetupPose()` / `SetupPoseBones()` / `SetupPoseSlots()` |
+| Bone local / world | `bone.X`, `bone.WorldX` | `bone.Pose.X`, `bone.AppliedPose.WorldX` |
+| Slot attachment / color | `slot.Attachment`, `slot.R/G/B/A` | `slot.AppliedPose.Attachment`, `slot.AppliedPose.GetColor()` |
+| Mesh settings | `skeletonAnimation.zSpacing` | `skeletonAnimation.Renderer.MeshSettings.zSpacing` |
+| Track mixing | `MixBlend`, `HoldPrevious` | removed; `TrackEntry.Additive` |
+| Default texture workflow | PMA | straight alpha |
+
+Full rename list: [references/versions-and-upgrade.md](references/versions-and-upgrade.md). The rest of this skill and its references use 4.3 names with 4.2 noted where they differ; translate through this table for 4.2 projects.
+
 ## Workflow
 
 1. **Match versions.** The runtime's major.minor must equal the Spine Editor version used to export (4.3 runtime reads only 4.3 exports; 4.2 and older exports will not load). Patch versions may differ, but re-export everything when changing major.minor. Pin the editor version in the team's Spine launcher settings.
@@ -27,7 +44,7 @@ The Spine Runtimes are distributed under the Spine Runtimes License Agreement. Y
      3. URP: `https://github.com/EsotericSoftware/spine-runtimes.git?path=spine-unity/Modules/com.esotericsoftware.spine.urp-shaders#4.3`. This one requires spine-unity installed via UPM; with the unitypackage, use the URP Shaders zip from the download page instead.
      Replace `#4.3` with a commit hash in `manifest.json` for reproducible builds; the branch moves.
    - The base runtime ships Built-in RP shaders only. **URP projects need the URP Shaders package**, otherwise skeletons render pink or unlit.
-3. **Pick the texture workflow before importing.** Unity 6 URP projects use Linear color space, and premultiplied-alpha (PMA) textures are incompatible with Linear. Use **straight alpha**, which is the spine-unity 4.3 default. The Spine Editor's Texture Packer still defaults to PMA, so disable `Premultiply alpha` and enable `Bleed` there. In Unity, Edit > Preferences > Spine > `Switch Texture Workflow` switches the texture preset (`StraightAlphaTexturePreset` / `PMATexturePreset`) and the blend-mode materials together. Straight-alpha materials need `Straight Alpha Texture` enabled.
+3. **Pick the texture workflow before importing.** Unity 6 URP projects use Linear color space, and premultiplied-alpha (PMA) textures are incompatible with Linear. Use **straight alpha**, which is the spine-unity 4.3 default (4.2 defaults to PMA; switch it). The Spine Editor's Texture Packer still defaults to PMA, so disable `Premultiply alpha` and enable `Bleed` there. In Unity, Edit > Preferences > Spine > `Switch Texture Workflow` switches the texture preset (`StraightAlphaTexturePreset` / `PMATexturePreset`) and the blend-mode materials together. Straight-alpha materials need `Straight Alpha Texture` enabled.
 4. **Export** binary (`.skel.bytes`) for production, JSON while learning. Atlas extension `.atlas.txt`. spine-unity cannot load `.skel` without `.bytes`. Drop the skeleton file, `.atlas.txt` and `.png` pages into one folder.
 5. **Check the generated assets**: `<name>_Atlas` (SpineAtlasAsset), `<name>_Material` (one per atlas page), `<name>_SkeletonData` (SkeletonDataAsset). Set the `Scale` on the SkeletonDataAsset (default 0.01, meaning 100 Spine px per Unity unit; use 1/pixelsPerUnit to match art), default mix and per-pair mix durations.
 6. **Instantiate**: drag `_SkeletonData` into the scene and choose SkeletonAnimation (or SkeletonMecanim), or into a Canvas for SkeletonGraphic. Assign URP materials (see [references/urp-3d-rendering.md](references/urp-3d-rendering.md)).
@@ -36,7 +53,7 @@ The Spine Runtimes are distributed under the Spine Runtimes License Agreement. Y
 
 ## Components (4.3 split architecture)
 
-In 4.3, animation and rendering are separate components on the same GameObject:
+In 4.2, `SkeletonAnimation` and `SkeletonMecanim` derive from `SkeletonRenderer` and `SkeletonGraphic` animates itself; there is one component per skeleton. In 4.3, animation and rendering are separate components on the same GameObject:
 
 | Animation component | Renderer component | Use |
 |---|---|---|

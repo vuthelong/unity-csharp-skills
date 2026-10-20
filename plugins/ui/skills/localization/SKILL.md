@@ -1,6 +1,6 @@
 ---
 name: localization
-description: Sets up and drives Unity Localization (`com.unity.localization`) — LocalizationSettings and Locales, String Table and Asset Table collections, Smart Strings, `LocalizeStringEvent` wiring that updates in Edit mode, runtime locale switching via `LocalizationSettings.SelectedLocale`, per-locale TMP font swapping for CJK through Asset Tables and Addressables, table completeness checks, and batch localization of existing scenes. Use when adding languages, translating UI text, building a language menu, fixing tofu (missing CJK glyphs) or "No translation found" text, extracting hard-coded strings, or mentions of i18n, l10n, multilingual, StringTable, LocalizedString, or Locale.
+description: Sets up and drives Unity Localization (com.unity.localization) - Locales, String and Asset Tables, Smart Strings, LocalizeStringEvent wiring, runtime locale switching, per-locale font swapping through Asset Tables, completeness checks and batch-binding existing scene text. Use when adding languages, building a language menu, extracting hard-coded strings, or fixing "No translation found" text or a CJK locale showing tofu because its font is not swapped. Font atlas tuning belongs to optimize-text-mesh-pro.
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: ui

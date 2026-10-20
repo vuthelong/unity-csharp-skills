@@ -45,7 +45,7 @@ Verified against MagicOnion 7.11.0 `docs/docs/supported-platforms.md`, `installa
 | Package | built into `MagicOnion.Client` / `MagicOnion.Abstractions` | `MagicOnion.Serialization.MemoryPack` (client + server) + MemoryPack |
 | Contract | `[MessagePackObject]`, `[Key(int)]` | `[MemoryPackable] partial` |
 | Switch | default | `MagicOnionSerializerProvider.Default = MemoryPackMagicOnionSerializerProvider.Instance`, or per client: `MagicOnionClient.Create<T>(channel, MemoryPackMagicOnionSerializerProvider.Instance)` / `StreamingHubClient.ConnectAsync<,>(channel, receiver, serializerProvider: ...)` |
-| Source generator | `[MagicOnionClientGeneration(typeof(X))]`, register `.Resolver` in `StaticCompositeResolver` | `[MagicOnionClientGeneration(typeof(X), Serializer = MagicOnionClientGenerationAttribute.GenerateSerializerType.MemoryPack)]` + `MagicOnionMemoryPackFormatterProvider.RegisterFormatters()` at startup |
+| Source generator | `[MagicOnionClientGeneration(typeof(X))]`, add `.Resolver` to the shared `messagepack-csharp` resolver bootstrap | `[MagicOnionClientGeneration(typeof(X), Serializer = MagicOnionClientGenerationAttribute.GenerateSerializerType.MemoryPack)]` + `MagicOnionMemoryPackFormatterProvider.RegisterFormatters()` at startup |
 | Interop | language-neutral format | C# only |
 | Version tolerance | int keys; add new keys at the end | add members at the end; `[MemoryPackable(GenerateType.VersionTolerant)]` for more |
 

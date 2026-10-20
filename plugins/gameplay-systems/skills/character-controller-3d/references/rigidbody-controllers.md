@@ -10,7 +10,7 @@ Read when building or debugging a dynamic or kinematic Rigidbody character.
 | `isKinematic` | false | Physics resolves contacts |
 | `constraints` | `FreezeRotation` | Stops the capsule tipping over; rotate with `MoveRotation` |
 | `interpolation` | `Interpolate` | Removes stutter when the render rate exceeds the fixed rate. Use only on the visible character, not on every crate. |
-| `collisionDetectionMode` | `Continuous` for normal speeds; `ContinuousDynamic` for fast characters vs other moving bodies; `ContinuousSpeculative` when kinematic bodies are involved | See table below |
+| `collisionDetectionMode` | `Continuous` (script default) | A character mostly needs to not tunnel through static walls and floors, which is exactly what `Continuous` sweeps against, and unlike `ContinuousSpeculative` it does not snag on ghost contacts at floor seams and edges. Use `ContinuousDynamic` for fast characters vs other moving bodies. |
 | `linearDamping` | 0 on the ground | The motor sets velocity directly; damping fights it. Use it for air drag only. |
 | `useGravity` | off while grounded on walkable ground, on otherwise | Prevents creeping down slopes on a frictionless capsule |
 | `mass` | 60-80 | Relevant when pushing or being pushed by other bodies |
@@ -22,11 +22,11 @@ Unity 6 renames: `velocity` to `linearVelocity`, `drag` to `linearDamping`, `ang
 | Mode | Sweeps against | Cost | Use for |
 |---|---|---|---|
 | `Discrete` | Nothing | Lowest | Slow props |
-| `Continuous` | Static colliders | Low | Characters at normal speed |
-| `ContinuousDynamic` | Static + Continuous/ContinuousDynamic bodies | High | Fast characters, projectiles |
-| `ContinuousSpeculative` | Everything, including kinematic | Medium | Kinematic bodies, spinning objects. Can cause ghost collisions on edges and tile seams. |
+| `ContinuousSpeculative` | Everything, speculatively (no sweep), including kinematic | Low | Kinematic bodies, spinning objects. Can cause ghost collisions on edges and tile seams. |
+| `Continuous` | Static colliders | Medium | Characters (default) |
+| `ContinuousDynamic` | Static + Continuous/ContinuousDynamic bodies | Highest | Fast characters, projectiles |
 
-Kinematic bodies support only `ContinuousSpeculative` (Unity silently uses it).
+Kinematic bodies support only `Discrete` and `ContinuousSpeculative`.
 
 ## Movement in FixedUpdate
 

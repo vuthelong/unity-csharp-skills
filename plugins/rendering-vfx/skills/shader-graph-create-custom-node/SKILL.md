@@ -1,6 +1,6 @@
 ---
 name: shader-graph-create-custom-node
-description: Turns HLSL into reusable Shader Graph nodes for URP on Unity 6 - Custom Function nodes (File or String mode, _float/_half suffixes, UnityTexture2D/UnitySamplerState, SHADERGRAPH_PREVIEW guards), Sub Graphs, and reflected HLSL function nodes (UNITY_EXPORT_REFLECTION with sg: hint tags, Shader Graph 17.5+). Also covers Shader Graph structure (targets, material types, blackboard properties, keywords) and safe ways to inspect or create .shadergraph assets. Use when the user wants a custom Shader Graph node, to call existing HLSL from Shader Graph, to package node clusters for reuse, to fix "undeclared identifier" or "_float" errors in a Custom Function node, or to set up a graph for VFX Graph or fullscreen effects.
+description: Turns HLSL into reusable Shader Graph nodes for URP on Unity 6 - Custom Function nodes (File or String mode, _float/_half suffixes, SHADERGRAPH_PREVIEW guards), Sub Graphs, and reflected function nodes with UNITY_EXPORT_REFLECTION (Shader Graph 17.5+). Use when the user wants a custom Shader Graph node, to call existing HLSL from a graph, to package node clusters for reuse, or to fix 'undeclared identifier' or '_float' errors in a Custom Function node.
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: rendering-vfx

@@ -1,6 +1,6 @@
 ---
 name: game-data-pipeline
-description: Builds and maintains an end-to-end game data pipeline in Unity 6 - CSV or Google Sheets baked by ZBase.Csv-Reader into ScriptableObject tables, auto-marked Addressable in a dedicated GameData group, loaded at runtime by label into Dictionary<int, TRow> lookups with UniTask, optionally registered in VContainer, and updated remotely via catalog updates. Covers folder layout, row design (int ids, enums, cross-table references by id, schema versioning), manual/auto/CI import, CreateOrMoveEntry with stable GUIDs and addresses, LoadAssetsAsync and handle release, CheckForCatalogUpdates / UpdateCatalogs, validation of duplicate ids and missing references with IPreprocessBuildWithReport, and pitfalls (Odin, bundle duplication, Editor SO mutation, large tables, localized text). Use when the user mentions game config, balance data, data tables, static data, design data, CSV to ScriptableObject to Addressables, GameDataService, or "data not updating after reimport / content update".
+description: Builds an end-to-end game data pipeline in Unity 6 - CSV or Google Sheets baked into ScriptableObject tables, auto-registered as Addressables, loaded by label into id lookups with UniTask, validated in builds, and updated remotely via catalog updates. Use for game config, balance or design data tables, static data, a GameDataService, or "data not updating after reimport / content update". General Addressables loading and memory belong to addressables-asset-loading.
 license: MIT
 metadata:
   category: asset-pipeline

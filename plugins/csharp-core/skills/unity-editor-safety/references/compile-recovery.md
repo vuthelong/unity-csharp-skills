@@ -23,9 +23,9 @@ Never conclude "Unity is not running" while a Unity process for the project is a
 
 ### Stale-log traps
 
-1. **Errors already fixed.** If a file cited by an error is newer than the newest `Library/ScriptAssemblies/*.dll`, no compile has finished since you edited it. Do not "fix" that code again; trigger a recompile and read again.
-2. **Log mtime lies.** Asset imports keep touching `Editor.log`, so a fresh file mtime does not mean the error block is fresh. Compare DLL time with source time instead.
-3. **Clean log, stale assembly.** If any `.cs` file is newer than the newest DLL, a "no errors" reading cannot be trusted either. Unity's incremental compiler can no-op a recompile request.
+1. **Errors already fixed.** If a file cited by an error was edited after that error's compile block in `Editor.log`, the error is stale. Do not "fix" that code again; trigger a recompile and read the new block.
+2. **Log mtime lies.** Asset imports keep touching `Editor.log`, so a fresh file mtime does not mean the error block is fresh. Find the newest compile block and check it started after your edit.
+3. **DLL timestamps are a hint, not proof.** A DLL newer than your edit suggests a compile ran. A DLL older than your edit does not prove none did: comment-only or other no-IL-change edits can compile without rewriting the DLL, and the incremental compiler can no-op a request. Decide from the newest finished compile block in `Editor.log`; if none started after your edit, trigger a recompile (`unity recompile` via `unity-cli` when available) and read again.
 4. **Wrong author.** The log header records the Unity version and whether it was a `-batchmode` run. If a different Unity version (for example a newer batch run) wrote the log, its errors (such as an API that is only an error on that version) may not apply to the user's Editor. Confirm against the live Editor before acting.
 5. **Previous session.** With the Editor closed, `Editor.log` is from the last session and does not reflect your edits. Compile verification needs a running Editor or a headless run with its own `-logFile`.
 6. **Headless runs do not write to Editor.log.** Read the `-logFile` you passed; a clean `Editor.log` proves nothing about a batch run.
@@ -36,13 +36,13 @@ Never conclude "Unity is not running" while a Unity process for the project is a
 2. The change is in a package outside `Assets/` (an embedded package in `Packages/<name>` or a local `file:` package). Unity does not always detect these. Force it with `AssetDatabase.ImportAsset("Packages/<name>/...", ImportAssetOptions.ForceUpdate)` followed by `CompilationPipeline.RequestScriptCompilation()`, a package re-resolve, or a refocus after touching a file under `Assets/`.
 3. A compile error elsewhere blocks the assembly (or a referenced asmdef). Check for any `error CS`.
 4. The file is excluded by asmdef `defineConstraints`, platform filters, or an `#if` symbol that is not defined.
-5. Verify: `Library/ScriptAssemblies/<Assembly>.dll` mtime > your edit mtime. Do not run tests until it is.
+5. Verify: `Editor.log` has a finished compile block after your edit with no `error CS`. Do not run tests until it does. A DLL mtime newer than the edit is supporting evidence, not a requirement.
 
 ## Build driver crash (file descriptor exhaustion)
 
 Long sessions with many domain reloads can leak file descriptors until Mono's internal limit (~1024) is crossed. The Bee build driver then throws `System.NotSupportedException: Could not register to wait for file descriptor N` and the Editor hangs mid-build or stays idle with a stale DLL. There is no C# error to fix and a recompile does not clear it.
 
-Recovery: save scene work, close and restart the Editor, then discard any conclusions drawn from results since the hang (they ran against the old assembly). A clean `isCompiling == false` with a DLL that never updates and no CS errors is this crash, not an incremental no-op.
+Recovery: save scene work, close and restart the Editor, then discard any conclusions drawn from results since the hang (they ran against the old assembly). A clean `isCompiling == false`, no CS errors and no compile block for your edit in `Editor.log` (while the log shows the Bee exception) is this crash, not an incremental no-op.
 
 ## Modal dialogs
 

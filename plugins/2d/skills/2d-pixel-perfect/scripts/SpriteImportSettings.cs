@@ -7,6 +7,8 @@ namespace PixelPerfect.Editor
 {
     public static class SpriteImportSettings
     {
+        static readonly string[] k_OverridePlatforms = { "Android", "iPhone", "WebGL", "Standalone" };
+
         public static TextureImporter GetImporter(Sprite sprite)
         {
             if (sprite == null) return null;
@@ -26,10 +28,7 @@ namespace PixelPerfect.Editor
 
             if (!NeedsFix(importer, targetPPU)) return true;
 
-            importer.filterMode = FilterMode.Point;
-            importer.mipmapEnabled = false;
-            importer.textureCompression = TextureImporterCompression.Uncompressed;
-            importer.spritePixelsPerUnit = targetPPU;
+            ApplyPixelArtSettings(importer, targetPPU);
             importer.SaveAndReimport();
             return true;
         }
@@ -47,10 +46,7 @@ namespace PixelPerfect.Editor
                     if (importer == null || !seen.Add(importer.assetPath)) continue;
                     if (!NeedsFix(importer, targetPPU)) continue;
 
-                    importer.filterMode = FilterMode.Point;
-                    importer.mipmapEnabled = false;
-                    importer.textureCompression = TextureImporterCompression.Uncompressed;
-                    importer.spritePixelsPerUnit = targetPPU;
+                    ApplyPixelArtSettings(importer, targetPPU);
                     EditorUtility.SetDirty(importer);
                     importer.SaveAndReimport();
                     fixedCount++;
@@ -64,12 +60,40 @@ namespace PixelPerfect.Editor
             return fixedCount;
         }
 
+        static void ApplyPixelArtSettings(TextureImporter importer, int targetPPU)
+        {
+            importer.filterMode = FilterMode.Point;
+            importer.mipmapEnabled = false;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.spritePixelsPerUnit = targetPPU;
+
+            foreach (var platform in k_OverridePlatforms)
+            {
+                var settings = importer.GetPlatformTextureSettings(platform);
+                if (!settings.overridden) continue;
+                settings.format = TextureImporterFormat.RGBA32;
+                settings.textureCompression = TextureImporterCompression.Uncompressed;
+                importer.SetPlatformTextureSettings(settings);
+            }
+        }
+
+        static bool HasCompressedPlatformOverride(TextureImporter importer)
+        {
+            foreach (var platform in k_OverridePlatforms)
+            {
+                var settings = importer.GetPlatformTextureSettings(platform);
+                if (settings.overridden && settings.format != TextureImporterFormat.RGBA32) return true;
+            }
+            return false;
+        }
+
         static bool NeedsFix(TextureImporter importer, int targetPPU)
         {
             return importer.filterMode != FilterMode.Point
                 || importer.mipmapEnabled
                 || importer.textureCompression != TextureImporterCompression.Uncompressed
-                || !Mathf.Approximately(importer.spritePixelsPerUnit, targetPPU);
+                || !Mathf.Approximately(importer.spritePixelsPerUnit, targetPPU)
+                || HasCompressedPlatformOverride(importer);
         }
     }
 }

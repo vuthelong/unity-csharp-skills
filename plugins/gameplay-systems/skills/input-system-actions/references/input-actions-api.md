@@ -105,13 +105,12 @@ void OnEnable()
 void OnDisable()
 {
     fire.action.performed -= OnFire;
-    fire.action.Disable();
 }
 
 void OnFire(InputAction.CallbackContext ctx) => Shoot();
 ```
 
-Disabling a shared action affects every consumer; with project-wide actions, skip `Enable`/`Disable` and only subscribe.
+`OnDisable` only unsubscribes: the action asset is shared, and disabling it here would silence every other consumer. Disable an action only from the code that owns its lifetime (e.g. switching action maps). With project-wide actions, skip `Enable` too and only subscribe.
 
 ### Generated C# class
 

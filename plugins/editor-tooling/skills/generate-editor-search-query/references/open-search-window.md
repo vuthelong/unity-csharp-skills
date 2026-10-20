@@ -9,7 +9,7 @@ This is a read-only Editor UI action. It must not create, modify, delete, import
 Base64-encode the generated Unity Search query (UTF-8) and embed only the base64 text, decoding it
 back to a string inside the snippet. Never embed the raw query text in the C# string or in the
 shell command: a query containing `"` would break out of a verbatim C# string, and a query
-containing `'` would break the shell's single-quoting around `--code`. Base64's alphabet
+containing `'` would break the shell's single-quoting around the snippet. Base64's alphabet
 (`A-Z a-z 0-9 + / =`) cannot close either quote, so it stays safe in both places at once.
 
 Encode it without putting the raw query on a command line either. Write the query to a
@@ -24,8 +24,8 @@ Delete the temporary file afterwards.
 
 Replace `QUERY_BASE64` with that output.
 
-Run it through the Editor with `unity command eval --code '<snippet>'`. Fully qualified, with no
-`using` directives, because `eval` compiles a statement block rather than a file.
+Run it through the Editor with `unity command eval '<snippet>'` (see `unity-cli` → Eval syntax).
+Fully qualified, with no `using` directives, because `eval` compiles a statement block rather than a file.
 
 ```csharp
 var query = System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String("QUERY_BASE64"));
@@ -35,10 +35,13 @@ var candidates = new[]
     UnityEditor.Search.SearchService.GetProvider("asset"),
     UnityEditor.Search.SearchService.GetProvider("scene")
 };
-var preferredProviders = System.Linq.Enumerable.ToArray(
-    System.Linq.Enumerable.Where(candidates, provider => provider != null));
+var preferredProviders = new System.Collections.Generic.List<UnityEditor.Search.SearchProvider>();
+foreach (var provider in candidates)
+{
+    if (provider != null) preferredProviders.Add(provider);
+}
 
-var context = preferredProviders.Length > 0
+var context = preferredProviders.Count > 0
     ? new UnityEditor.Search.SearchContext(preferredProviders, query)
     : new UnityEditor.Search.SearchContext(UnityEditor.Search.SearchService.GetActiveProviders(), query);
 

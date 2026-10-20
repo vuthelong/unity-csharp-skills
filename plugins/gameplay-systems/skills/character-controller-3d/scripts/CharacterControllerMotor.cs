@@ -166,10 +166,10 @@ public class CharacterControllerMotor : MonoBehaviour
 
     private void ReadInput()
     {
-        this._moveInput = this.moveAction != null ? this.moveAction.action.ReadValue<Vector2>() : Vector2.zero;
-        this._sprintHeld = this.sprintAction != null && this.sprintAction.action.IsPressed();
+        this._moveInput = this.moveAction != null && this.moveAction.action != null ? this.moveAction.action.ReadValue<Vector2>() : Vector2.zero;
+        this._sprintHeld = this.sprintAction != null && this.sprintAction.action != null && this.sprintAction.action.IsPressed();
 
-        if (this.jumpAction != null && this.jumpAction.action.WasPressedThisFrame())
+        if (this.jumpAction != null && this.jumpAction.action != null && this.jumpAction.action.WasPressedThisFrame())
         {
             this._lastJumpPressedTime = Time.time;
         }

@@ -66,7 +66,7 @@ importer.SaveAndReimport();
 |---|---|
 | `"Standalone"` | `BC7` (quality) or `DXT5` |
 | `"Android"` | `ASTC_6x6` (`ASTC_4x4` for sharper UI), `ETC2_RGBA8` for very old GPUs |
-| `"iOS"` / `"tvOS"` | `ASTC_6x6` / `ASTC_4x4` |
+| `"iPhone"` (iOS) / `"tvOS"` | `ASTC_6x6` / `ASTC_4x4` |
 | `"WebGL"` | `DXT5` / `BC7` for desktop browsers, `ASTC` for mobile web (see `optimize-web`) |
 | `"WindowsStoreApps"` | `BC7` / `DXT5` |
 

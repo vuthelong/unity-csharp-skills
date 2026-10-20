@@ -1,6 +1,6 @@
 ---
 name: zlogger
-description: Sets up Cysharp ZLogger v2 (Microsoft.Extensions.Logging provider with zero-allocation UTF-8 interpolated logging) in Unity 6. Covers NuGetForUnity install, the ZLogger.Unity UPM git URL, the csc.rsp -langVersion:10 requirement for interpolated string handlers (Unity compiles C# 9 by default), LoggerFactory.Create with AddZLoggerUnityDebug, AddZLoggerFile, AddZLoggerRollingFile, AddZLoggerStream, AddZLoggerInMemory, ILogger<T> categories, ZLogTrace..ZLogCritical, UsePlainTextFormatter prefix/suffix, UseJsonFormatter structured logs, BeginScope, AddFilter by category and level, [ZLoggerMessage] source-generated loggers, a static LogManager, VContainer registration, flushing on Application.quitting, persistentDataPath log files, release-build stripping, and Debug.Log cost comparison. Use when the user mentions ZLogger, ZLogInformation, Microsoft.Extensions.Logging in Unity, structured or file logging, log rotation, or replacing Debug.Log for performance.
+description: "Sets up Cysharp ZLogger v2, a zero-allocation Microsoft.Extensions.Logging provider for Unity: NuGet + UPM install, the csc.rsp -langVersion:10 opt-in, Unity console, file, rolling-file and in-memory providers, JSON/structured logs, filters, LogManager or VContainer wiring, release stripping. Use when replacing Debug.Log with structured or file logging, or fixing 'cannot convert from string to ref ZLogger...InterpolatedStringHandler', lost file logs, or IL2CPP MissingMethodException."
 license: MIT
 metadata:
   category: libraries
@@ -16,14 +16,14 @@ Read `references/recipes.md` for the bootstrap/LogManager, VContainer registrati
 
 ## Install (Unity 6)
 
-1. Install NuGetForUnity, then `NuGet > Manage NuGet Packages` and install `ZLogger`. It pulls `Microsoft.Extensions.Logging` 8.x, `Microsoft.Extensions.DependencyInjection`, `System.Text.Json`, `System.Threading.Channels`, `Utf8StringInterpolation`, `Microsoft.Bcl.TimeProvider`, `Microsoft.Bcl.AsyncInterfaces` and related DLLs. Keep exactly one copy of shared DLLs such as `System.Runtime.CompilerServices.Unsafe` (also used by `zstring`, `memorypack`).
+1. Install NuGet `ZLogger` with NuGetForUnity (setup in `r3` -> "NuGetForUnity setup"). It pulls `Microsoft.Extensions.Logging` 8.x, `Microsoft.Extensions.DependencyInjection`, `System.Text.Json`, `System.Threading.Channels`, `Utf8StringInterpolation`, `Microsoft.Bcl.TimeProvider`, `Microsoft.Bcl.AsyncInterfaces` and related DLLs.
+   - **System.Runtime.CompilerServices.Unsafe:** install once via NuGetForUnity (package `System.Runtime.CompilerServices.Unsafe` 6.0.0, usually pulled in as a dependency); if the project already has it from another route (a `.unitypackage` DLL, the `org.nuget.system.runtime.compilerservices.unsafe` UPM package), keep that one and don't add a second copy (duplicate-assembly errors).
 2. Add the Unity provider: Package Manager > Add package from git URL `https://github.com/Cysharp/ZLogger.git?path=src/ZLogger.Unity/Assets/ZLogger.Unity` (package id `com.cysharp.zlogger`, 2.5.10, `unity: 2022.3.12f1+`). Its asmdef `ZLogger.Unity` precompile-references the NuGet DLLs, so step 1 comes first. Namespace `ZLogger.Unity` provides `AddZLoggerUnityDebug`.
 3. Enable C# 10 for every assembly that calls `ZLog*`. Unity 6 compiles C# 9 by default, and `ZLog*` methods only accept `ref Z...InterpolatedStringHandler` parameters (C# 10 interpolated string handlers); there is no `string` overload. Under C# 9 a call like `logger.ZLogInformation($"...")` does not compile.
    - Put a `csc.rsp` containing `-langVersion:10 -nullable` next to each asmdef that logs, or in `Assets/` for the predefined `Assembly-CSharp`. Unity's bundled Roslyn accepts it (README: Unity 2022.2+ ships a .NET 6 SDK compiler).
    - For `[ZLoggerMessage]` source-generated methods use `-langVersion:preview` (C# 11 features, Unity 2022.3.12f1+).
    - ZLogger.Unity ships its own `csc.rsp` (`-langVersion:10 -nullable`) for its asmdef only; it does not change your assemblies.
    - IDE: install Cysharp CsprojModifier and add a `.props` with `<LangVersion>10.0</LangVersion>` (or 11) so Rider/VS match the compiler.
-4. If the Editor reports assembly version conflicts after the NuGet install, untick Player Settings > Other Settings > Assembly Version Validation.
 
 Plain MEL calls (`logger.LogInformation("...")`) and `logger.Log(...)` work under C# 9, but they box arguments and are formatted to `string` (`IsFormatLogImmediatelyInStandardLog = true`), losing ZLogger's advantages.
 
@@ -61,7 +61,18 @@ Each provider has its own `ZLoggerOptions` (formatter, `IncludeScopes`, `Capture
 
 - Set `SetMinimumLevel(LogLevel.Warning)` (or higher) in player builds: disabled calls skip formatting, but the call and the `IsEnabled` check remain.
 - To remove calls completely, wrap with `[System.Diagnostics.Conditional("ZLOGGER_VERBOSE")]` static methods that accept a pre-built message or take the logger and arguments, and define the symbol only in development builds. A `[Conditional]` method cannot forward an interpolated string handler, so keep it simple: see recipes.
-- IL2CPP: providers are created through factory lambdas, but MEL builds `LoggerFactory` through `Microsoft.Extensions.DependencyInjection`, which activates types via reflection. If you get `MissingMethodException` with Managed Stripping Level Medium/High, add a `link.xml` preserving `Microsoft.Extensions.Logging`, `Microsoft.Extensions.DependencyInjection`, `Microsoft.Extensions.Options` and `ZLogger`.
+- IL2CPP: providers are created through factory lambdas, but MEL builds `LoggerFactory` through `Microsoft.Extensions.DependencyInjection`, which activates types via reflection. If you get `MissingMethodException` during `LoggerFactory.Create` with Managed Stripping Level Medium/High, add `Assets/link.xml` (the `fullname`s are the NuGet DLL assembly names):
+
+  ```xml
+  <linker>
+    <assembly fullname="Microsoft.Extensions.Logging" preserve="all"/>
+    <assembly fullname="Microsoft.Extensions.Logging.Abstractions" preserve="all"/>
+    <assembly fullname="Microsoft.Extensions.DependencyInjection" preserve="all"/>
+    <assembly fullname="Microsoft.Extensions.DependencyInjection.Abstractions" preserve="all"/>
+    <assembly fullname="Microsoft.Extensions.Options" preserve="all"/>
+    <assembly fullname="ZLogger" preserve="all"/>
+  </linker>
+  ```
 
 ## ZLogger vs Debug.Log
 

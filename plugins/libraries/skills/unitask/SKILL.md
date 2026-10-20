@@ -1,6 +1,6 @@
 ---
 name: unitask
-description: Writes and reviews allocation-free async/await code in Unity with Cysharp UniTask (com.cysharp.unitask, namespace Cysharp.Threading.Tasks). Covers install via UPM git URL or OpenUPM, UniTask / UniTask<T> / UniTaskVoid and Forget(), PlayerLoopTiming, Delay / DelayFrame / Yield / NextFrame / WaitUntil / WaitWhile / WaitUntilValueChanged, cancellation (GetCancellationTokenOnDestroy, destroyCancellationToken, linked tokens, SuppressCancellationThrow, AttachExternalCancellation, CancelAfterSlim, TimeoutController), WhenAll / WhenAny / WhenEach, awaiting UnityWebRequest, Addressables and DOTween, async LINQ (UniTaskAsyncEnumerable), AsyncReactiveProperty, Channel, async triggers, UniTaskCompletionSource, thread switching, UniTaskTracker, Preserve(), and UniTask vs Unity 6 Awaitable. Use when the user writes async code in Unity, replaces coroutines, mentions UniTask, UniTaskVoid, Forget, CancellationToken in MonoBehaviours, or hits "UniTask awaited twice", leaked tasks, or unobserved exceptions.
+description: "Writes and reviews allocation-free async/await in Unity with Cysharp UniTask: UniTask/UniTaskVoid return types, PlayerLoop timing, cancellation tied to object lifetime, WhenAll/WhenAny, awaiting Addressables, UnityWebRequest and DOTween, async LINQ and channels, UniTask Tracker. Use for any Unity async code, replacing coroutines or Task, or fixing leaked/pending tasks, OperationCanceledException noise, async void, or exceptions from awaiting the same UniTask twice."
 license: MIT
 metadata:
   category: libraries

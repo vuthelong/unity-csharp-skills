@@ -4,8 +4,8 @@
 
 | Unity | SVG import |
 |---|---|
-| 6000.3+ | Built in. SVG files import as `VectorImage` usable directly in UI Toolkit |
-| 6000.0–6000.2 | Requires the `com.unity.vectorgraphics` package; set the importer's **Generated Asset Type** to **UI Toolkit Vector Image** |
+| Newer Unity 6 releases (reportedly 6000.3+; confirm in your version's manual) | Built in. SVG files import as `VectorImage` usable directly in UI Toolkit |
+| Earlier Unity 6 releases | Requires the `com.unity.vectorgraphics` package; set the importer's **Generated Asset Type** to **UI Toolkit Vector Image** |
 
 Check the project's version (and `Packages/manifest.json` for the package on older minors) before generating SVGs. Without import support, fall back to PNG icons.
 

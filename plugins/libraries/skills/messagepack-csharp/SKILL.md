@@ -1,6 +1,6 @@
 ---
 name: messagepack-csharp
-description: Writes and reviews binary serialization in Unity and .NET with MessagePack-CSharp v3 (NuGet MessagePack, UPM com.github.messagepack-csharp). Covers install via NuGetForUnity plus the MessagePack.Unity git URL, the v3 source generator (no mpc), GeneratedMessagePackResolver, [GeneratedMessagePackResolver] / [CompositeResolver], IL2CPP resolver registration with StaticCompositeResolver, [MessagePackObject] / [Key(int)] / [Key(string)] / keyAsPropertyName / [IgnoreMember] / [SerializationConstructor] / [Union], serialization callbacks, MessagePackSerializer Serialize / Deserialize / SerializeAsync / DeserializeAsync / ConvertToJson, options (WithResolver, Lz4BlockArray, MessagePackSecurity.UntrustedData), UnityResolver / UnityBlitResolver, custom IMessagePackFormatter<T>, typeless/contractless risks, version tolerance and v2 to v3 migration. Use when the user mentions MessagePack, msgpack, MessagePackObject, MagicOnion DTOs, save or network payload serialization, or "formatter not found" on IL2CPP.
+description: "Writes and reviews MessagePack-CSharp v3 binary serialization in Unity and .NET: [MessagePackObject]/[Key] contracts, source-generated resolvers, the single IL2CPP resolver bootstrap shared with MasterMemory and MagicOnion, security options, LZ4, Unity types, v2 to v3 migration. Choose it over memorypack for cross-language peers, a documented wire format, or MagicOnion. Triggers: MessagePack, msgpack, FormatterNotRegisteredException or 'formatter not found' on IL2CPP."
 license: MIT
 metadata:
   category: libraries
@@ -20,12 +20,13 @@ Reference files, read when needed:
 ## Workflow
 
 1. Install in Unity (both steps, not one):
-   - NuGetForUnity (`https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity`), then `NuGet > Manage NuGet Packages`, install `MessagePack`. This brings `MessagePack.Annotations` and `MessagePackAnalyzer` (analyzers + source generator).
+   - NuGet `MessagePack` with NuGetForUnity (setup in `r3` -> "NuGetForUnity setup"). This brings `MessagePack.Annotations` and `MessagePackAnalyzer` (analyzers + source generator).
    - UPM git URL, same version as the NuGet package: `https://github.com/MessagePack-CSharp/MessagePack-CSharp.git?path=src/MessagePack.UnityClient/Assets/Scripts/MessagePack#v3.1.11` (package `com.github.messagepack-csharp`, asmdef `MessagePack.Unity`, `allowUnsafeCode: true`). Tags are `vX.Y.Z`.
+   - **One MessagePack version for the whole project: 3.1.11** (minimum 3.1.7, required by MagicOnion 7.11.0; MasterMemory 3.0.4 needs 3.1.3+). The `MessagePack` NuGet version and the MessagePack.Unity UPM tag must be identical; when NuGetForUnity resolves a higher `MessagePack` for MagicOnion or MasterMemory, bump the UPM `#vX.Y.Z` to match.
    - .NET server sharing Unity types: NuGet `MessagePack.UnityShims` (shim `UnityEngine.Vector3` etc. plus the same `UnityResolver`).
 2. Annotate data types: `[MessagePackObject]` + `[Key(0..n)]` on every serialized public member, `[IgnoreMember]` on the rest. Make types `partial` when private members are serialized.
 3. Let the source generator produce formatters at compile time. `StandardResolver` already contains `SourceGeneratedFormatterResolver`, which finds them through the assembly-level `[GeneratedAssemblyMessagePackResolver]` attribute the generator emits.
-4. Configure options once at startup (see bootstrap below) and pass them explicitly at call sites (analyzer MsgPack001 flags reliance on the mutable `DefaultOptions`).
+4. Configure options once at startup in the single resolver bootstrap below and pass them explicitly at call sites (analyzer MsgPack001 flags reliance on the mutable `DefaultOptions`).
 5. Build IL2CPP and round-trip every DTO on device. The Editor (Mono) can fall back to Reflection.Emit formatters and hide missing generation.
 
 ## Contract
@@ -115,12 +116,16 @@ var options = MessagePackSerializerOptions.Standard
 
 ## Unity resolvers
 
-- The UPM package's `MessagePack.Unity.MessagePackInitializer` sets `DefaultOptions = Standard.WithResolver(UnityResolver.InstanceWithStandardResolver)` at `SubsystemRegistration`. Anything that later assigns `DefaultOptions` with its own resolver (MagicOnion bootstrap, your own) drops it unless you add `UnityResolver.Instance` back.
+- The UPM package's `MessagePack.Unity.MessagePackInitializer` sets `DefaultOptions = Standard.WithResolver(UnityResolver.InstanceWithStandardResolver)` at `SubsystemRegistration`. The resolver bootstrap below replaces it, so it lists `UnityResolver.Instance` itself.
 - `UnityResolver` (`MessagePack.Unity`): `Vector2/3/4`, `Quaternion`, `Color`, `Color32`, `Bounds`, `Rect`, `Matrix4x4`, `AnimationCurve`, `Keyframe`, `Gradient`, `RectOffset`, `LayerMask`, `Vector2Int`, `Vector3Int`, `RangeInt`, `RectInt`, `BoundsInt`, plus their nullable, array and list forms.
 - `UnityBlitResolver` / `UnityBlitWithPrimitiveArrayResolver` (`MessagePack.Unity.Extension`): raw memory blit of `Vector3[]` etc. (ext codes 30-39), about 20x faster than `JsonUtility`; .NET-and-Unity only, same endianness assumed.
 - Custom formatter for a type you do not own: implement `IMessagePackFormatter<T>`, make it `internal` or `public` with a public parameterless constructor or `public static readonly Instance`, and it is added to the generated resolver automatically. See `references/recipes-and-migration.md`.
 
-## Bootstrap (Unity, IL2CPP-safe)
+## Resolver bootstrap (Unity, IL2CPP-safe)
+
+This is the single, canonical bootstrap for the whole project. `mastermemory`, `magiconion` and any other skill that needs a MessagePack resolver add one line to the `Register` call here instead of registering on their own.
+
+**Never call `StaticCompositeResolver.Instance.Register` more than once.** Each call replaces the previously registered list (source: "If call twice in the Register methods, registered formatters and resolvers will be overridden"), so with several `BeforeSceneLoad` bootstraps the last one to run wins and the others' formatters vanish, which shows up only on IL2CPP as "formatter not found" / `FormatterNotRegisteredException`. `RuntimeInitializeOnLoadMethod` order between classes is not defined.
 
 ```csharp
 using MessagePack;
@@ -147,6 +152,8 @@ public static class MessagePackBootstrap
         {
             StaticCompositeResolver.Instance.Register(
                 GeneratedMessagePackResolver.Instance,
+                MyGame.MasterData.MasterMemoryResolver.Instance,
+                MagicOnionGeneratedClientInitializer.Resolver,
                 UnityResolver.Instance,
                 StandardResolver.Instance);
             _registered = true;
@@ -160,8 +167,11 @@ public static class MessagePackBootstrap
 }
 ```
 
-- `GeneratedMessagePackResolver` (namespace `MessagePack`, internal `partial class`) is generated per assembly that has `[MessagePackObject]` types or custom formatters; put the bootstrap in the asmdef that owns your DTOs, or drop that line. It holds only that assembly's formatters. Types in other asmdefs are still found through `StandardResolver` -> `SourceGeneratedFormatterResolver`. Rename it with `[GeneratedMessagePackResolver] partial class MyResolver { }`; aggregate formatters/resolvers at compile time with `[CompositeResolver(typeof(...), ...)] partial class MyCompositeResolver { }`.
+- Keep only the lines you use: `GeneratedMessagePackResolver` (your DTO assembly), `MasterMemoryResolver` (`mastermemory`, in the namespace set by `MasterMemoryGeneratorOptions`), `MagicOnionGeneratedClientInitializer.Resolver` (`magiconion`), `UnityResolver` (only with the MessagePack.Unity UPM package and Unity types in DTOs). Order matters: the first resolver that returns a formatter wins, so specific/generated resolvers go first and `StandardResolver` last.
+- Every resolver listed must be accessible from the bootstrap's assembly. `GeneratedMessagePackResolver` is `internal` and generated per assembly, and the MagicOnion initializer is usually declared `internal`, so put the bootstrap in the asmdef that owns them (typically the client/DTO asmdef) or declare the initializer `public`.
+- `GeneratedMessagePackResolver` (namespace `MessagePack`, internal `partial class`) holds only its own assembly's formatters. Types in other asmdefs are still found through `StandardResolver` -> `SourceGeneratedFormatterResolver`. Rename it with `[GeneratedMessagePackResolver] partial class MyResolver { }`; aggregate formatters/resolvers at compile time with `[CompositeResolver(typeof(...), ...)] partial class MyCompositeResolver { }`.
 - `StaticCompositeResolver.Register` throws after the first `GetFormatter` call, and the static instance survives Play sessions when domain reload is disabled. The `_registered` guard handles both.
+- `DefaultOptions` is set here and nowhere else. Other code passes `MessagePackBootstrap.Options` / `UntrustedOptions` (or `StaticCompositeResolver.Instance` as a resolver, e.g. MasterMemory's `formatterResolver:`).
 
 ## Typeless and contractless
 
@@ -204,5 +214,6 @@ Choose MessagePack when any peer is not C#, when you need a documented wire form
 
 - `magiconion` - MessagePack is its default wire format.
 - `memorypack` - C#-only alternative.
+- `mastermemory` - read-only master-data database stored as MessagePack; its resolver goes in the bootstrap above.
 - `unitask` - awaiting `DeserializeAsync` / file IO without blocking the main thread.
 - `csharp-unity` - house style for DTOs and bootstrap code.

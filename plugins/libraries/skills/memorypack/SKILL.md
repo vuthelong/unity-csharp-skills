@@ -1,6 +1,6 @@
 ---
 name: memorypack
-description: Serializes C# objects to a compact binary format in Unity 6 with Cysharp MemoryPack (source-generated, reflection-free, IL2CPP-safe). Covers install via NuGetForUnity (MemoryPack core + generator) plus the MemoryPack.Unity UPM git URL, [MemoryPackable] partial types, GenerateType.Object / VersionTolerant / CircularReference / Collection, [MemoryPackOrder], [MemoryPackIgnore], [MemoryPackInclude], [MemoryPackConstructor], [MemoryPackUnion] and union formatters, OnSerializing/OnDeserialized callbacks, MemoryPackSerializer.Serialize / Deserialize with byte[], IBufferWriter<byte>, Stream and async APIs, overwrite deserialization, Unity type formatters (Vector3, Quaternion, Color, AnimationCurve, Gradient), MemoryPackFormatterProvider.Register, version-tolerance rules, Brotli compression, and save-game / network / binary game-data use. Use for MemoryPack, binary serialization, fast save files, replacing JsonUtility / Newtonsoft / MessagePack, MEMPACK diagnostics, or member-order bugs.
+description: "Serializes C# objects with Cysharp MemoryPack, the fastest C#-only binary format (source-generated, IL2CPP-safe): [MemoryPackable] types, version tolerance, unions, Unity type formatters, save games and network payloads. Choose it over messagepack-csharp when every reader is C# and raw speed matters; pick MessagePack for non-C# peers, a documented wire format or MagicOnion defaults. Triggers: MemoryPack, MEMPACK diagnostics, 'is not registered in this provider'."
 license: MIT
 metadata:
   category: libraries
@@ -19,10 +19,8 @@ Reference files, read when needed:
 
 ## Workflow
 
-1. Install the core from NuGet with NuGetForUnity (Unity 2022.3.12f1+ / Unity 6):
-   - Add NuGetForUnity (its own UPM git URL / OpenUPM), then `NuGet > Manage NuGet Packages`, search `MemoryPack`, Install. That pulls `MemoryPack.Core`, `MemoryPack.Generator`, `System.Runtime.CompilerServices.Unsafe` and `System.Collections.Immutable`.
-   - Check that `MemoryPack.Generator.dll` is imported as an analyzer: no platforms selected in its Inspector and the `RoslynAnalyzer` asset label set. NuGetForUnity normally does this; if generated code is missing, set it by hand (Unity manual: Roslyn analyzers and source generators).
-   - On "Assembly Version Validation" conflicts, untick it in Player Settings > Other Settings > Configuration.
+1. Install NuGet `MemoryPack` with NuGetForUnity (Unity 2022.3.12f1+ / Unity 6; setup, analyzer label and Assembly Version Validation in `r3` -> "NuGetForUnity setup"). It pulls `MemoryPack.Core`, `MemoryPack.Generator`, `System.Runtime.CompilerServices.Unsafe` and `System.Collections.Immutable`.
+   - **System.Runtime.CompilerServices.Unsafe:** install once via NuGetForUnity (package `System.Runtime.CompilerServices.Unsafe` 6.0.0, usually pulled in as a dependency); if the project already has it from another route (a `.unitypackage` DLL, the `org.nuget.system.runtime.compilerservices.unsafe` UPM package), keep that one and don't add a second copy (duplicate-assembly errors).
 2. Add Unity type support: Package Manager > Add package from git URL `https://github.com/Cysharp/MemoryPack.git?path=src/MemoryPack.Unity/Assets/MemoryPack.Unity` (pin with `#1.21.4`; tags are plain `x.y.z`). The package id is `com.cysharp.memorypack`; its asmdef `MemoryPack.Unity` precompile-references `MemoryPack.Core.dll`, so step 1 must come first.
 3. Mark data types `[MemoryPackable] public partial class|struct|record ...`. Only `partial` types get generated code; the generator reports `MEMPACK001`..`MEMPACK035` diagnostics in the Console.
 4. Serialize with `MemoryPackSerializer.Serialize(value)` and read back with `MemoryPackSerializer.Deserialize<T>(bytes)`.
@@ -69,7 +67,8 @@ Unity 6 compiles C# 9, so the generator emits Unity-compatible code (no `scoped`
 | Add member at the end | OK (missing data reads as `default`) | OK with a new, unused `[MemoryPackOrder]` |
 | Delete member | breaks | OK; never reuse its order number |
 | Rename member | OK | OK |
-| Reorder members | breaks | breaks (order number is identity) |
+| Reorder member declarations | breaks | OK if every `[MemoryPackOrder]` value is kept |
+| Change a `[MemoryPackOrder]` value | n/a | breaks (order number is identity) |
 | Change member type | breaks | breaks |
 | Change an unmanaged struct | breaks | breaks |
 
@@ -105,4 +104,6 @@ README benchmark claim: in Unity, MemoryPack is x3 to x10 faster than `JsonUtili
 - `csharp-unity` for house style used in the recipes.
 - `unitask` for async file IO and thread hopping around serialization.
 - `zstring` for zero-allocation text output alongside binary data.
+- `mastermemory` for indexed, read-only master data (MessagePack-based) instead of a raw MemoryPack blob.
+- `native-memory-array` for serializing into or out of buffers larger than 2 GB or kept off the managed heap.
 - `game-data-pipeline` for where binary baked data fits next to ScriptableObjects and CSV imports.

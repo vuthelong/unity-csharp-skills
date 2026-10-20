@@ -13,6 +13,7 @@ Test Suite.
 - [Test Suite Setup](#test-suite-setup)
 - [Test Suite Initializer Template](#test-suite-initializer-template)
 - [Testing Workflow](#testing-workflow)
+- [Production Release Checklist](#production-release-checklist)
 
 ## Early Development: Mock Ads in Unity Editor
 
@@ -220,3 +221,14 @@ public class LevelPlayInitializer : MonoBehaviour
 6. Verify all ad formats load and callbacks fire correctly
 
 **Best for**: Integration validation before production, final testing with real ad networks
+
+## Production Release Checklist
+
+- [ ] Test Suite validation passed on device; `is_test_suite` metadata and `LaunchTestSuite()` removed
+- [ ] All implemented formats load; all callbacks fire as expected
+- [ ] Production App Key and ad unit IDs verified
+- [ ] Tested on multiple devices (screen sizes, OS versions) and with real ads in production
+- [ ] iOS: SKAdNetwork IDs in Info.plist, ATT implemented, privacy manifest if required, tested on a physical device (see `ios-setup.md`)
+- [ ] Android: dependencies resolved, `AD_ID` permission if targeting API 33+, tested on a physical device (see `dependency-resolution.md`)
+- [ ] Interstitial frequency capping implemented (if used)
+- [ ] Airplane-mode test: ads fail gracefully without crashing or blocking gameplay

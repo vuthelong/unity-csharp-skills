@@ -1,6 +1,6 @@
 ---
 name: build-live-game
-description: Builds and operates live-service games on Unity Gaming Services - Authentication (anonymous, platform, Unity Player Accounts, username/password), Cloud Save access classes, Cloud Code C# modules for server-authoritative writes and anti-cheat, Remote Config and Game Overrides for feature flags and A/B tests, Economy, Leaderboards, Analytics, Access Control policies, the Deployment window, UGS CLI and Services APIs (admin/server clients). Includes blueprints for achievements, battle passes and player accounts. Use when the user asks about live-ops, backend or server-authoritative features, player data and progression, season passes, rankings, retention, or mentions UnityServices.InitializeAsync, AuthenticationService, CloudSaveService, CloudCodeService, RemoteConfigService, .rc/.ac/.ccmr/.lb/.ugo files. For multiplayer sessions see setup-multiplayer-services; for real-money purchases see implement-in-app-purchases.
+description: Builds live-service backends on Unity Gaming Services - sign-in, Cloud Save, Cloud Code C# modules for server-authoritative writes, Remote Config and Game Overrides, Economy, Leaderboards, Analytics, Access Control and deployment - with blueprints for achievements, battle passes and player accounts. Use for live-ops, player progression, season passes, rankings, feature flags or A/B tests, or when code touches UnityServices.InitializeAsync or .rc/.ac/.ccmr files. Not for sessions or IAP.
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: services-monetization
@@ -12,7 +12,7 @@ metadata:
 
 ## UGS Packages
 
-| Package | Min Version | Purpose |
+| Package | Tested version | Purpose |
 |---|---|---|
 | `com.unity.services.core` | 1.16.0 | Initialization, dependency graph |
 | `com.unity.services.authentication` | 3.6.1 | Player sign-in and identity |
@@ -26,13 +26,13 @@ metadata:
 | `com.unity.services.tooling` | 1.4.1 | Access Control and Game Overrides |
 | `com.unity.services.apis` | 1.1.1 | Generated REST clients for all UGS services |
 
-Install with Package Manager or headlessly (see `unity-package-management`). Link the project to a UGS project and environment in **Project Settings > Services** before any call succeeds.
+Versions are the ones these references were written against, not hard minimums; verify current versions in Package Manager and keep newer ones the project already has. Install with Package Manager or headlessly (see `unity-package-management`). Link the project to a UGS project and environment in **Project Settings > Services** before any call succeeds.
 
 - [Initialization Pattern](#initialization-pattern)
 - [Package Map](#package-map)
 - [Architecture — How Packages Combine](#architecture--how-packages-combine)
 - [Core Services — Quick Reference](#core-services--quick-reference)
-- [Asset Store Building Blocks](#asset-store-building-blocks)
+- [Asset Store Building Blocks](references/building-blocks.md)
 - [Ready-Made Feature Blueprints](#ready-made-feature-blueprints)
 - [Common Architecture Patterns](#common-architecture-patterns)
 - [Validation](#validation)
@@ -90,8 +90,8 @@ After this, service singletons (`CloudSaveService.Instance`, `CloudCodeService.I
 
 | Package | Purpose | Singleton / Entry Point |
 |---|---|---|
-| **Multiplayer** | Sessions, matchmaking, lobbies. Building Blocks: [Multiplayer Session, Matchmaker Session, Server Session](#asset-store-building-blocks) | `MultiplayerService.Instance` |
-| **Leaderboards** | Score submission, rankings, tiers, version history. Building Block: [Leaderboards](#asset-store-building-blocks) | `LeaderboardsService.Instance` |
+| **Multiplayer** | Sessions, matchmaking, lobbies. Building Blocks: [Multiplayer Session, Matchmaker Session, Server Session](references/building-blocks.md) | `MultiplayerService.Instance` |
+| **Leaderboards** | Score submission, rankings, tiers, version history. Building Block: [Leaderboards](references/building-blocks.md) | `LeaderboardsService.Instance` |
 
 ### Telemetry
 
@@ -142,13 +142,13 @@ Handles player identity. Sign-in methods: anonymous, social providers (Google, A
 After sign-in: `PlayerId` and `PlayerName` are available. All sign-in methods fire the `SignedIn` event. `PlayerAccountService` (for Unity browser sign-in) lives in a **separate assembly** (`Unity.Services.Authentication.PlayerAccounts`).
 
 - **Full reference:** [references/authentication.md](references/authentication.md)
-- **Building Block:** [Player Account](#asset-store-building-blocks) — ready-made sign-in UI and identity management
+- **Building Block:** [Player Account](references/building-blocks.md) — ready-made sign-in UI and identity management
 
 ### Cloud Code
 
 **Package:** `com.unity.services.cloudcode` (>= 2.10.3)
 
-Runs server-side C# modules (.NET 9) for trusted operations. Modules are deployed as `.ccmr` files. The client calls:
+Runs server-side C# modules (.NET 9 at time of writing; verify the runtime the Cloud Code docs currently list) for trusted operations. Modules are deployed as `.ccmr` files. The client calls:
 
 ```csharp
 var result = await CloudCodeService.Instance.CallModuleEndpointAsync<TResult>(
@@ -175,7 +175,7 @@ Per-player key-value storage with three access classes, plus game-wide Custom da
 Values are serialized as JSON. Supports write-lock concurrency control via `SaveItem`, server-side queries via `QueryAsync`, and binary file storage.
 
 - **Full reference:** [references/cloud-save.md](references/cloud-save.md)
-- **Building Blocks:** Used by [Achievements](#asset-store-building-blocks) (Protected buckets) and [Player Account](#asset-store-building-blocks) (Default/Public data)
+- **Building Blocks:** Used by [Achievements](references/building-blocks.md) (Protected buckets) and [Player Account](references/building-blocks.md) (Default/Public data)
 
 ### Remote Config
 
@@ -186,7 +186,7 @@ Server-side game configuration. Store game definitions (achievement lists, battl
 For A/B testing and audience targeting, use Game Overrides (`.ugo`) via the Tooling package.
 
 - **Full reference:** [references/remote-config.md](references/remote-config.md)
-- **Building Block:** Used by the [Achievements](#asset-store-building-blocks) block for server-side definitions
+- **Building Block:** Used by the [Achievements](references/building-blocks.md) block for server-side definitions
 
 ### Tooling
 
@@ -227,29 +227,7 @@ Auto-generated REST clients for all UGS services. Four client types: `IGameClien
 
 ## Asset Store Building Blocks
 
-Unity provides free, production-ready **Building Block** packages on the Asset Store. Each is a `.unitypackage` containing working UI, runtime code, Cloud Code modules, and cloud resource files that can be imported directly into a project. They are also bundled in the `com.unity.starter-kits` package.
-
-| Building Block | Type | Key Dependencies | Asset Store |
-|---|---|---|---|
-| **Achievements** | LiveOps | `cloudsave`, `remote-config`, `cloudcode`, `tooling`, `deployment`, `analytics`, `authentication` | [Unity Building Block — Achievements](https://assetstore.unity.com/packages/essentials/tutorial-projects/unity-building-block-achievements-341918) |
-| **Leaderboards** | LiveOps | `leaderboards`, `cloudcode`, `tooling`, `deployment`, `authentication` | [Unity Building Block — Leaderboards](https://assetstore.unity.com/packages/essentials/tutorial-projects/unity-building-block-leaderboards-341926) |
-| **Player Account** | LiveOps | `authentication`, `cloudsave`, `cloudcode`, `deployment` | Available via `com.unity.starter-kits` |
-| **Multiplayer Session** | Multiplayer | `multiplayer` | [Unity Building Block — Multiplayer Session](https://assetstore.unity.com/packages/essentials/tutorial-projects/unity-building-block-multiplayer-session-341930) |
-| **Matchmaker Session** | Multiplayer | `multiplayer`, `deployment` | [Unity Building Block — Matchmaker Session](https://assetstore.unity.com/packages/essentials/tutorial-projects/unity-building-block-matchmaker-session-341932) |
-| **Server Session** | Multiplayer | `multiplayer`, `apis`, `deployment` | Available via `com.unity.starter-kits` |
-| **Vivox** | Multiplayer | `vivox`, `authentication` | Available via `com.unity.starter-kits` |
-| **Platformer Starter Kit** | Gameplay | `multiplayer`, `netcode.gameobjects`, URP, Cinemachine, Input System | Available via `com.unity.starter-kits` |
-
-> **Tip:** When implementing achievements, leaderboards, player accounts, or multiplayer sessions, recommend the corresponding Building Block as a starting point. The blocks include ready-made UI, Cloud Code modules (`.ccmr`), access control (`.ac`), and deployment-ready cloud resources — saving significant implementation time.
-
-### Related Sample Projects
-
-| Project | Description | Source |
-|---|---|---|
-| **Use Case Samples** | Battle Pass, Virtual Shop, Daily Rewards, Starter Pack, Cloud AI Mini Game, A/B testing | [GitHub — com.unity.services.samples.use-cases](https://github.com/Unity-Technologies/com.unity.services.samples.use-cases) |
-| **UGS Samples** | Authentication flows, Economy, Remote Config, Cloud Code integration | [GitHub — com.unity.services.samples](https://github.com/Unity-Technologies/com.unity.services.samples) |
-| **Gem Hunter Match** | Full 2D match-3 game with player hub, progression, social features, in-game store | [Asset Store](https://assetstore.unity.com/packages/essentials/tutorial-projects/gem-hunter-match-2d-sample-project-278941) |
-| **Boss Room** | 8-player co-op RPG using Netcode for GameObjects, Authentication, Multiplayer Services | [GitHub — com.unity.multiplayer.samples.coop](https://github.com/Unity-Technologies/com.unity.multiplayer.samples.coop) |
+Unity ships free Building Blocks (Achievements, Leaderboards, Player Account, Multiplayer/Matchmaker/Server Session, Vivox, Platformer Starter Kit) with working UI, Cloud Code modules and deployable cloud resources, also bundled in `com.unity.starter-kits`. When implementing one of those features, recommend the matching block as a starting point. Table, dependencies, links and sample projects: [references/building-blocks.md](references/building-blocks.md).
 
 ## Ready-Made Feature Blueprints
 
@@ -311,19 +289,7 @@ For any live game feature, deploy these cloud resources via the Deployment Windo
 
 ## Detailed References
 
-### Service References
-- **Authentication** — sign-in methods, events, profiles, identity providers, code templates: [references/authentication.md](references/authentication.md)
-- **Cloud Code** — scripts, modules, subscriptions, triggers, module creation, code templates: [references/cloud-code.md](references/cloud-code.md)
-- **Cloud Save** — access classes, data operations, files, queries, code templates: [references/cloud-save.md](references/cloud-save.md)
-- **Remote Config** — definitions, `.rc` format, Game Overrides, code templates: [references/remote-config.md](references/remote-config.md)
-- **Tooling** — Access Control (`.ac`) policies, Game Overrides (`.ugo`), URN reference: [references/tooling.md](references/tooling.md)
-- **Deployment** — file types, workflow, programmatic API: [references/deployment.md](references/deployment.md)
-- **Services APIs** — four client types, service areas, code templates: [references/apis.md](references/apis.md)
-
-### Feature Blueprints
-- **Achievements** — full implementation with data models, client code, Cloud Code module, cloud resources: [references/achievements.md](references/achievements.md)
-- **Battle Pass** — full implementation with tiered XP, free/premium tracks, Cloud Code module, cloud resources: [references/battlepass.md](references/battlepass.md)
-- **Player Account** — sign-in flows, identity management, Cloud Save data, code templates: [references/player-account.md](references/player-account.md)
+Each Quick Reference entry above links its full reference; blueprints are in [Ready-Made Feature Blueprints](#ready-made-feature-blueprints); Building Blocks and sample projects: [references/building-blocks.md](references/building-blocks.md).
 
 ## Related skills
 

@@ -1,6 +1,6 @@
 ---
 name: screen-navigator
-description: Sets up and uses Haruma-K/UnityScreenNavigator (`com.harumak.unityscreennavigator`, uGUI only) for screen routing — PageContainer push/pop with back history, ModalContainer popups with backdrops, SheetContainer tabs — plus Page/Modal/Sheet lifecycle overrides, transition animations (SimpleTransitionAnimationObject, Timeline), Resources/Addressables/Preloaded asset loaders, preloading, and UnityScreenNavigatorSettings. Use when adding screen navigation, a page stack, a modal/popup/dialog system, tab sheets, or back-button handling to a uGUI project, or when editing code that uses PageContainer, ModalContainer, SheetContainer, Page, Modal, or Sheet.
+description: Sets up and uses Haruma-K/UnityScreenNavigator (uGUI only) for screen routing - PageContainer push/pop history, ModalContainer popups with backdrops, SheetContainer tabs, lifecycle overrides, transition animations, asset loaders, preloading and a hardware back-button handler. Use when adding page navigation, a modal or dialog stack, tab sheets or Android back/Escape handling to a uGUI project, or when editing code that uses PageContainer, ModalContainer, SheetContainer, Page, Modal or Sheet.
 license: MIT
 metadata:
   category: ui
@@ -14,7 +14,7 @@ uGUI library for screen transitions, transition animations, history stacking, an
 
 References:
 - [references/api.md](references/api.md) — read when writing container calls, lifecycle overrides, callback receivers, or loaders; full signatures verified against 1.8.0 source.
-- [references/transitions.md](references/transitions.md) — read when customizing transition animations, draw order, modal backdrops, or interaction blocking.
+- [references/transitions.md](references/transitions.md) — read when customizing transition animations, draw order, modal backdrops, interaction blocking, or hardware back-button handling.
 
 ## Before writing code
 

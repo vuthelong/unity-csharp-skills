@@ -1,6 +1,6 @@
 ---
 name: character-controller-3d
-description: Builds and debugs 3D player character movement in Unity 6 - choosing between CharacterController, kinematic Rigidbody and dynamic Rigidbody; CharacterController.Move vs SimpleMove, gravity accumulation, SphereCast ground probes, isGrounded flicker, slopeLimit and slope sliding, stepOffset, skinWidth, OnControllerColliderHit pushing, coyote time, jump buffering and moving platforms; dynamic Rigidbody motors (linearVelocity in FixedUpdate, PhysicsMaterial friction, interpolation, collision detection mode); camera-relative movement with Cinemachine 3 CinemachineCamera + OrbitalFollow; Input System Move/Jump/Sprint actions; and root motion via OnAnimatorMove. Use for third-person or first-person controllers, WASD or gamepad movement, jumping, slopes, stairs and platforms, or when the user reports a character that cannot jump, flickers between grounded and falling, bounces down slopes, sticks to walls, ignores teleports, jitters with the camera, or slides its feet.
+description: Builds and debugs 3D player movement in Unity 6 with CharacterController or a kinematic or dynamic Rigidbody - ground probes, gravity, slopes and steps, jump buffering and coyote time, moving platforms, camera-relative input with Cinemachine 3 and the Input System, and root motion. Use for first- or third-person controllers, or when a character cannot jump, flickers between grounded and falling, bounces down slopes, sticks to walls, ignores teleports or jitters with the camera.
 license: MIT
 metadata:
   category: gameplay-systems

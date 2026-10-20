@@ -46,6 +46,7 @@ var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(path);
 Undo.RecordObject(clip, "Edit clip");
 foreach (var b in AnimationUtility.GetCurveBindings(clip))
     Debug.Log($"{b.path} {b.type.Name} {b.propertyName}");
+var binding = EditorCurveBinding.FloatCurve("", typeof(Transform), "m_LocalPosition.y");
 AnimationUtility.SetEditorCurve(clip, binding, null);
 EditorUtility.SetDirty(clip);
 AssetDatabase.SaveAssets();

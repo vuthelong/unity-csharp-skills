@@ -40,11 +40,13 @@
 | Mode | Coverage | Cost |
 |---|---|---|
 | `Discrete` | Default; tunnels at speed | Lowest |
-| `Continuous` | Sweeps vs static only; Discrete vs dynamic | Medium |
+| `ContinuousSpeculative` | Speculative contacts vs everything, including kinematic bodies; can produce ghost collisions on edges and tile seams | Low (cheaper than the sweep-based modes) |
+| `Continuous` | Sweeps vs static colliders only; Discrete vs dynamic | Medium |
 | `ContinuousDynamic` | Sweeps vs static and other Continuous/ContinuousDynamic bodies | Highest |
-| `ContinuousSpeculative` | Speculative contacts vs everything; also works for kinematic bodies; may produce rare ghost contacts | Low |
 
-Choose `ContinuousSpeculative` by default. For bullets, skip Rigidbody simulation and sweep with `Physics.SphereCast` / `Physics.Raycast` from last to current position each `FixedUpdate`.
+Kinematic bodies support only `Discrete` and `ContinuousSpeculative`.
+
+Choose `ContinuousSpeculative` as the general tunneling fix. For characters and bodies that slide along tiled floors or wall seams, prefer `Continuous`: it only needs to stop tunneling through static geometry, and it has no ghost-collision snagging. For bullets, skip Rigidbody simulation and sweep with `Physics.SphereCast` / `Physics.Raycast` from last to current position each `FixedUpdate`.
 
 ## Build vs Editor
 

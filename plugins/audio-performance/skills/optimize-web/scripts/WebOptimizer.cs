@@ -21,8 +21,10 @@ public static class WebOptimizer
 #if UNITY_6000_1_OR_NEWER
         PlayerSettings.WebGL.wasm2023 = true;
 #endif
+#if UNITY_WEBGL
         UnityEditor.WebGL.UserBuildSettings.codeOptimization =
             UnityEditor.WebGL.WasmCodeOptimization.DiskSizeLTO;
+#endif
 
         AssetDatabase.SaveAssets();
 
@@ -41,6 +43,11 @@ public static class WebOptimizer
 #if UNITY_6000_1_OR_NEWER
             + $"  wasm2023 = {PlayerSettings.WebGL.wasm2023}\n"
 #endif
-            + $"  codeOptimization = {UnityEditor.WebGL.UserBuildSettings.codeOptimization} (Library/, per machine)");
+#if UNITY_WEBGL
+            + $"  codeOptimization = {UnityEditor.WebGL.UserBuildSettings.codeOptimization} (Library/, per machine)"
+#else
+            + "  codeOptimization = skipped (switch the active build target to Web and rerun)"
+#endif
+            );
     }
 }

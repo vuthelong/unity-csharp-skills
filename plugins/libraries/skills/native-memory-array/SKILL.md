@@ -1,6 +1,6 @@
 ---
 name: native-memory-array
-description: Uses Cysharp NativeMemoryArray (Cysharp.Collections.NativeMemoryArray<T>) in Unity 6 for native-memory buffers that bypass the managed heap and the 2 GB array limit, exposed as Span<T>, Memory<T>, IBufferWriter<T>, ReadOnlySequence<T> and UnmanagedMemoryStream. Covers UPM git or NuGetForUnity install and the System.Runtime.CompilerServices.Unsafe DLL, the unmanaged constraint, skipZeroClear / addMemoryPressure, long Length and indexer, AsSpan / AsMemory slices, AsSpanSequence / AsMemorySequence chunking, GetPinnableReference and fixed, CreateBufferWriter for MemoryPack / MessagePack, large file IO, differences from Unity NativeArray<T> (Allocator, Jobs, Burst, safety handles), and pitfalls such as missing Dispose, use-after-dispose crashes, Span across await, and 32-bit WebGL limits. Use when the user mentions NativeMemoryArray, buffers over 2 GB, huge binary files, point clouds or video frames in C#, or IBufferWriter backed by native memory.
+description: "Uses Cysharp NativeMemoryArray<T> for native-memory buffers that bypass the managed heap and the 2 GB array limit, exposed as Span, Memory, IBufferWriter and ReadOnlySequence. Use for very large byte buffers, streaming big files, or feeding MemoryPack/MessagePack/ZString without GC pressure, and when deciding between it and Unity NativeArray (Jobs, Burst). Triggers: NativeMemoryArray, arrays over 2 GB, OutOfMemory on large byte[], LOH churn."
 license: MIT
 metadata:
   category: libraries
@@ -21,7 +21,9 @@ Pick one:
 - UPM git URL: `https://github.com/Cysharp/NativeMemoryArray.git?path=src/NativeMemoryArray.Unity/Assets/Plugins/NativeMemoryArray` (package id `com.cysharp.nativememoryarray`, 1.2.2). Source package; its asmdef is literally named `NewAssembly` (auto-referenced, unsafe code allowed), so reference that name from your asmdef.
 - NuGetForUnity: package `NativeMemoryArray` (netstandard2.1 DLL). It has a few extra members (`StealPointer`, `AsStream(offset, length)`, the `ReadFromAsync` / `WriteToAsync` / `WriteToFileAsync` extensions) that the UPM source compiles out.
 
-DLL requirements on Unity 6: Unity's .NET Standard 2.1 / .NET Framework profiles already contain `Span<T>`, `Memory<T>`, `IBufferWriter<T>` and `ReadOnlySequence<T>`, so `System.Memory.dll` and `System.Buffers.dll` are not needed. `System.Runtime.CompilerServices.Unsafe.dll` IS needed and is not in the git package. The same rule applies as in `zstring`: add it once (from the release `.unitypackage`, NuGet `System.Runtime.CompilerServices.Unsafe` 6.0.0, or NuGetForUnity), and keep exactly one copy across ZString, MemoryPack, ZLogger and this package. The README's unitypackage still ships `System.Memory.dll` and `System.Buffers.dll`; delete them if they cause duplicate-type errors.
+DLL requirements on Unity 6: Unity's .NET Standard 2.1 / .NET Framework profiles already contain `Span<T>`, `Memory<T>`, `IBufferWriter<T>` and `ReadOnlySequence<T>`, so `System.Memory.dll` and `System.Buffers.dll` are not needed. `System.Runtime.CompilerServices.Unsafe.dll` IS needed and is not in the git package.
+
+**System.Runtime.CompilerServices.Unsafe:** install once via NuGetForUnity (package `System.Runtime.CompilerServices.Unsafe` 6.0.0, usually pulled in as a dependency); if the project already has it from another route (a `.unitypackage` DLL, the `org.nuget.system.runtime.compilerservices.unsafe` UPM package), keep that one and don't add a second copy (duplicate-assembly errors). The README's unitypackage still ships `System.Memory.dll` and `System.Buffers.dll`; delete them if they cause duplicate-type errors.
 
 ## Workflow
 

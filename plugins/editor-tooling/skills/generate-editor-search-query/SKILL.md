@@ -1,6 +1,6 @@
 ---
 name: generate-editor-search-query
-description: Translates natural-language "find/search/locate/list/filter/which assets use/what references X" requests into Unity Search (Quick Search) query syntax — `t:`, `dir:`, `l:`, `ref=`, search expressions — and opens the Unity Search window pre-filled through `unity command eval` with `UnityEditor.Search.SearchService.ShowWindow`. Use for read-only lookups of project assets (materials, textures, prefabs, scenes, scripts, shaders, ScriptableObjects) or scene objects and components (Lights, Cameras, Rigidbodies, Canvas/UI, Renderers) in the Editor, or when the user asks what Unity Search query to use. Not for filesystem/repo text search, build logs, project overviews, package installs, or modifying the results.
+description: "Turns natural-language find/locate/list requests into Unity Search (Quick Search) queries (t:, dir:, l:, ref=, search expressions) and opens the Search window pre-filled in the live Editor through unity command eval. Use for read-only lookups of project assets or scene objects and components. Triggers: \"find all materials using X\", \"which prefabs reference this\", \"what Unity Search query should I use\". Not for repo text search, build logs, package installs or modifying results."
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: editor-tooling
@@ -64,7 +64,7 @@ Official English references:
 
 The `unity-cli` skill owns the prerequisites — installing the CLI, confirming a connected Editor,
 adding the project's `com.unity.pipeline` package, and discovering the command catalog. You need
-`eval` in particular; if it is absent, generate the query text and say the window can't be opened. Without the CLI the user can open **Window > Search > New Search Window** (Ctrl+K) and paste the query.
+`eval` in particular (exact command form: `unity-cli` → Eval syntax); if it is absent, generate the query text and say the window can't be opened. Without the CLI the user can open **Window > Search > New Search Window** (Ctrl+K) and paste the query.
 
 ## Query Generation Rules
 

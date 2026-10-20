@@ -1,6 +1,6 @@
 ---
 name: manage-sprite-atlas
-description: Creates, configures, and loads Sprite Atlas V2 assets (.spriteatlasv2) from editor C# using SpriteAtlasAsset, SpriteAtlasImporter, and SpriteAtlasUtility, by default through an IPreprocessBuildWithReport prebuild generator. Covers Sprite Packer Mode, packables (folders, textures, sprites), packing and texture settings, per-platform formats, master/variant atlases, includeInBuild, late binding with SpriteAtlasManager.atlasRequested and Addressables, runtime SpriteAtlas.GetSprite access, ScriptablePacker custom packers, and V1-to-V2 migration. Use when the user asks to create or optimize sprite atlases, reduce draw calls or texture memory for 2D/UI sprites, add sprites to an atlas, make HD/SD variants, fix sprites missing or invisible at runtime because of atlases, or load atlases on demand.
+description: Creates, configures, and loads Sprite Atlas V2 assets from editor C#, by default through a prebuild generator - packables, packing and per-platform texture settings, HD/SD variants, late binding with Addressables, and runtime GetSprite caching. Use when the user wants to create or optimize sprite atlases, cut draw calls or texture memory for 2D/UI sprites, fix sprites missing at runtime because of atlases, or load atlases on demand.
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: 2d
@@ -51,7 +51,7 @@ Manual one-off authoring (atlas assets committed to the repo, created once) is f
 - Assign enums directly: `platform.format = TextureImporterFormat.ASTC_6x6` (no casts).
 - Scope `AssetDatabase.FindAssets` to `new[] { "Assets" }` or a subfolder; unscoped searches reach into `Packages/`.
 - `SpriteAtlasImporter` settings are structs: copy, modify, assign back, then `SaveAndReimport()`.
-- `SpriteAtlas.GetSprite` / `GetSprites` return clones; cache them ([scripts/AtlasSpriteCache.cs](scripts/AtlasSpriteCache.cs)) and destroy clones you no longer need.
+- `SpriteAtlas.GetSprite` / `GetSprites` return a new clone on every call; cache and reuse them ([scripts/AtlasSpriteCache.cs](scripts/AtlasSpriteCache.cs)) and `Dispose()` the cache to destroy the clones when done.
 - Do not hand-edit `.spriteatlasv2` or `.meta` files.
 
 ## References
@@ -59,6 +59,7 @@ Manual one-off authoring (atlas assets committed to the repo, created once) is f
 - [references/api.md](references/api.md): full V2 API (members, settings structs, platform names and formats). Read when writing any atlas code.
 - [references/pitfalls.md](references/pitfalls.md): invalid patterns, runtime gotchas, V1 to V2 migration, checklists. Read before generating code and when an atlas "does nothing".
 - [references/addressables-delivery.md](references/addressables-delivery.md): late binding, defines, asmdefs, Addressables build integration.
+- [scripts/SpriteAtlasLateBinding.cs](scripts/SpriteAtlasLateBinding.cs): ready-made `SpriteAtlasManager.atlasRequested` handler for atlases not included in the build (Addressables when `UNITY_ADDRESSABLES` is defined).
 - [references/custom-packing.md](references/custom-packing.md): `ScriptablePacker` custom packing algorithms.
 
 Related: `sprite-editor` (slicing before packing), `tilemap-authoring` (tile atlases), `unity-texture-import` (source texture settings), `ui-ugui` (UI Image constraints).

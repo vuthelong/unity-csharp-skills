@@ -19,9 +19,17 @@ Proper SDK initialization is critical for LevelPlay to function correctly. This 
 
 ## Code Organization Options (Step 7)
 
-Step 7 of SKILL.md asks the user how they want to handle initialization and presents four options. Full
-implementation for each option follows. Present the four option labels exactly as written in SKILL.md;
-use the code here once the user has chosen.
+If the user has not said where initialization should live, offer these four options (or recommend one
+from what the project already has):
+
+1. Create a new dedicated script for LevelPlay initialization
+2. Add to an existing initialization/manager script they already have
+3. Create a new LevelPlay script that the existing manager references
+4. Just show the initialization code — the user decides how to integrate it
+
+For Option 4, give the complete Option 1 class as a standalone snippet without creating files or adding
+Inspector/GameObject steps, and note: save it as `LevelPlayInitializer.cs`, attach it to a persistent
+GameObject in the first scene, and set the App Key field in the Inspector.
 
 ### Option 1: Creating a New Script
 

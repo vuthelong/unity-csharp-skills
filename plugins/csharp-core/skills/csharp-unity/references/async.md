@@ -35,7 +35,7 @@ private async UniTaskVoid LoadAsync(CancellationToken ct)
 ## Awaitable (built-in)
 
 ```csharp
-private async void Start()
+private async Awaitable Start()
 {
     try
     {
@@ -56,7 +56,7 @@ private async Awaitable<Texture2D> DownloadAsync(string url, CancellationToken c
 }
 ```
 
-`Start` may be declared `async void` or `async Awaitable`; Unity accepts both for message methods. Prefer `async Awaitable` so failures are observable.
+Declare async message methods as `async Awaitable`, never `async void`; Unity accepts both, but only `Awaitable` keeps failures observable. Catch `OperationCanceledException` at this top level.
 
 Key API:
 - `Awaitable.NextFrameAsync(ct)`, `Awaitable.EndOfFrameAsync(ct)`, `Awaitable.FixedUpdateAsync(ct)`
@@ -74,7 +74,7 @@ Pitfalls:
 
 1. Every await that can outlive its object takes a token: `destroyCancellationToken` for component-bound work, `Application.exitCancellationToken` for app-wide work.
 2. After every await, assume the object may have been destroyed or disabled if no token was passed. Check `if (this == null) return;` when you cannot pass a token.
-3. Never `async void` except Unity message methods and UI callbacks with a fixed `void` signature; wrap their bodies in `try/catch` and log with `Debug.LogException(e, this)`.
+3. Never `async void`, including Unity message methods: use `async Awaitable Start()` or a synchronous `Start()` that calls a `UniTaskVoid` method with `.Forget()`. The only exception is a UI callback with a fixed `void` signature; wrap its body in `try/catch` and log with `Debug.LogException(e, this)`.
 4. A `Task` that nobody awaits drops its exception silently. Never discard a `Task` with `_ = DoAsync();`.
 5. Plain `Task` continuations keep running after you exit Play Mode in the Editor. Tie them to `Application.exitCancellationToken`.
 6. Never block the main thread on async work: no `.Result`, `.Wait()`, `GetAwaiter().GetResult()`, or spin-waits. Unity continuations run on the main thread, so this deadlocks the Editor or player.

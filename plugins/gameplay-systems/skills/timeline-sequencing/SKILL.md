@@ -1,6 +1,6 @@
 ---
 name: timeline-sequencing
-description: Builds, binds and controls Unity Timeline (com.unity.timeline) sequences in Unity 6 - TimelineAsset (.playable) creation by script, Animation / Activation / Audio / Signal / Control / Group tracks, clips, markers and SignalReceiver reactions, PlayableDirector bindings (SetGenericBinding, SetReferenceValue), playback control, wrap modes, time update modes, Cinemachine tracks, and custom PlayableAsset / PlayableBehaviour / TrackAsset clips. Use when the user wants a cutscene, intro cinematic, scripted sequence, in-game event timed to music, skippable cutscene, or reports bindings lost after duplicating a timeline, a character frozen after a cutscene, signals not firing, or Timeline changes not applying at runtime.
+description: Builds, binds and controls Unity Timeline sequences in Unity 6 - TimelineAsset creation by script, Animation, Activation, Audio, Signal and Control tracks, markers and SignalReceivers, PlayableDirector bindings and playback, wrap and time update modes, Cinemachine tracks and custom playable clips. Use for cutscenes, intro cinematics, skippable or music-timed sequences, or when bindings are lost after duplicating a timeline, a character freezes after a cutscene or signals do not fire.
 license: MIT
 metadata:
   category: gameplay-systems
@@ -45,7 +45,7 @@ Code for every step, custom clips and the Cinemachine track: [references/timelin
 - `director.Play()`, `Pause()`, `Resume()`, `Stop()`; `director.time` + `director.Evaluate()` to scrub; subscribe to `director.stopped` for "cutscene finished".
 - `extrapolationMode` (Inspector "Wrap Mode"): `Hold` keeps the last frame and **keeps the graph alive**, so Animators and objects stay under Timeline control after the end. Use `None` to hand control back, or call `Stop()` from `stopped`/end signal.
 - `timeUpdateMode`: `GameTime` follows `Time.timeScale` (pauses with the game), `UnscaledGameTime` ignores it (pause-menu cinematics), `DSPClock` locks to audio, `Manual` for scrubbing via script.
-- Skipping: set `director.time` to the end and `Evaluate()`, then `Stop()`. Signals between the old and new time do **not** fire; apply end-of-cutscene state explicitly or use `SignalEmitter.retroactive`.
+- Skipping: set `director.time` to the end and `Evaluate()`, then `Stop()`. Signals between the old and new time do **not** fire; apply end-of-cutscene state explicitly. (`SignalEmitter.retroactive` does not help here: it only fires a marker when playback *starts* after it, not for markers skipped by a time jump.)
 - Editing a timeline at runtime (adding clips, changing bindings) requires `director.RebuildGraph()` before it takes effect.
 - Disable Play On Awake for directors started by gameplay code.
 

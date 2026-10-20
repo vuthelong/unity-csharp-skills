@@ -1,6 +1,6 @@
 ---
 name: animation-sequencer
-description: Sets up and uses brunomikoski/Animation-Sequencer (com.brunomikoski.animationsequencer), a DOTween-based inspector tool for authoring and previewing UI/object animation sequences in edit mode. Covers install via OpenUPM or git URL, the DOTween dependency (free or Pro, DOTween Utility Panel asmdef generation, the DOTWEEN_ENABLED define), the AnimationSequencerController component (autoplay mode, play type, update type, time-scale independence, loops, Play/PlayForward/PlayBackwards/Complete/Kill/Rewind/SetProgress, UnityEvents, PlayEnumerator/PlayAsync), built-in steps and DOTween actions, and custom AnimationStepBase / DOTweenActionBase steps. Use when the user mentions Animation Sequencer, AnimationSequencerController, AnimationStepBase, DOTweenActionBase, DOTweenAnimationStep, "Tween Target" steps, CS1929 'does not contain a definition for DOFade' after installing it, or wants designer-tunable DOTween sequences for popups, screens and juice.
+description: "Authors and drives DOTween-based UI/object animation sequences with brunomikoski Animation Sequencer (AnimationSequencerController, steps, DOTween actions, custom steps). Use when building inspector-authored UI transitions or show/hide timelines, playing them from code (Play, PlayBackwards, PlayAsync), or debugging setup issues such as the missing DOTWEEN_ENABLED define, 'No DOTween found, animation sequencer will be disabled', or CS1929 DOFade errors."
 license: MIT
 metadata:
   category: libraries
@@ -32,7 +32,9 @@ DOTween (required):
 - Run `Tools > Demigiant > DOTween Utility Panel` > **Setup DOTween...**, enable the modules you need (UI, TextMeshPro if used), and click **Create ASMDEF**. The runtime asmdef references `DOTween.Modules`; without that asmdef you get `error CS1929: 'CanvasGroup' does not contain a definition for 'DOFade'`.
 - Or install DOTween from OpenUPM as `com.demigiant.dotween`; the runtime asmdef's `versionDefines` then sets `DOTWEEN_ENABLED` automatically.
 
-`DOTWEEN_ENABLED`: every runtime and editor script is wrapped in `#if DOTWEEN_ENABLED`. `AnimationSequencerSetupHelper` (`[InitializeOnLoad]`) scans compiled assemblies for `DOTween.Modules` and adds `DOTWEEN_ENABLED` to **Player > Scripting Define Symbols** for the currently selected build target group only, or removes it and logs "No DOTween found, animation sequencer will be disabled...". After switching platform the helper re-runs on domain reload; for CI builds that pass `-buildTarget`, verify the define is present for that target (or add it yourself) before building.
+`DOTWEEN_ENABLED`: every runtime and editor script is wrapped in `#if DOTWEEN_ENABLED`. `AnimationSequencerSetupHelper` (`[InitializeOnLoad]`) scans compiled assemblies for `DOTween.Modules` and adds `DOTWEEN_ENABLED` to **Player > Scripting Define Symbols**, or removes it and logs "No DOTween found, animation sequencer will be disabled...".
+
+- **`DOTWEEN_ENABLED` is per build target / CI.** The helper writes the define for the currently selected build target group only. Add it to every target you ship (Android, iOS, Standalone...) in Player Settings, and in CI builds that pass `-buildTarget` verify it is present for that target (or set it in the build script) before building; otherwise the sequencer silently compiles to nothing in that player.
 
 Package:
 

@@ -1,6 +1,6 @@
 ---
 name: unity-lighting
-description: Sets up, scripts, bakes, and debugs lighting in Unity 6 URP scenes. Covers Light components (types, modes, shadows, cookies, rendering layers), URP Forward/Forward+/Deferred light limits, the URP Asset shadow settings, ambient and skybox (RenderSettings, DynamicGI.UpdateEnvironment), fog, reflection probes (baked/realtime, box projection, RenderProbe), light probes and Adaptive Probe Volumes, lightmapping (LightingSettings assets, Lightmapping.BakeAsync, mixed lighting modes, lightmap UVs), and common artifacts. Use when the user mentions lights, shadows, shadow acne, light leaking, baked GI, lightmaps, APV, probe volumes, reflection probes, skybox, ambient light, fog, time of day, "scene too dark", or lights not affecting objects.
+description: Sets up, scripts, bakes, and debugs lighting in Unity 6 URP scenes - Light components and modes, shadows, ambient and skybox, fog, reflection and light probes, Adaptive Probe Volumes, and lightmap baking with LightingSettings. Use for shadow acne, light leaking, scenes that are too dark, lights not affecting objects, baked GI or lightmap problems, or time-of-day setups. For the frame cost of lights and shadows, use optimize-3d-rendering.
 license: MIT
 metadata:
   category: rendering-vfx
@@ -61,14 +61,14 @@ public static class LightFactory
         light.intensity = intensity;
         light.range = range;
         light.shadows = LightShadows.Soft;
-        var data = go.GetUniversalAdditionalLightData();
+        var data = light.GetUniversalAdditionalLightData();
         data.renderingLayers = 1u;
         return light;
     }
 }
 ```
 
-`GetUniversalAdditionalLightData()` is an extension in `UnityEngine.Rendering.Universal`; it adds the component if missing. The older `lightLayerMask` property is obsolete; use `renderingLayers`.
+`GetUniversalAdditionalLightData()` is an extension method on `Light` in `UnityEngine.Rendering.Universal`; it adds the component if missing. The older `lightLayerMask` property is obsolete; use `renderingLayers`.
 
 ## Rendering path and light limits
 

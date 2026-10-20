@@ -1,6 +1,6 @@
 ---
 name: sprite-editor
-description: Edits sprite metadata (names, rects, pivots, 9-slice borders, outlines, physics shapes) and slices sprite sheets (automatic, grid, isometric) by generating editor C# against ISpriteEditorDataProvider and SpriteDataProviderFactories, run in the open Editor via `unity command eval`. Works for TextureImporter, PSDImporter, and custom importers. Use when the user asks to slice a sprite sheet, set pivots or borders, rename sprites, set custom outlines, extract a sprite to PNG, or otherwise edit what the Sprite Editor window edits. Not for atlas packing (manage-sprite-atlas) or texture compression settings (unity-texture-import).
+description: Edits sprite metadata (rects, names, pivots, 9-slice borders, outlines, physics shapes) and slices sprite sheets (automatic, grid, isometric) through ISpriteEditorDataProvider, run in the Editor via unity command eval or as a generated Editor script. Use when the user asks to slice a sprite sheet, set pivots or borders, rename sprites, set custom outlines, or extract a sprite to PNG. Not for atlas packing or texture compression.
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: 2d
@@ -14,20 +14,18 @@ Sprite metadata lives inside the asset importer, not in a file you can safely ed
 
 ## Workflow
 
-1. **Get a connected Editor with `eval`.** Follow `unity-cli` to install the CLI, connect to the Editor, add `com.unity.pipeline`, and tell a missing Editor apart from one stuck in Safe Mode. Then confirm `eval` is in the command catalog (`unity command --format json`); its presence depends on the Pipeline package version. Use `unity command eval --code '<snippet>'`. Only use `eval_file` if the catalog lists it. Default timeout is 30 s.
+1. **Prefer a connected Editor with `eval`.** Follow `unity-cli` to connect and confirm `eval` is in the command catalog. If `eval` is unavailable (no Editor reachable, no Pipeline package, or a Pipeline version that does not compile on this Editor), use the fallback below instead of stopping.
 2. **Build the snippet from the Safe Core Pattern** in [references/templates.md](references/templates.md): get the data provider, check edit capabilities, modify, `Apply()`, `SaveAndReimport()`.
 3. **Abort on a failed capability check.** Never bypass it, even if you think the call would work; that is how importer data gets corrupted.
 4. **Verify**: re-read `GetSpriteRects()` (or the Console / Project window) and report what changed.
 
-If no Editor is reachable, stop and say so. Never hand-edit `.meta` files to change sprite data.
+**Fallback without `eval`:** write the same code as an Editor script under an `Editor` folder with a `[MenuItem]` entry point, and tell the user which menu item to run and what to check afterwards. Never hand-edit `.meta` files to change sprite data.
 
 ## Passing C# to `eval`
 
-`eval` compiles a statement block, not a file:
-- No `using` directives (`CS0210`: parsed as a disposal statement).
-- Fully qualify types: `UnityEditor.AssetDatabase`, `UnityEditor.U2D.Sprites.SpriteRect`, `UnityEngine.Object` (bare `Object` is ambiguous with `object`, `CS0104`).
+Eval syntax and prerequisites: see the `unity-cli` skill (unity-editor-tooling plugin) → Eval syntax.
 
-The files in `scripts/` are written as normal C# with usings. When you inline them into `eval`, qualify every type; when you save them into the project, put them in an `Editor` folder.
+The files in `scripts/` are written as normal C# with usings. When you inline them into `eval`, qualify every type (`UnityEditor.U2D.Sprites.SpriteRect`, `UnityEngine.Object`); when you save them into the project, put them in an `Editor` folder.
 
 ## Operations
 
@@ -43,6 +41,7 @@ Slicing (all go through [scripts/GenerateNewSpriteRects.cs](scripts/GenerateNewS
 - [scripts/GridSliceTexture.cs](scripts/GridSliceTexture.cs): fixed cell size, offset, padding.
 - [scripts/IsometricSliceTexture.cs](scripts/IsometricSliceTexture.cs): diamond tiles with diamond outlines.
 - [scripts/GetTextureToSlice.cs](scripts/GetTextureToSlice.cs): readable texture at original image size (required before slicing).
+- [scripts/GetTextureSourceImageSize.cs](scripts/GetTextureSourceImageSize.cs): original source image width/height (the space sprite rects use) without making a readable copy.
 - [scripts/SpriteToPng.cs](scripts/SpriteToPng.cs): render one sprite's mesh to PNG bytes.
 
 Read [references/scripts-guide.md](references/scripts-guide.md) when slicing or combining scripts (modes, parameters, name generators). Read [references/api-reference.md](references/api-reference.md) for every data provider interface, `SpriteRect` fields, and coordinate-space rules.
@@ -53,6 +52,6 @@ Read [references/scripts-guide.md](references/scripts-guide.md) when slicing or 
 - When adding or removing sprites, keep `ISpriteNameFileIdDataProvider` in sync (`SpriteEditorUtility.ApplySpriteRects` does this). Otherwise new sprites get unstable file IDs and references to existing sprites can break.
 - For a `TextureImporter`, `textureType` must be `Sprite` and `spriteImportMode` `Multiple` before slicing into several sprites.
 - Use enum values, never magic numbers: `SpriteAlignment.Custom`, not `9`; cast with `(int)SpriteAlignment.Center` only where an API takes `int`.
-- Generate standalone snippets. Do not wrap the work in an `AssetPostprocessor` or `[MenuItem]`.
+- Prefer standalone `eval` snippets. Do not wrap the work in an `AssetPostprocessor`; a `[MenuItem]` wrapper is fine for the no-`eval` fallback.
 - Do not use the legacy `TextureImporter.spritesheet` / `SpriteMetaData` path; it bypasses the data provider and does not work for PSD or custom importers.
 - `UnityEditorInternal.InternalSpriteUtility` (used for auto and grid detection) is internal API; it works in 6000.x but can change between minors. If it fails to compile, fall back to computing rects yourself.

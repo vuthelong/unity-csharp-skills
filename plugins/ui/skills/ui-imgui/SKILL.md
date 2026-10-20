@@ -1,6 +1,6 @@
 ---
 name: ui-imgui
-description: Maintains and writes Unity IMGUI (immediate mode) code — EditorWindow `OnGUI`, custom inspectors with `OnInspectorGUI`, IMGUI PropertyDrawers, ScriptableWizards, `Handles` scene GUI, and runtime `OnGUI` debug overlays — using `GUILayout`, `EditorGUILayout`, `EditorGUI`, `SerializedProperty`, and cached `GUIStyle`s. Use when editing existing OnGUI/OnInspectorGUI code, when the user explicitly asks for IMGUI or immediate mode, when a project's editor tooling is IMGUI-only, or for a quick runtime debug overlay. New editor windows and inspectors default to UI Toolkit (`ui-uitk`).
+description: Maintains and writes Unity IMGUI code - EditorWindow OnGUI, OnInspectorGUI custom editors, IMGUI PropertyDrawers, ScriptableWizards, Handles scene GUI and runtime OnGUI debug overlays. Use when editing an existing OnGUI or OnInspectorGUI script, when the user explicitly asks for IMGUI, for a quick debug overlay, or for errors like "Invalid GUILayout state". New editor tools default to UI Toolkit (ui-uitk).
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: ui
@@ -22,8 +22,7 @@ References (read when the trigger applies):
 |---|---|
 | Editing a file with `OnGUI` / `OnInspectorGUI` | Use IMGUI; match its style |
 | User asks for IMGUI / OnGUI / immediate mode | Use IMGUI |
-| Project's editor tools are all IMGUI | Use IMGUI for consistency |
-| New editor window/inspector, no preference stated | Ask once, recommend UI Toolkit (`ui-uitk`) |
+| New editor window/inspector, no preference stated | Use UI Toolkit (`ui-uitk`), not IMGUI |
 | Runtime debug overlay (FPS, state dump) | IMGUI `OnGUI` in a MonoBehaviour, stripped from release builds |
 
 If "inspector" is ambiguous, ask whether it is a custom `Editor` for one component or a `PropertyDrawer` for a field type.
@@ -69,5 +68,5 @@ If "inspector" is ambiguous, ask whether it is a custom `Editor` for one compone
 ## Unity 6 notes
 
 - `FindObjectOfType`/`FindObjectsOfType` are obsolete: use `FindFirstObjectByType`, `FindAnyObjectByType`, `FindObjectsByType`.
-- On 6000.5+, `Object.GetInstanceID()` is an error (CS0619); key editor caches and `EditorPrefs` entries by `GetEntityId()` or by asset GUID (`AssetDatabase.AssetPathToGUID`).
+- Newer Unity 6 releases move to `EntityId` and deprecate `Object.GetInstanceID()` (check your version's docs). Key persistent editor caches and `EditorPrefs` entries by asset GUID (`AssetDatabase.AssetPathToGUID`); instance IDs were never stable across sessions anyway.
 - An IMGUI-only `PropertyDrawer` still works inside Unity 6 UI Toolkit inspectors (hosted in an `IMGUIContainer`), at some performance cost; drawers used in many lists or UI Toolkit inspectors benefit from also implementing `CreatePropertyGUI` (see `ui-uitk`).

@@ -1,6 +1,6 @@
 ---
 name: asset-transformer-toolkit
-description: Imports CAD, 3D model and point-cloud files with Unity Asset Transformer Toolkit (formerly the Pixyz Plugin, `com.unity.industry.toolkit` 4.0+) and creates, edits, validates and runs its RuleSets, Rules, RuleBlocks and Actions (decimate, merge, repair, LOD generation) through the `ATTAssistantUtilities` API and ImporterScriptableObjects. Use when the user mentions Pixyz, Asset Transformer, importing CAD/STEP/point clouds into Unity, creating or configuring an importer, building a RuleSet or adding Actions to one, setting Action parameters, or generating LODs on imported models. Not for Asset Transformer Studio / Pixyz Studio (a separate product).
+description: "Imports CAD, 3D model and point-cloud files with Unity Asset Transformer Toolkit (formerly the Pixyz Plugin, com.unity.industry.toolkit 4.0+) and creates, edits and runs its RuleSets, Rules and Actions (decimate, merge, repair, LOD generation) by running C# in the open Editor. Use when the user mentions Pixyz, Asset Transformer, importing CAD/STEP or point clouds, building an importer or RuleSet, or generating LODs on imported models. Not for Pixyz Studio."
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: editor-tooling
@@ -28,7 +28,7 @@ versions don't have the `ATTAssistantUtilities` API every workflow below relies 
 ## Running the C#
 
 Every workflow writes C# and runs it in the user's open Editor. With the `unity` CLI that is
-`unity command eval` (see `unity-cli`). `eval` compiles a statement block, not a file: drop the
+`unity command eval` (see `unity-cli` → Eval syntax). `eval` compiles a statement block, not a file: drop the
 `using` directives from the reference examples and fully qualify types
 (`UnityEditor.PixyzPlugin4Unity.RuleEngine.RuleSet`, `UnityEngine.Debug`, …). Without a live
 Editor connection, write an Editor script under an `Editor/` folder with a `[MenuItem]` and ask

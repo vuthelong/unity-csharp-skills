@@ -1,6 +1,6 @@
 ---
 name: zstring
-description: Builds strings without GC garbage in Unity using Cysharp ZString (com.cysharp.zstring, namespace Cysharp.Text). Covers install via UPM git URL plus the System.Runtime.CompilerServices.Unsafe DLL, ZString.Concat / Format / Join, ZString.CreateStringBuilder (Utf16ValueStringBuilder) and CreateUtf8StringBuilder (Utf8ValueStringBuilder) with using/Dispose, notNested thread-static builders vs pooled builders, Append / AppendLine / AppendFormat / AppendJoin, AsSpan / AsArraySegment / TryCopyTo, IBufferWriter and ZStringWriter (TextWriter), TextMeshPro SetTextFormat / SetText(builder) via ZSTRING_TEXTMESHPRO_SUPPORT, PrepareUtf16 / PrepareUtf8 prepared formats, RegisterTryFormat custom formatters, and when to choose ZString over string interpolation or StringBuilder. Use when the user mentions ZString, zero-allocation strings, per-frame UI text (score, timer, FPS counters), string.Format or $"" GC alloc in the profiler, TMP_Text.SetText garbage, or NestedStringBuilderCreationException.
+description: "Builds strings without GC garbage in Unity using Cysharp ZString: Concat, Format, Join, UTF-16/UTF-8 value builders, prepared formats, TextMeshPro SetTextFormat/SetText, custom formatters. Use for per-frame UI text (score, timer, FPS), hot-path logging or network text, and when the Profiler shows GC Alloc from string.Format, interpolation or TMP SetText, or on NestedStringBuilderCreationException. Not for structured logging (see zlogger)."
 license: MIT
 metadata:
   category: libraries
@@ -18,7 +18,8 @@ Read `references/api.md` when you need full member lists, the Utf8 format-string
 
 1. Install:
    - Package Manager > Add package from git URL: `https://github.com/Cysharp/ZString.git?path=src/ZString.Unity/Assets/Scripts/ZString#2.6.0` (release tags are plain `x.y.z`), or import `ZString.Unity.*.unitypackage` from the GitHub releases.
-   - The code calls `System.Runtime.CompilerServices.Unsafe`. The unitypackage ships `Assets/Plugins/System.Runtime.CompilerServices.Unsafe.dll` (6.0.0); the git package does NOT. For a git install, add that DLL yourself (extract it from the unitypackage or the NuGet package `System.Runtime.CompilerServices.Unsafe` 6.0.0) unless another package in the project already provides it. Two copies cause a "Multiple precompiled assemblies with the same name" error, so search the project first.
+   - The code calls `System.Runtime.CompilerServices.Unsafe`. The unitypackage ships `Assets/Plugins/System.Runtime.CompilerServices.Unsafe.dll` (6.0.0); the git package does NOT. Two copies cause "Multiple precompiled assemblies with the same name".
+   - **System.Runtime.CompilerServices.Unsafe:** install once via NuGetForUnity (package `System.Runtime.CompilerServices.Unsafe` 6.0.0, usually pulled in as a dependency); if the project already has it from another route (a `.unitypackage` DLL, the `org.nuget.system.runtime.compilerservices.unsafe` UPM package), keep that one and don't add a second copy (duplicate-assembly errors).
 2. Your asmdef references `ZString` (it is `autoReferenced`, so `Assembly-CSharp` sees it without changes).
 3. `using Cysharp.Text;`.
 4. Replace hot-path string building (per frame, per tick, per log line) with the patterns below. Leave one-off strings alone.
@@ -93,7 +94,7 @@ TMP's own `TMP_Text.SetText(string, float, ...)` overloads also avoid allocation
 | `a + b + c` | one `ToString()` per non-string arg, often an array, final string | cold paths |
 | `System.Text.StringBuilder` | builder + chunks, boxed `AppendFormat` args, final string | cold paths; cache-and-`Clear()` if you must |
 | ZString `Concat` / `Format` / builder | final string only (zero with TMP / span consumers) | hot paths, per-frame UI, logging |
-| `DefaultInterpolatedStringHandler` / custom interpolated handlers | n/a | not available: needs C# 10, Unity 6 compiles C# 9 |
+| `DefaultInterpolatedStringHandler` / custom interpolated handlers | n/a | needs C# 10; Unity 6 compiles C# 9 by default, but an asmdef can opt in with a `csc.rsp` containing `-langVersion:10` (as `zlogger` does). use it for your own handlers; ZString's `Format` / builder APIs do not need it |
 
 The README benchmarks show ZString ahead of `+`, `string.Format` and `StringBuilder` for a mixed `int` / `string` concat; exact numbers depend on runtime and are not published as a table. Measure in your own Profiler.
 
@@ -112,3 +113,4 @@ The README benchmarks show ZString ahead of `+`, `string.Format` and `StringBuil
 - `csharp-unity` for general allocation and GC rules.
 - `optimize-text-mesh-pro` for TMP rendering and layout costs.
 - `unitask` and `r3` (Cysharp siblings) often pair with ZString for UI binding.
+- `native-memory-array` for UTF-8 output larger than 2 GB or kept off the managed heap (`CreateBufferWriter()` as the `IBufferWriter<byte>` target).

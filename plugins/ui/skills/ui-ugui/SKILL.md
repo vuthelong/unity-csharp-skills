@@ -1,6 +1,6 @@
 ---
 name: ui-ugui
-description: Understands, edits, and generates Unity uGUI (Canvas-based) UI — Canvas/CanvasScaler/GraphicRaycaster setup, RectTransform anchors and pivots, Horizontal/Vertical/Grid Layout Groups, ContentSizeFitter, ScrollRect, Button/Toggle/Slider/TMP_InputField composition, EventSystem input modules, world-space canvases, and UI prefabs. Use for requests mentioning Canvas, uGUI, RectTransform, Layout Group, ScrollView, EventSystem, `UnityEngine.UI`, invisible or mis-sized UI elements, buttons that do not click, or `.prefab` UI hierarchies.
+description: Understands, edits and generates Unity uGUI (Canvas-based) UI - Canvas and CanvasScaler setup, RectTransform anchors, Layout Groups, ScrollRect, buttons and input fields, EventSystem and world-space canvases in scenes or UI prefabs. Use when the request mentions Canvas, uGUI, RectTransform or a .prefab UI hierarchy, or reports UI that is invisible, mis-sized, mis-anchored or not receiving clicks.
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: ui
@@ -114,13 +114,7 @@ If 1–3 are missing, elements render but fail silently.
 
 ## TextMeshPro essentials
 
-World-space and screen UI text both use TMP. If `TMPro.TMP_Settings.instance` is null, TMP Essential Resources are missing. Import them non-interactively:
-
-```csharp
-TMPro.TMP_PackageResourceImporter.ImportResources(importEssentials: true, importExamples: false, interactive: false);
-```
-
-Never call `EditorApplication.ExecuteMenuItem("Window/TextMeshPro/Import TMP Essential Resources")` unless the user wants the interactive flow — it opens a modal that blocks automation until a human dismisses it. If an import window does open, close it after the import completes.
+World-space and screen UI text both use TMP. If `TMPro.TMP_Settings.instance` is null, TMP Essential Resources are missing; import them non-interactively as described in `optimize-text-mesh-pro` → TMP Essential Resources (never via the menu item, which opens a blocking modal).
 
 ## Understanding existing UI
 

@@ -152,6 +152,7 @@ public sealed class MaskData : ContextItem
     public TextureHandle Mask;
     public override void Reset() => Mask = TextureHandle.nullHandle;
 }
+```
 
 Writer pass, in its `RecordRenderGraph`:
 
@@ -167,7 +168,7 @@ if (frameData.Contains<MaskData>())
     builder.UseTexture(frameData.Get<MaskData>().Mask, AccessFlags.Read);
 ```
 
- This keeps lifetimes explicit, unlike globals.
+This keeps lifetimes explicit, unlike globals.
 
 ## Porting Execute() to RecordRenderGraph
 

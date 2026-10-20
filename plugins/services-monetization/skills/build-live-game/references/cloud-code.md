@@ -258,6 +258,8 @@ EndGlobal
 
 ### `.csproj` (net9.0, CloudCode.Apis 0.0.21, CloudCode.Core 0.0.1)
 
+Versions below are known-good examples, not requirements; verify current versions (Package Manager / NuGet / UGS docs) and keep what the project already has if newer. Cloud Code C# modules must target a .NET version the Cloud Code runtime currently supports; check the Cloud Code docs before changing `TargetFramework`.
+
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
 

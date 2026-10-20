@@ -1,6 +1,6 @@
 ---
 name: unity-package-management
-description: Adds, removes, upgrades, pins and discovers Unity Package Manager (UPM) packages programmatically with `UnityEditor.PackageManager.Client` (`AddAndRemove`, `Search`, `SearchAll`), driven headless from the terminal or CI by launching the Editor in `-batchmode` without `-quit`, or inside an already-open Editor. Use for "install a Unity package", "add com.unity.*", "upgrade/pin package version", "set up packages headless/in CI", verifying a package id or version against the Unity registry, generating missing `.meta` files headlessly, or choosing which packages a game needs by genre, platform and monetization. The `unity` CLI has no package command, so this covers that gap; see `unity-cli` for Editor/project commands and `new-unity-project` for the guided bootstrap.
+description: "Adds, removes, upgrades and discovers Unity Package Manager (UPM) packages: through an open Editor's package_add command or the UnityEditor.PackageManager.Client API, or headless in CI by launching the Editor in -batchmode without -quit. Use for \"install a Unity package\", \"add com.unity.*\", \"pin a package version\", headless or CI package setup, verifying package ids, or \"which packages for a <genre> game\". The unity CLI has no top-level package command."
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: editor-tooling
@@ -16,7 +16,9 @@ hand-edit `Packages/manifest.json` — the Client API resolves dependencies and 
 versions correctly, whereas manual edits routinely break resolution.
 
 This complements the **`unity-cli`** skill (editor install, project creation, build/test): the
-CLI has **no** package-management command, so all package work goes through the Editor's C# API.
+CLI has **no top-level** package command (`unity --help` lists none), so package work goes through
+the Editor — a connected Editor's Pipeline `package_*` commands (`unity command package_add`, below)
+or the C# Client API.
 
 ## When to use
 
@@ -47,7 +49,7 @@ locked). If `unity status` (see `unity-cli`) shows a connected Editor for the pr
 
 1. Run `unity command` and use a package command the Editor exposes (for example
    `unity command package_add --identifier com.unity.cinemachine --confirm true`) when listed.
-2. Otherwise run the request through `unity command eval`, fully qualified, for example
+2. Otherwise run the request through `unity command eval` (see `unity-cli` → Eval syntax), fully qualified, for example
    `UnityEditor.PackageManager.Client.AddAndRemove(new[] { "com.unity.cinemachine" }, null);`.
    The live Editor keeps ticking, so the async request completes on its own; no poll loop or
    `Exit` is needed.
@@ -95,7 +97,6 @@ namespace ProjectBootstrap
         {
             "com.unity.inputsystem",
             "com.unity.cinemachine",
-            "com.unity.render-pipelines.universal",
             // "com.unity.package@1.2.3"  // pin a version with @ when a minimum is required
         };
 

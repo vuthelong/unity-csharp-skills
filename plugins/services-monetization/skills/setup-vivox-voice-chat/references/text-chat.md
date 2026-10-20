@@ -60,7 +60,7 @@ void OnDirectedMessageReceived(VivoxMessage m)
 
 ## Chat History
 
-Retention: **7 days** by default (30 days if Text Evidence Management is enabled).
+Retention: **7 days** by default (30 days if Text Evidence Management is enabled), as of the Vivox 16 docs; verify current retention.
 
 ```csharp
 IReadOnlyCollection<VivoxMessage> GetChannelTextMessageHistoryAsync(

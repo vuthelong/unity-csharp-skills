@@ -1,6 +1,6 @@
 ---
 name: fmod-unity
-description: Integrates FMOD Studio into Unity 6 with the FMOD for Unity plugin (2.03/2.04) - install and Studio version matching, Setup Wizard, FMOD Settings (Source Type, Import Type, Load Banks, Event Linkage, encryption, Live Update port), disabling Unity audio, version control, RuntimeManager PlayOneShot/CreateInstance, EventInstance start/stop/release, EventReference and [EventRef] migration, 3D attributes, local and global parameters, buses, VCAs, snapshots, StudioListener, bank and sample-data loading with Addressables, timeline marker/beat callbacks under IL2CPP, programmer sounds, StudioEventEmitter and parameter triggers, adaptive music, and an IAudioService facade backend. Use when the user mentions FMOD, FMODUnity, fmod banks, Master.strings.bank, EventInstance, EventNotFoundException, BankLoadException, ERR_EVENT_NOTFOUND, Live Update, MonoPInvokeCallback, adaptive or beat-synced music, or is choosing between Unity audio, FMOD and Wwise.
+description: Integrates FMOD Studio into Unity 6 with the FMOD for Unity plugin - setup and Studio version matching, settings and banks, EventInstance lifecycle, EventReference, 3D attributes, parameters, buses, VCAs and snapshots, bank loading with Addressables, timeline/beat callbacks under IL2CPP, and adaptive music. Use when the project uses FMOD, on EventNotFoundException or bank load errors, Live Update issues, or when choosing Unity audio vs FMOD vs Wwise. For Unity built-in audio use audio-playback-system.
 license: MIT
 metadata:
   category: audio-performance

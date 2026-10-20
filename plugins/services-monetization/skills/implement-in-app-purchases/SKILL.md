@@ -1,6 +1,6 @@
 ---
 name: implement-in-app-purchases
-description: Implements, configures, debugs and migrates Unity In-App Purchasing 5.x (com.unity.purchasing, UnityIAPServices.StoreController) - store connection, product catalog and IAPProductCatalog.json, consumables, non-consumables and subscriptions, the two-step pending/confirm purchase flow, receipt validation (GooglePlayTangle, StoreKit 2 JWS), entitlements, restore, Apple and Google Play extensions, and D2C web payments via Stripe or Coda (IAP 5.4+). Use for real-money purchases, microtransactions, shops, "restore purchases", or migrating from IAP v4 (IStoreListener, UnityPurchasing.Initialize, ConfigurationBuilder), native Google BillingClient or StoreKit, RevenueCat, Adapty, Essential Kit or UniPay. Not for virtual-currency economies (see build-live-game) or ads (see levelplay-unity-integration).
+description: Implements, debugs and migrates real-money purchases with Unity IAP 5.x (StoreController) - store connection, product catalog, consumables, non-consumables, subscriptions, pending/confirm flow, receipt validation, restore, Apple and Google extensions, and D2C web payments (Stripe/Coda). Use for shops, microtransactions or "restore purchases", or when migrating from IAP v4, native BillingClient/StoreKit, RevenueCat, Adapty, Essential Kit or UniPay. Not for virtual currency or ads.
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: services-monetization
@@ -19,11 +19,14 @@ Target IAP 5.x on Unity 6 (6000.0+). IAP 4.x APIs (`IStoreListener`, `IDetailedS
 
 ## Before You Start
 
-**Always read [references/pre-check.md](references/pre-check.md) first.** It scans the project for third-party IAP packages, native Google Billing, and existing Unity IAP versions, then routes to the correct path. Do not read any other reference file or make any changes until routing is resolved.
+Scale the check to the request:
+
+- **Quick path.** If `Packages/manifest.json` already lists `com.unity.purchasing` 5.x, the project already calls `UnityIAPServices.StoreController()`, and the request is incremental (add a consumable or shop item, a new product ID, a purchase button, fix a confirm/restore bug), skip the full scan: follow the existing store wiring, add the `ProductDefinition` (or `IAPProductCatalog.json` entry, see [references/codeless-catalog.md](references/codeless-catalog.md)), and handle it in the existing pending/confirm handler. Use [references/api-notes.md](references/api-notes.md) for signatures.
+- **Full pre-check.** For anything else (no IAP yet, IAP 4.x, native billing, a third-party IAP package such as RevenueCat/Adapty/Essential Kit/UniPay, D2C, or an unclear project state), read [references/pre-check.md](references/pre-check.md) first. It scans for those packages and existing Unity IAP versions and routes to the correct path; resolve routing before making changes.
 
 ## Detailed References
 
-- **Project scan and path routing (read first):** See [references/pre-check.md](references/pre-check.md)
+- **Project scan and path routing (read first unless on the quick path):** See [references/pre-check.md](references/pre-check.md)
 - **API signatures & code examples:** See [references/api-notes.md](references/api-notes.md)
 - **Platform extensions (Apple, Google):** See [references/platform-notes.md](references/platform-notes.md)
 - **Editing `IAPProductCatalog.json` (schema, decimal serialization, refresh):** See [references/codeless-catalog.md](references/codeless-catalog.md)

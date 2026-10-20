@@ -57,7 +57,7 @@ public class RuleTileGenerator : EditorWindow
             var ruleTile = CreateInstance<RuleTile>();
             TilemapRuleTileCreateFromSegment.ApplyRulesToTile(ruleTile, rules);
 
-            string directory = Path.GetDirectoryName(path)?.Replace('\', '/');
+            string directory = Path.GetDirectoryName(path)?.Replace('\\', '/');
             string savePath = AssetDatabase.GenerateUniqueAssetPath($"{directory}/{Path.GetFileNameWithoutExtension(path)}_RuleTile.asset");
             AssetDatabase.CreateAsset(ruleTile, savePath);
             AssetDatabase.SaveAssets();

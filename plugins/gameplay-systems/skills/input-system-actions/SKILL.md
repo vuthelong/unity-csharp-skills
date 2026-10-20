@@ -1,6 +1,6 @@
 ---
 name: input-system-actions
-description: Sets up, scripts and tests the Unity Input System 1.x (com.unity.inputsystem) in Unity 6 - Active Input Handling, project-wide actions (InputSystem.actions), .inputactions assets, action maps, Button / Value / PassThrough actions, bindings and composites (2DVector, 1DAxis, modifiers), control schemes, interactions and processors, generated C# wrappers, PlayerInput / PlayerInputManager, InputSystemUIInputModule, interactive rebinding with saved overrides, and automated input in tests (InputTestFixture, simulated presses, uGUI pointer events). Use when the user wants WASD / gamepad movement, mouse look, jump or fire actions, key rebinding, local multiplayer join, touch input, or input-driven play-mode tests, or reports "You are trying to read Input using the UnityEngine.Input class", activeInputHandler -1 errors, actions that never fire, missed presses in FixedUpdate, or UI not responding to clicks.
+description: Sets up, scripts and tests the Unity Input System 1.x in Unity 6 - Active Input Handling, project-wide actions, .inputactions assets, bindings and composites, control schemes, interactions and processors, generated C# wrappers, PlayerInput, rebinding and simulated input in tests. Use for movement, look, jump or fire actions, key rebinding, local multiplayer join or input tests, or when the legacy Input class throws, actions never fire, presses are missed in FixedUpdate or UI ignores clicks.
 license: MIT
 metadata:
   category: gameplay-systems

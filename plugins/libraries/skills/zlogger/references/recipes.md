@@ -243,6 +243,7 @@ public static class DevLog
   <assembly fullname="Microsoft.Extensions.Logging" preserve="all"/>
   <assembly fullname="Microsoft.Extensions.Logging.Abstractions" preserve="all"/>
   <assembly fullname="Microsoft.Extensions.DependencyInjection" preserve="all"/>
+  <assembly fullname="Microsoft.Extensions.DependencyInjection.Abstractions" preserve="all"/>
   <assembly fullname="Microsoft.Extensions.Options" preserve="all"/>
   <assembly fullname="ZLogger" preserve="all"/>
 </linker>

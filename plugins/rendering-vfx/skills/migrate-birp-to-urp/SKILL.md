@@ -1,6 +1,6 @@
 ---
 name: migrate-birp-to-urp
-description: Plans, executes, and troubleshoots moving a Unity project from the Built-in Render Pipeline (BiRP) to URP on Unity 6 in safe, verified phases - URP asset and renderer setup, Graphics and per-Quality-level assignment, Render Pipeline Converter runs, material conversion with texture/color preservation, particle and foliage materials, PPv2 to URP Volume profiles, baked lighting, lightmaps and reflection probes, custom shader triage (Surface Shaders, GrabPass, OnRenderImage, replacement shaders), URP 2D, and saved-state validation. Use when the user asks to upgrade/convert/switch a project, scene, material, or shader to URP, has pink/magenta materials after switching, lost post-processing or lighting parity, or wants an audit of migration risk before changing anything.
+description: Plans and runs a phased, verified migration of a Unity 6 project from the Built-in Render Pipeline to URP - URP asset setup, Render Pipeline Converter, material and particle conversion that keeps textures, PPv2 to Volume profiles, lighting rebakes, and custom shader triage. Use when the user wants to switch a project, scene, or material to URP, sees pink/magenta materials after switching, or wants a migration risk audit first. Needs a live Editor with eval.
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: rendering-vfx
@@ -51,11 +51,11 @@ Rules for phases:
 Every step runs as C# in a live Editor through the Unity CLI. The `unity-cli` skill owns setup (CLI install, connected Editor, `com.unity.pipeline`, Safe Mode, command catalog). Additionally:
 
 - You need the `eval` command. If the catalog lacks it, say so and stop.
-- **`com.unity.pipeline` requires Unity 6000.3+.** It uses `IPreprocessBuildWithContext` / `BuildCallbackContext`, introduced in 6000.3, but declares `"unity": "6000.0"`, so on 6000.0-6000.2 it installs and then fails with CS0246 in the Editor log while `unity status` shows nothing. Projects leaving BiRP are often on older Editors; diagnose this instead of retrying the CLI.
+- **Some `com.unity.pipeline` versions do not compile on older 6000.x Editors.** Versions that use `IPreprocessBuildWithContext` / `BuildCallbackContext` (added in 6000.3) still declare `"unity": "6000.0"`, so on 6000.0-6000.2 they install and then fail with CS0246 in the Editor log while `unity status` shows nothing. Other versions run on 6000.0 (eval observed working on 6000.0.70f1 with pipeline 0.8.0-exp.1). On CS0246, pin a Pipeline version that matches the Editor (`unity pipeline list-versions`) or upgrade the Editor. Projects leaving BiRP are often on older Editors; diagnose this instead of retrying the CLI.
 - A migration is not safely authorable blind. An unreachable Editor is a stop, not a cue to hand-edit `ProjectSettings/GraphicsSettings.asset`.
-- `unity command eval --code '<snippet>'` has a 30 s default timeout. Installing URP outlasts it; treat that as a phase boundary.
+- `eval` has a 30 s default timeout. Installing URP outlasts it; treat that as a phase boundary.
 
-`eval` compiles a **statement block**: no `using` directives (CS0210), fully qualify types (bare `Object` is CS0104), no extension methods (use `GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>()`, `System.Linq.Enumerable.FirstOrDefault(seq, pred)`).
+Eval syntax and prerequisites: see the `unity-cli` skill (unity-editor-tooling plugin) → Eval syntax. Here that means `GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>()` instead of the extension method.
 
 Snippets that declare a `class`, `static` method, or `[MenuItem]` are project files: save under `Assets/Editor/`, let Unity compile, then call the entry point with a one-line `eval`. Prefer this for multi-step work; scripts survive domain reloads, long `eval` payloads do not.
 

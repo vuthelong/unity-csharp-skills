@@ -92,4 +92,35 @@ Each container GameObject gets a `RectMask2D`. Disable it when entering screens 
 
 ## Hardware back button
 
-The library has no built-in back handling. Route Android back / Escape through one handler: pop the top modal if `ModalContainer.OrderedModalIds.Count > 0`, else pop the page if more than one is stacked, skipping when `IsInTransition`.
+The library has no built-in back handling. Route Android back / Escape through one handler: pop the top modal if any is open, else pop the page if more than one is stacked, skipping while either container is in transition. The Input System reports the Android back button as `Keyboard.escapeKey`.
+
+```csharp
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityScreenNavigator.Runtime.Core.Modal;
+using UnityScreenNavigator.Runtime.Core.Page;
+
+public sealed class BackButtonHandler : MonoBehaviour
+{
+    [SerializeField] private PageContainer pageContainer;
+    [SerializeField] private ModalContainer modalContainer;
+
+    private void Update()
+    {
+        var keyboard = Keyboard.current;
+        if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame) return;
+        if (this.pageContainer.IsInTransition || this.modalContainer.IsInTransition) return;
+
+        if (this.modalContainer.OrderedModalIds.Count > 0)
+        {
+            this.modalContainer.Pop(true);
+        }
+        else if (this.pageContainer.OrderedPagesIds.Count > 1)
+        {
+            this.pageContainer.Pop(true);
+        }
+    }
+}
+```
+
+At the root page, decide explicitly what back does (confirm-quit modal, or nothing) rather than popping the last page.

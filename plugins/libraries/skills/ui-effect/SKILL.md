@@ -1,6 +1,6 @@
 ---
 name: ui-effect
-description: Applies and configures mob-sakai UIEffect v5 (com.coffee.ui-effect, namespace Coffee.UIEffects) on uGUI Image, RawImage, Text and TextMeshProUGUI - grayscale, sepia, blur, pixelation, dissolve, shiny, fade, shadow/outline, gradation, edge and detail-texture effects. Covers install via OpenUPM or git URL with ?path=Packages/src, the UIEffect component and its filter groups, UIEffectPreset and runtime presets, UIEffectProjectSettings and shader variant registration (missing variants in player builds), UIEffectTweener, UIEffectReplica, TextMeshPro and ShaderGraph support samples, Timeline tracks, batching cost, and migrating v4 components (UIDissolve, UIShiny, UIHsvModifier, UITransitionEffect, UIShadow, UIGradient, UIFlip). Use when the user mentions UIEffect, UI dissolve/shiny/grayscale/blur effects, UIEffectTweener, UIEffectReplica, LoadPreset, or an effect that works in the Editor but is pink, missing or default-looking in a build.
+description: "Applies mob-sakai UIEffect v5 effects on uGUI Image, RawImage, Text and TextMeshProUGUI (grayscale, blur, dissolve, shiny, shadow/outline, gradation), with presets, UIEffectTweener, replicas for batching, TMP and ShaderGraph samples, and v4 migration. Use for UI visual effects or when an effect looks pink, plain or wrong only in player builds (unregistered shader variants), LoadPreset does nothing, or v4 components like UIDissolve/UIShiny need converting."
 license: MIT
 metadata:
   category: libraries
@@ -42,13 +42,14 @@ using UnityEngine.UI;
 public sealed class DissolveOnHide : MonoBehaviour
 {
     [SerializeField] private Graphic _graphic;
+    [SerializeField] private UIEffectPreset _dissolvePreset;
 
     private UIEffectTweener _tweener;
 
     private void Awake()
     {
         var effect = _graphic.gameObject.AddComponent<UIEffect>();
-        effect.LoadPreset("Dissolve");
+        effect.LoadPreset(_dissolvePreset);
         effect.transitionWidth = 0.1f;
         effect.transitionColor = Color.red;
 

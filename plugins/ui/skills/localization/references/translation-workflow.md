@@ -29,7 +29,7 @@ This catches plain, interpolated, concatenated, and `+=` assignments plus `SetTe
 - One shared String Table Collection for UI (e.g. `UIStrings`) with the base language filled first.
 - Key naming: `screen.element` (`menu.play`, `settings.audio.title`).
 - Add translator context per key (where it appears, max length, tone).
-- Map existing UI text to keys **longest string first**, so `"NO ITEMS FOUND"` binds to its own key rather than a shorter `"NO"`. Use case-insensitive matching where appropriate.
+- Map existing UI text to keys by **exact match on the trimmed label text** (ordinal), never substring: `"OK"` must not bind a label reading `"BOOK"`, and `"NO"` must not bind `"NO ITEMS FOUND"`. Labels mixing static text with runtime values need a Smart String, not a substring match.
 
 ## 3. Bind components
 

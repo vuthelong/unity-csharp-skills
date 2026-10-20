@@ -1,6 +1,6 @@
 ---
 name: unity-particle-system
-description: Creates, tunes, scripts, and optimizes Unity's built-in CPU Particle System (Shuriken) on Unity 6 with URP particle shaders. Covers the module struct API (main, emission, shape, color/size over lifetime, noise, collision, trails, sub-emitters, renderer), MinMaxCurve/MinMaxGradient modes, bursts, Emit with EmitParams, Play/Stop/Clear and stopAction, simulation and scaling space, collision and trigger callbacks, GetParticles/SetParticles and particle jobs, pooling, procedural culling, and overdraw. Use when the user mentions ParticleSystem, Shuriken, ParticleSystemRenderer, emission bursts, sub emitters, OnParticleCollision, OnParticleTrigger, particle trails, or fire/smoke/explosion effects that must run on WebGL or low-end mobile. For GPU particles at scale use `unity-vfx-graph`.
+description: Creates, tunes, scripts, and optimizes the built-in CPU Particle System (Shuriken) on Unity 6 with URP particle shaders - the module struct API, bursts, Emit with EmitParams, sub-emitters, collision and trigger callbacks, trails, pooling, and overdraw. Use when the user mentions ParticleSystem, Shuriken, OnParticleCollision, or fire, smoke, or explosion effects that must run on WebGL or low-end mobile. For GPU particles at scale use unity-vfx-graph.
 license: MIT
 metadata:
   category: rendering-vfx
@@ -131,7 +131,7 @@ Read [references/scripting.md](references/scripting.md) when handling `OnParticl
 - **Collision**: World collision with High quality raycasts per particle. Use Planes, or World with Medium/Low quality and a restricted *Collides With* layer mask.
 - **Noise**: quality High (3D) is the most expensive module; Low (1D) is often enough.
 - **Pooling**: pool effect GameObjects with `stopAction = Disable`; avoid `Instantiate`/`Destroy` per shot. Or use `Emit(EmitParams)` on shared systems.
-- **Many systems**: Unity updates systems on worker threads; keep `Play On Awake` off for effects that start disabled so they do not tick.
+- **Many systems**: Unity updates systems on worker threads. Only playing systems on active GameObjects simulate; a pooled, disabled, or stopped-and-cleared system costs no simulation. `Play On Awake` only decides whether a system starts itself when enabled, so turn it off for effects you start explicitly with `Play()`.
 
 ## Recipes
 

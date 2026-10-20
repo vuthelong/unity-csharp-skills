@@ -1,6 +1,6 @@
 ---
 name: observable-collections
-description: Builds data-driven Unity UI on Cysharp ObservableCollections - generic, low-allocation observable collections (ObservableList, ObservableDictionary, ObservableHashSet, ObservableQueue, ObservableStack, ObservableRingBuffer, ObservableFixedSizeRingBuffer) with struct NotifyCollectionChangedEventArgs<T>, synchronized views (CreateView, ISynchronizedView, AttachFilter / ResetFilter, Filtered / Unfiltered, ViewChanged), ToViewList / ToNotifyCollectionChanged for IList binding, writable views, and R3 integration (ObserveAdd, ObserveRemove, ObserveReplace, ObserveMove, ObserveReset, ObserveCountChanged). Covers NuGetForUnity install, SyncRoot thread safety, inventory lists driving uGUI or UI Toolkit ListView, pooled item views, and pitfalls such as undisposed views, Clear losing views, and mutating inside callbacks. Use when the user mentions ObservableCollections, ObservableList, ISynchronizedView, CreateView, collection change notifications, or syncing a list model to UI rows.
+description: "Builds data-driven UI on Cysharp ObservableCollections: observable list/dictionary/queue/ring-buffer with struct change events, synchronized views that map items to row views with sort and filter, IList binding for UI Toolkit, and R3 Observe* streams. Choose it over plain r3 when the model is a collection and the UI must mirror adds, removes, moves and resets; use r3 alone for single values and event streams. Triggers: ObservableList, CreateView, ISynchronizedView."
 license: MIT
 metadata:
   category: libraries
@@ -16,7 +16,8 @@ Read `references/api.md` for full member lists of every collection, the view int
 
 ## Workflow
 
-1. Install with NuGetForUnity (there is no UPM package): `NuGet > Manage NuGet Packages`, install `ObservableCollections`; install `ObservableCollections.R3` too if you use R3 (it pulls `R3`; also add `R3.Unity` per `r3`). The netstandard builds depend on `System.Runtime.CompilerServices.Unsafe` (and `System.Memory` for netstandard2.0), which NuGetForUnity resolves; keep only one copy of the Unsafe DLL in the project.
+1. Install with NuGetForUnity (no UPM package; setup in `r3` -> "NuGetForUnity setup"): `ObservableCollections`, plus `ObservableCollections.R3` if you use R3 (it pulls `R3`; also add `R3.Unity` per `r3`).
+   - **System.Runtime.CompilerServices.Unsafe:** install once via NuGetForUnity (package `System.Runtime.CompilerServices.Unsafe` 6.0.0, usually pulled in as a dependency); if the project already has it from another route (a `.unitypackage` DLL, the `org.nuget.system.runtime.compilerservices.unsafe` UPM package), keep that one and don't add a second copy (duplicate-assembly errors).
 2. Hold the model as an `ObservableList<T>` (or another collection) in a plain C# class or presenter.
 3. For UI, create a view: `var view = list.CreateView(item => SpawnRow(item));`. The transform runs once per added item.
 4. Handle `view.ViewChanged` to destroy/despawn rows on Remove and to reorder/reactivate on Move, Reset (sort, reverse, clear, filter).
@@ -81,12 +82,13 @@ Filtering does not destroy views: filtered-out items keep their `TView` (the tra
 
 ## Unity patterns
 
-uGUI rows (pool instead of `Instantiate`/`Destroy`; see `zbase-pooling` and `ui-ugui`):
+uGUI rows, pooled with `UnityEngine.Pool.ObjectPool<T>` (or `zbase-pooling`; see also `ui-ugui`):
 
 ```csharp
 using System.Collections.Specialized;
 using ObservableCollections;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public sealed class InventoryPanel : MonoBehaviour
 {
@@ -95,11 +97,17 @@ public sealed class InventoryPanel : MonoBehaviour
     [SerializeField] private Transform content;
     private ObservableList<ItemStack> _items;
     private ISynchronizedView<ItemStack, InventoryRow> _view;
+    private ObjectPool<InventoryRow> _rowPool;
     #endregion
 
     #region Public API
     public void Bind(ObservableList<ItemStack> items)
     {
+        this._rowPool ??= new ObjectPool<InventoryRow>(
+            () => Instantiate(this.rowPrefab, this.content),
+            row => row.gameObject.SetActive(true),
+            row => row.gameObject.SetActive(false),
+            row => Destroy(row.gameObject));
         this._items = items;
         this._view = items.CreateView(this.CreateRow);
         this._view.ViewChanged += this.OnViewChanged;
@@ -109,16 +117,20 @@ public sealed class InventoryPanel : MonoBehaviour
     #region Unity Lifecycle
     private void OnDestroy()
     {
-        if (this._view == null) return;
-        this._view.ViewChanged -= this.OnViewChanged;
-        this._view.Dispose();
+        if (this._view != null)
+        {
+            this._view.ViewChanged -= this.OnViewChanged;
+            this._view.Dispose();
+        }
+
+        this._rowPool?.Dispose();
     }
     #endregion
 
     #region View Sync
     private InventoryRow CreateRow(ItemStack item)
     {
-        var row = Instantiate(this.rowPrefab, this.content);
+        var row = this._rowPool.Get();
         row.Show(item);
         return row;
     }
@@ -131,11 +143,11 @@ public sealed class InventoryPanel : MonoBehaviour
                 this.SyncSiblingOrder();
                 break;
             case NotifyCollectionChangedAction.Remove:
-                if (e.IsSingleItem) Destroy(e.OldItem.View.gameObject);
-                else for (var i = 0; i < e.OldViews.Length; i++) Destroy(e.OldViews[i].gameObject);
+                if (e.IsSingleItem) this._rowPool.Release(e.OldItem.View);
+                else for (var i = 0; i < e.OldViews.Length; i++) this._rowPool.Release(e.OldViews[i]);
                 break;
             case NotifyCollectionChangedAction.Replace:
-                Destroy(e.OldItem.View.gameObject);
+                this._rowPool.Release(e.OldItem.View);
                 this.SyncSiblingOrder();
                 break;
             case NotifyCollectionChangedAction.Move:

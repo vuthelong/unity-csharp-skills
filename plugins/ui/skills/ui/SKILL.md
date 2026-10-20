@@ -1,6 +1,6 @@
 ---
 name: ui
-description: Routes Unity UI requests to the right framework skill — `ui-uitk` (UI Toolkit, UXML/USS), `ui-ugui` (Canvas, RectTransform), or `ui-imgui` (OnGUI) — and to the specialist skills `screen-navigator`, `optimize-text-mesh-pro`, and `localization`. Answers framework comparison questions directly. Use for menus, HUDs, panels, popups, settings screens, inventories, or editor windows when the request does not name a framework, for "UI Toolkit vs uGUI" questions, and before writing any Unity UI code.
+description: Routes ambiguous Unity UI requests to the right skill. Use when a UI request names no framework (a menu, HUD, popup or editor window with no UI Toolkit, uGUI or IMGUI signal), when choosing between UI Toolkit and uGUI, or for framework comparison questions. Picks ui-uitk, ui-ugui or ui-imgui from project context and layers screen-navigator, optimize-text-mesh-pro or localization on top. Skip it when the request already names a framework.
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: ui
@@ -45,13 +45,13 @@ Pick the UI system, then hand the request to the matching skill. Answer directly
 - **Existing project:** follow the framework already used for similar UI.
 - **New runtime UI, no preference:** default to uGUI (`ui-ugui`). Ask once if the user seems open to options: UI Toolkit is CSS/flexbox-like with data binding; uGUI is GameObject/Canvas-based, mature, and has the widest third-party support (TextMeshPro, UnityScreenNavigator, world-space UI, Animator-driven UI).
 - **Mobile or tight perf budgets, world-space UI, heavy animation:** bias toward uGUI.
-- **New editor tools (EditorWindow, inspector, PropertyDrawer):** UI Toolkit (`ui-uitk`). Use IMGUI only when the project's editor code is exclusively IMGUI or the user asks for it.
+- **New editor tools (EditorWindow, inspector, PropertyDrawer):** UI Toolkit (`ui-uitk`) by default. Use IMGUI only when maintaining existing IMGUI code or when the user asks for it.
 - **IMGUI is never for shipped game UI** — only debug overlays.
 
 ### Mixed projects
 
 - Runtime requests (menus, HUDs) → whichever runtime system similar screens use.
-- Editor requests → UI Toolkit unless existing editor tools are IMGUI-only; confirm by checking for editor `.uxml`.
+- Editor requests → UI Toolkit for new tools; IMGUI only when editing an existing `OnGUI`/`OnInspectorGUI` script.
 - New runtime UI with no similar precedent and no stated preference → uGUI.
 
 ## Figma import

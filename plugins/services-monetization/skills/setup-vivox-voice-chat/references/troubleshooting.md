@@ -1,6 +1,6 @@
 # Troubleshooting and Platform Notes
 
-For the authoritative error table, see the Vivox SDK error codes page linked from the Vivox documentation map.
+For the authoritative error table, see the Vivox SDK error codes page linked from the Vivox documentation map. Codes and limits below are as of the Vivox 16 docs; verify against current documentation before surfacing them to players.
 
 ## Common Errors
 

@@ -109,7 +109,7 @@ Your `.asmdef` must reference all four assemblies. `Unity.Services.Authenticatio
 
 ## Package Setup
 
-Ensure the following packages are listed in `Packages/manifest.json`:
+Ensure the following packages are listed in `Packages/manifest.json`. Versions below are known-good examples, not requirements; verify current versions (Package Manager / NuGet / UGS docs) and keep what the project already has if newer.
 
 ```json
 {

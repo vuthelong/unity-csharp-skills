@@ -1,11 +1,11 @@
 ---
 name: optimize-audio
-description: Audits and optimizes Unity 6 audio memory, DSP CPU cost, and playback quality through AudioImporter settings, per-platform overrides, and AudioMixer topology. Use when audio memory is high in the Memory Profiler, when choosing Load Type (Decompress On Load, Compressed In Memory, Streaming), compression format (PCM, ADPCM, Vorbis, MP3) or sample rate per platform, when a stereo clip on a 3D AudioSource sounds wrong (Force To Mono), when the Profiler Audio module shows DSP spikes from deep mixer trees or effects on silent groups, or when there are zero or several AudioListeners.
+description: Audits and fixes the cost of audio assets in Unity 6 - AudioImporter Load Type, compression format, sample rate, Force To Mono and per-platform overrides, plus DSP cost from deep AudioMixer trees or effects on silent groups. Use when audio memory is high in the Memory Profiler, clips load or stream badly, a stereo clip on a 3D source sounds wrong, or the Profiler Audio module shows DSP spikes. Not for playback code (audio-playback-system) or routing (audio-setup-mixers).
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: audio-performance
   sources: "Unity-Technologies/skills/skills/optimize-audio, AlexeyPerov/Unity-Open-MCP/skills/extensions/audio"
-  unity: "6000.0+"
+  unity: "6000.0+ (live eval path needs com.unity.pipeline)"
 ---
 
 # Optimize Audio
@@ -14,21 +14,18 @@ metadata:
 
 - Report findings before changing anything. Stop at every **WAIT** and let the user respond.
 - Follow the steps in order. Measure before and after each change.
-- Change import settings only through `AudioImporter` + `SaveAndReimport()` in a live Editor. Never hand-edit `.meta` files; an unreachable Editor is a stop, not a cue to edit metadata.
+- Change import settings only through `AudioImporter` + `SaveAndReimport()` in Editor code (live `eval` or a generated Editor script). Never hand-edit `.meta` files.
 - Editor audio stats are indicative only. Confirm memory savings in a device build (see `memory-snapshot-profiling`).
 - Read back every value after reimport. Never report a change as applied without reading it.
 
 ## 0. Execution path
 
-Every C# step runs in a live Editor. Follow `unity-cli` to get a connected Editor and confirm the `eval` command is in its catalog (it comes from the `com.unity.pipeline` package version, not the CLI). If `eval` is missing, say so and stop.
+Preferred: run snippets in a live Editor with `unity command eval`. Eval syntax and prerequisites: see the `unity-cli` skill (unity-editor-tooling plugin) → Eval syntax. Each call is a fresh scope; resolve the `AudioSource` or `AudioClip` at the top of every snippet. All recipes in [references/audio-import-api.md](references/audio-import-api.md) are `eval`-ready.
 
-Run snippets with `unity command eval --code '<snippet>'` (default 30 s timeout). `eval` compiles a statement block, not a file:
+When `eval` is unavailable, continue read-only instead of stopping:
 
-- No `using` directives (`using UnityEngine;` is parsed as a disposal statement, CS0210).
-- Fully qualify every type (`UnityEditor.AudioImporter`, `UnityEngine.Object`); bare names fail with CS0246/CS0103/CS0104.
-- Each call is a fresh scope. Resolve the `AudioSource` or `AudioClip` at the top of every snippet.
-
-All recipes in [references/audio-import-api.md](references/audio-import-api.md) are `eval`-ready.
+- Audit: read the `AudioImporter` block in each clip's `.meta` (`loadType`, `compressionFormat`, `quality`, `sampleRateSetting`, `forceToMono`, per-platform overrides), `.mixer` YAML for groups and effects, and `ProjectSettings/AudioManager.asset`. Report from that; label it file-based.
+- Changes: wrap the recipe in a static method with `[UnityEditor.MenuItem("Tools/Audio/...")]`, give it to the user to save under `Assets/Editor/` and run, and have it `Debug.Log` the read-back values for them to paste back.
 
 ## 1. Pre-flight
 

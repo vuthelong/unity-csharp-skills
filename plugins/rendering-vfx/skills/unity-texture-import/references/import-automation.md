@@ -10,13 +10,21 @@
 
 `OnPreprocessTexture` runs before import, so settings apply on first import and every reimport. Only set what the rule owns; leave the rest to artists.
 
+Rules key off folders the team assigns by content (the folder is the declared classification), not off file-name suffixes. Sprites, UI, and pixel art are left out of the mobile ASTC override: UI and sprite compression belongs to their Sprite Atlas (`manage-sprite-atlas`), and pixel art must stay uncompressed (`2d-pixel-perfect`).
+
 ```csharp
 using UnityEditor;
 using UnityEngine;
 
 public sealed class TextureImportRules : AssetPostprocessor
 {
-    const int Version = 1;
+    const int Version = 2;
+    const int MobileMaxSize = 2048;
+    const string UiFolder = "/UI/";
+    const string PixelArtFolder = "/PixelArt/";
+    const string NormalsFolder = "/Normals/";
+    const string MasksFolder = "/Masks/";
+    const string FlipbooksFolder = "/VFX/Flipbooks/";
 
     public override uint GetVersion() => Version;
 
@@ -25,31 +33,44 @@ public sealed class TextureImportRules : AssetPostprocessor
         var importer = (TextureImporter)assetImporter;
         string path = assetPath.Replace('\\', '/');
 
-        if (path.Contains("/UI/"))
+        if (path.Contains(PixelArtFolder))
+            return;
+
+        if (path.Contains(UiFolder))
         {
             importer.textureType = TextureImporterType.Sprite;
             importer.mipmapEnabled = false;
             importer.alphaIsTransparency = true;
             importer.wrapMode = TextureWrapMode.Clamp;
         }
-        else if (path.EndsWith("_N.png") || path.EndsWith("_Normal.png") || path.Contains("/Normals/"))
+        else if (path.Contains(NormalsFolder))
         {
             importer.textureType = TextureImporterType.NormalMap;
         }
-        else if (path.EndsWith("_Mask.png") || path.EndsWith("_MaskMap.png"))
+        else if (path.Contains(MasksFolder))
         {
             importer.textureType = TextureImporterType.Default;
             importer.sRGBTexture = false;
         }
-        else if (path.Contains("/VFX/Flipbooks/"))
+        else if (path.Contains(FlipbooksFolder))
         {
             importer.wrapMode = TextureWrapMode.Clamp;
             importer.mipmapEnabled = true;
             importer.alphaIsTransparency = true;
         }
 
+        if (!WantsMobileCompression(importer))
+            return;
+
         ApplyMobileOverride(importer, "Android");
         ApplyMobileOverride(importer, "iPhone");
+    }
+
+    static bool WantsMobileCompression(TextureImporter importer)
+    {
+        if (importer.textureType == TextureImporterType.Sprite) return false;
+        if (importer.filterMode == FilterMode.Point) return false;
+        return true;
     }
 
     static void ApplyMobileOverride(TextureImporter importer, string platform)
@@ -57,7 +78,7 @@ public sealed class TextureImportRules : AssetPostprocessor
         var settings = importer.GetPlatformTextureSettings(platform);
         if (settings.overridden) return;
         settings.overridden = true;
-        settings.maxTextureSize = Mathf.Min(importer.maxTextureSize, 2048);
+        settings.maxTextureSize = Mathf.Min(importer.maxTextureSize, MobileMaxSize);
         settings.format = importer.textureType == TextureImporterType.NormalMap
             ? TextureImporterFormat.ASTC_5x5
             : TextureImporterFormat.ASTC_6x6;
@@ -66,6 +87,7 @@ public sealed class TextureImportRules : AssetPostprocessor
 }
 ```
 
+- Textures under a `PixelArt` folder, any `Sprite`-type texture, and anything already set to Point filtering never get an ASTC override. Configure pixel art with `2d-pixel-perfect` (`SpriteImportSettings`), which forces RGBA32 on every platform.
 - Bump `Version` when the rules change; Unity reimports affected textures.
 - Do not call `SaveAndReimport` inside a postprocessor; you are already in the import.
 - Respect existing overrides (`settings.overridden`) so manual artist choices survive.

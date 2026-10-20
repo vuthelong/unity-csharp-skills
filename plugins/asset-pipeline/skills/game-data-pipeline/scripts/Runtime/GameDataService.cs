@@ -116,7 +116,8 @@ namespace Game.Data
 
                 if (table.DataSchemaVersion != table.CodeSchemaVersion)
                 {
-                    Debug.LogError($"{table.name}: data schema {table.DataSchemaVersion} does not match code schema {table.CodeSchemaVersion}.", table);
+                    Debug.LogError($"{table.name}: data schema {table.DataSchemaVersion} does not match code schema {table.CodeSchemaVersion}. Table skipped.", table);
+                    continue;
                 }
 
                 this._tables[table.GetType()] = table;

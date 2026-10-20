@@ -1,6 +1,6 @@
 ---
 name: physics-3d-collision
-description: Diagnoses and fixes 3D PhysX collision, trigger and query problems in Unity 6 MonoBehaviour projects. Use when OnCollisionEnter, OnTriggerEnter or OnControllerColliderHit does not fire, objects tunnel or pass through each other, Physics.Raycast / SphereCast / OverlapSphere misses, a MeshCollider is ignored, a ragdoll explodes on the first frame, AddForce stops working, or physics behaves differently in a build. Covers Rigidbody (linearVelocity, linearDamping), CharacterController, Layer Collision Matrix, collision detection modes, Physics.SyncTransforms, contact offset and sleeping. Gives best-effort answers for Physics 2D and DOTS Unity Physics.
+description: Diagnoses and fixes 3D PhysX collision, trigger and query problems in Unity 6 MonoBehaviour projects - Rigidbody body types, Layer Collision Matrix, MeshCollider rules, collision detection modes, SyncTransforms, contact offset and sleeping. Use when OnCollisionEnter or OnTriggerEnter does not fire, objects tunnel through each other, a Raycast or Overlap query misses, a ragdoll explodes on frame one, AddForce stops working, or physics differs in a build. Physics 2D and DOTS get best-effort answers.
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: gameplay-systems
@@ -12,9 +12,9 @@ metadata:
 
 ## Workflow
 
-1. Match the prompt against the **Fast paths** below. A match is the complete answer: state the cause and the fix, apply the code edit if the script is available, and stop. Do not inspect the scene, run `Physics.Simulate()`, or fetch docs to "verify" a fast path.
+1. Match the prompt against the **Fast paths** below. A clear match usually is the answer: state the cause and the fix and apply the code edit if the script is available. Inspect further only when the user's details contradict the fast path.
 2. Otherwise route through the **Symptom table** and walk the matching checklist top to bottom. First confirmed step wins.
-3. Spend at most ~5 tool calls investigating. If the cause is still unconfirmed, give the most likely diagnosis from the checklist with the fix, rather than no answer.
+3. Keep investigation proportionate. If the cause is still unconfirmed after the cheap checks, give the most likely diagnosis from the checklist with the fix and say what would confirm it, rather than no answer.
 4. Always finish with a user-facing diagnosis and fix. Do not end on "Shall I proceed?"; either apply the fix or give a self-contained explanation.
 5. If you change a project setting (Queries Hit Triggers, Layer Collision Matrix, Default Contact Offset) to reproduce something, restore the original value before finishing.
 
@@ -37,11 +37,11 @@ When a user reports two kinematic triggers not firing, say the setup is valid, d
 | 1 | `Rigidbody2D`, `Collider2D`, `OnCollisionEnter2D`, `Physics2D` | Prefix "2D physics is outside this skill's primary scope; verify against the Physics 2D docs." Answer with 2D APIs only. Never apply 3D rules or suggest switching to 3D. |
 | 2 | `Unity.Physics`, `PhysicsCollider`, `ICollisionEventsJob`, `ITriggerEventsJob`, Havok, DOTS, ECS | Prefix a similar scope note. Answer with DOTS APIs (`PhysicsBody`, `PhysicsCollider`, `SimulationSingleton`, `CollisionResponsePolicy`, `ICollisionEventsJob`). Never suggest MonoBehaviour callbacks. |
 | 3 | Two kinematic triggers, no `OnTriggerEnter` | See **Critical fact**. |
-| 4 | Ragdoll / jointed body explodes on frame 1 with no forces | Overlapping colliders at the start pose cause a depenetration spike. Fix: shrink colliders so none overlap. Confirm in **Window > Analysis > Physics Debugger** (overlaps visible on frame 1). Do not blame joint limits, projection, mass ratios, drives, or `Enable Collision`; ignore red-herring joint details in the prompt. |
+| 4 | Ragdoll / jointed body explodes on frame 1 with no forces | Overlapping colliders at the start pose cause a depenetration spike. Fix: shrink colliders so none overlap. Confirm in **Window > Analysis > Physics Debugger** (overlaps visible on frame 1). Check start-pose overlap before joint limits, projection, mass ratios, drives, or `Enable Collision`; those rarely cause a frame-1 explosion without forces. |
 | 5 | `CharacterController` + `OnCollisionEnter` | Never fires for `CharacterController.Move`. Use `OnControllerColliderHit(ControllerColliderHit hit)`. Do not add a Rigidbody. |
 | 6 | `AddForce` / `AddTorque` stops after the object settled | Rigidbody is asleep. Call `rb.WakeUp()` before the force, or apply more force. Touch nothing else (not Input System). |
 | 7 | All physics frozen, raycasts still hit | `Time.timeScale == 0`. Restore `Time.timeScale = 1f` (pause menu / cutscene code). Queries ignore time scale; simulation does not. |
-| 8 | Raycast false, `Debug.DrawRay` starts inside the target | Origin inside the collider. Offset the origin outside, or enable **Queries Hit Backfaces**. |
+| 8 | Raycast false, `Debug.DrawRay` starts inside the target | Origin inside the collider: a ray starting inside a primitive collider never detects that collider. Offset the origin outside, or test containment with `Physics.CheckSphere` / `Physics.OverlapSphere` / `Physics.ComputePenetration`. **Queries Hit Backfaces** only affects MeshColliders. |
 | 9 | Raycast misses inactive object / disabled collider | Queries ignore them. Require `activeInHierarchy` and `Collider.enabled`. |
 | 10 | Raycast misses a trigger | Pass `QueryTriggerInteraction.Collide`, or enable **Queries Hit Triggers** globally. |
 | 11 | `Physics.IgnoreLayerCollision` suppression persists across scenes | Recommend the Layer Collision Matrix first (explicit, persistent). Code fallback: `Physics.IgnoreLayerCollision(a, b, false)` on scene load. |
@@ -69,7 +69,7 @@ When a user reports two kinematic triggers not firing, say the setup is valid, d
 6. **Script location.** The callback must be on a GameObject with one of the colliders, or on the Rigidbody root that owns them.
 7. **MeshCollider.** A non-convex `MeshCollider` on a dynamic Rigidbody is not supported (Unity logs an error and ignores it). Two non-convex meshes never collide. Enable **Convex** or use compound primitives. Rules table in the reference.
 8. **Hierarchy.** Non-uniform parent scale distorts child primitives (sphere becomes ellipsoid); bake scale to `(1,1,1)` in the DCC tool. A child Rigidbody silently splits a compound body; remove unintended ones.
-9. **Tunneling.** Fast bodies skip thin colliders under `Discrete`. Recommend `CollisionDetectionMode.ContinuousSpeculative` as the default fix (cheap, works vs static and dynamic), `ContinuousDynamic` for accurate fast-vs-fast, and always mention a per-step `Physics.SphereCast` / `Rigidbody.SweepTest` along the travel segment for bullets and projectiles. Write mode names in full: `Continuous Speculative` is not `Continuous`.
+9. **Tunneling.** Fast bodies skip thin colliders under `Discrete`. Recommend `CollisionDetectionMode.ContinuousSpeculative` as the default fix (cheap, works vs static and dynamic, can ghost-collide on seams), `Continuous` for characters sliding along static geometry, `ContinuousDynamic` for accurate fast-vs-fast, and always mention a per-step `Physics.SphereCast` / `Rigidbody.SweepTest` along the travel segment for bullets and projectiles. Write mode names in full: `Continuous Speculative` is not `Continuous`.
 10. **Start-pose overlap.** Overlap at spawn causes a depenetration spike: shrink colliders (Fast path 4). Tune `Rigidbody.maxDepenetrationVelocity` only as mitigation.
 11. **2D/3D signature.** `OnCollisionEnter2D(Collision2D)` is never called in 3D; use `OnCollisionEnter(Collision)`.
 
@@ -88,7 +88,7 @@ When a user reports two kinematic triggers not firing, say the setup is valid, d
 2. LayerMask excludes the target. Debug with `Physics.DefaultRaycastLayers`, build masks with `LayerMask.GetMask("Enemy")` or `1 << layer`. Passing a layer *index* as the mask is a classic bug.
 3. Triggers ignored by default: `QueryTriggerInteraction.Collide`.
 4. Disabled collider / inactive object (Fast path 9).
-5. Back faces are skipped unless **Queries Hit Backfaces** is on.
+5. MeshCollider back faces are skipped unless **Queries Hit Backfaces** is on (no effect on primitive colliders).
 6. Transform written this frame: the query sees the old pose until the next step or `Physics.SyncTransforms()`.
 7. `maxDistance` defaulted to infinity is fine; a `0` or negative distance returns nothing.
 8. UI vs world: `GraphicRaycaster` hits uGUI only; `Physics.Raycast` hits 3D colliders only.
@@ -103,7 +103,7 @@ Use the non-allocating overloads (`RaycastNonAlloc`, `OverlapSphereNonAlloc`) or
 | `Rigidbody.drag` / `angularDrag` | `Rigidbody.linearDamping` / `angularDamping` |
 | `Physics.autoSimulation` | `Physics.simulationMode = SimulationMode.Script` + `Physics.Simulate(dt)` |
 | `FindObjectOfType<Rigidbody>()` | `FindFirstObjectByType` / `FindAnyObjectByType` |
-| `Object.GetInstanceID()` for pair keys | `GetEntityId()` on 6000.5+ (`GetInstanceID` is CS0619 there) |
+| `Object.GetInstanceID()` for pair keys | Newer Unity 6 releases move to `EntityId` (`GetEntityId()`) and deprecate `GetInstanceID`; check your version's docs |
 
 The old Rigidbody property names still compile on 6000.0 with obsolete warnings; write the new names.
 
@@ -124,5 +124,5 @@ Attach [scripts/CollisionDebugger.cs](scripts/CollisionDebugger.cs) to both obje
 ## Related skills
 
 - `initialize-ai-navigation`: NavMeshAgent with Rigidbody/colliders (kinematic rule).
-- `animation-authoring`: root motion vs physics, `Animator.updateMode = AnimatePhysics`.
+- `animation-authoring`: root motion vs physics, `Animator.updateMode = AnimatorUpdateMode.Fixed`.
 - `input-system-actions`: read input in `Update`, apply forces in `FixedUpdate`.

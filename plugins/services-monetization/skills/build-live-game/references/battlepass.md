@@ -804,7 +804,7 @@ Place at `Assets/BattlePasses.rc`. Contains pass definitions as a JSON array und
 
 ### `manifest.json` Entries
 
-Ensure these packages are listed in `Packages/manifest.json`:
+Ensure these packages are listed in `Packages/manifest.json`. Versions below are known-good examples, not requirements; verify current versions (Package Manager / NuGet / UGS docs) and keep what the project already has if newer.
 
 ```json
 {

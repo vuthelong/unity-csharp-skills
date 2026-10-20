@@ -153,4 +153,4 @@ A runtime script with `using UnityEditor;` compiles in the Editor but breaks the
 
 ## Obsolete and removed API
 
-Flag anything in the `csharp-unity` reference `unity6-api-changes.md`: `FindObjectOfType`, `FindObjectsOfType`, `Rigidbody.velocity`/`drag`/`angularDrag`, `PhysicMaterial`, `GraphicsSettings.renderPipelineAsset`, and `GetInstanceID()` which is a compile error (CS0619) on 6000.5+. Also flag C# 10+ syntax, which Unity 6's C# 9 compiler rejects.
+Flag anything in the `csharp-unity` reference `unity6-api-changes.md`: `FindObjectOfType`, `FindObjectsOfType`, `Rigidbody.velocity`/`drag`/`angularDrag`, `PhysicMaterial`, `GraphicsSettings.renderPipelineAsset`, and `GetInstanceID()`, which newer Unity 6 releases deprecate in favor of `EntityId` (check the Console/API docs for the project's exact version). Also flag C# 10+ syntax, which Unity 6's C# 9 compiler rejects.

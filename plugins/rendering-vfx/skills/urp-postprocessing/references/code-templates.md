@@ -10,6 +10,11 @@ to keep, add the usings back and drop the qualification.
 
 ### Creating a Global Volume with Effects
 
+`profile.Add<T>()` only creates the override in memory. On a profile saved with `CreateAsset`, each
+override must also be added as a sub-asset with `AssetDatabase.AddObjectToAsset` (with the same hide
+flags the Volume Profile inspector uses), or the saved asset has `{fileID: 0}` component entries. Assign
+through `sharedProfile` in Editor code; `profile` clones the asset (see below).
+
 ```csharp
 // Verify HDR is enabled on the URP Asset
 var urpAsset = UnityEngine.Rendering.Universal.UniversalRenderPipeline.asset;
@@ -33,10 +38,16 @@ var tonemapping = profile.Add<UnityEngine.Rendering.Universal.Tonemapping>();
 tonemapping.mode.overrideState = true;
 tonemapping.mode.value = UnityEngine.Rendering.Universal.TonemappingMode.ACES;
 
+foreach (var component in profile.components)
+{
+    component.hideFlags = UnityEngine.HideFlags.HideInInspector | UnityEngine.HideFlags.HideInHierarchy;
+    UnityEditor.AssetDatabase.AddObjectToAsset(component, profile);
+}
+
 var volumeObj = new UnityEngine.GameObject("Global Volume");
 var volume = volumeObj.AddComponent<UnityEngine.Rendering.Volume>();
 volume.isGlobal = true;
-volume.profile = profile;
+volume.sharedProfile = profile;
 
 UnityEditor.Undo.RegisterCreatedObjectUndo(volumeObj, "Create Global Volume");
 UnityEditor.EditorUtility.SetDirty(profile);

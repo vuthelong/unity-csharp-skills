@@ -18,6 +18,8 @@ return ok ? $"MusicVolume exposed, {db} dB" : "MusicVolume is not exposed";
 
 Perceived loudness is logarithmic. Map linear 0..1 to decibels with `20 * log10(v)` and clamp to -80 dB (the mixer floor).
 
+Persistence scheme (shared with `audio-playback-system`): save the linear 0..1 value in `PlayerPrefs` under `audio.<channel>` keys (`audio.master`, `audio.music`, `audio.sfx`, mute in `audio.muted`), never under the mixer parameter name, so renaming an exposed parameter does not reset player settings. If the project uses `audio-playback-system`, call its `AudioSettingsStore` (`scripts/AudioSettingsStore.cs`) instead of this component; it already implements this scheme. The component below is the standalone single-slider equivalent with the same keys.
+
 ```csharp
 using UnityEngine;
 using UnityEngine.Audio;
@@ -26,13 +28,14 @@ public sealed class MixerVolume : MonoBehaviour
 {
     [SerializeField] private AudioMixer _mixer;
     [SerializeField] private string _parameter = "MusicVolume";
+    [SerializeField] private string _prefKey = "audio.music";
     [SerializeField, Range(0f, 1f)] private float _default = 0.8f;
 
     private const float MinDb = -80f;
 
     private void Start()
     {
-        Apply(PlayerPrefs.GetFloat(_parameter, _default));
+        Apply(PlayerPrefs.GetFloat(_prefKey, _default));
     }
 
     public void Apply(float linear)
@@ -43,7 +46,7 @@ public sealed class MixerVolume : MonoBehaviour
             Debug.LogError($"Exposed parameter '{_parameter}' not found on {_mixer.name}", this);
             return;
         }
-        PlayerPrefs.SetFloat(_parameter, linear);
+        PlayerPrefs.SetFloat(_prefKey, linear);
     }
 
     public float Read()

@@ -116,8 +116,10 @@ Async tests: `[Test] public async Task Name()` is supported in recent Test Frame
 
 ## Running from the command line
 
+Which runner to use (live Editor, `unity test`, or raw `-runTests`) and each path's exit codes: `unity-cli` → "Run tests headless". The raw fallback, with the Editor closed:
+
 ```
 Unity -batchmode -nographics -projectPath <path> -runTests -testPlatform EditMode -testResults results.xml -logFile test.log
 ```
 
-Do not pass `-quit` with `-runTests`; the Editor exits before tests run. Exit code 0 = all passed, 2 = test failures, 3 = run error. Close the interactive Editor first (one Editor per project). See `unity-editor-safety`.
+Do not pass `-quit` with `-runTests`; the Editor exits before tests run. Raw `-runTests` exit codes: 0 = all passed, 2 = test failures, 3 = run error (`unity test` uses 8 for failures instead). Close the interactive Editor first (one Editor per project). See `unity-editor-safety`.

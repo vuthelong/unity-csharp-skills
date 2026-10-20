@@ -1,11 +1,11 @@
 ---
 name: optimize-web
-description: Audits and optimizes Unity 6 WebGL and WebGPU builds for download size, startup time, browser memory, and runtime smoothness. Use when a web build is too large or slow to load, needs Brotli/Gzip and server Content-Encoding headers, Decompression Fallback, Strip Engine Code, Managed Stripping, Disk Size with LTO, Wasm 2023, exception support, Initial/Maximum Memory Size, Data Caching, shader variant stripping, the Web Stripping Tool, KTX2/Basis textures, Addressables on a CDN, targetFrameRate in the browser, iOS Safari memory crashes, or browser profiling with Chrome DevTools, Firefox Profiler, or Safari Web Inspector.
+description: Audits and optimizes Unity 6 WebGL and WebGPU builds for download size, startup time, browser memory, and frame pacing. Use when a web build is too large or slow to load, Brotli/Gzip or server Content-Encoding is misconfigured, iOS Safari runs out of memory, the build stutters in one browser or drains battery, or textures need KTX2/Basis. Covers Player Settings, stripping, compression hosting, Addressables on a CDN, and browser profiling.
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
-  category: audio-performance
+  category: web-performance
   sources: "Unity-Technologies/skills/skills/optimize-web"
-  unity: "6000.0+"
+  unity: "6000.0+ (live writes need the com.unity.pipeline eval command)"
 ---
 
 # Optimize Web Builds
@@ -14,10 +14,12 @@ Be thorough; quality over speed. Measure in a browser, never in Editor Play Mode
 
 ## Execution path
 
-Player Settings reads and writes run in a live Editor. Follow `unity-cli` to connect, and confirm `eval` is in the command catalog (from the `com.unity.pipeline` package). If it is missing, say so and stop the write steps.
+Player Settings reads and writes run in a live Editor through `unity command eval`. Eval syntax and prerequisites: see the `unity-cli` skill (unity-editor-tooling plugin) → Eval syntax.
 
-- Read-only fallback: `ProjectSettings/ProjectSettings.asset` can be read, but never written. Its serialized names differ from the API, several values are per build target, and a hand edit silently disagrees with what the build uses.
-- `eval` takes a statement block: no `using` (CS0210), fully qualified types (CS0246), `UnityEngine.Object` spelled out (CS0104).
+When `eval` is unavailable, do not stop:
+
+- Audit read-only from `ProjectSettings/ProjectSettings.asset` (YAML) and report what you find. Never write it: its serialized names differ from the API, several values are per build target, and a hand edit silently disagrees with what the build uses.
+- For changes, hand the user [scripts/WebOptimizer.cs](scripts/WebOptimizer.cs) (or a similar `[MenuItem]` Editor script) to save under `Assets/Editor/` and run from the menu; it logs the resulting values for them to paste back.
 
 ### API names that trip people up
 
@@ -28,7 +30,7 @@ Player Settings reads and writes run in a live Editor. Follow `unity-cli` to con
 | IL2CPP code generation | `PlayerSettings.GetIl2CppCodeGeneration(NamedBuildTarget.WebGL)` | a bare property |
 | Wasm 2023 | `PlayerSettings.WebGL.wasm2023` | absent on 6000.0; available from 6000.1 |
 
-`UserBuildSettings` lives in the Web build-support module; read it in its own `eval` and treat a resolution failure as "module not installed". It persists to `Library/EditorUserBuildSettings.asset` (gitignored), so it is per machine: teammates and CI do not inherit it. Apply it in the CI build script, and never look for it in `ProjectSettings.asset`.
+`UserBuildSettings` lives in the Web build-support module (`UnityEditor.WebGL` assembly); read it in its own `eval` and treat a resolution failure as "module not installed". Any project script that references it must sit inside `#if UNITY_WEBGL`, or the Editor assembly fails to compile on machines without the module. It persists to `Library/EditorUserBuildSettings.asset` (gitignored), so it is per machine: teammates and CI do not inherit it. Apply it in the CI build script, and never look for it in `ProjectSettings.asset`.
 
 `BuildTarget.WebGL` / `NamedBuildTarget.WebGL` is the target for both WebGL2 and WebGPU builds.
 
@@ -71,7 +73,7 @@ Run the pre-flight snippet in [references/player-settings.md](references/player-
 
 ### One-click release settings
 
-Offer [scripts/WebOptimizer.cs](scripts/WebOptimizer.cs) for every new web project. It is a project file with a `[MenuItem]`, not `eval` input: save it under `Assets/Editor/`, let Unity compile, then run
+Offer [scripts/WebOptimizer.cs](scripts/WebOptimizer.cs) only for projects with the Web build-support module installed. Its `UserBuildSettings.codeOptimization` write is wrapped in `#if UNITY_WEBGL`, so it compiles everywhere but only sets Disk Size with LTO while the active build target is Web; switch the target first. It is a project file with a `[MenuItem]`, not `eval` input: save it under `Assets/Editor/`, let Unity compile, then run
 
 ```csharp
 UnityEditor.EditorApplication.ExecuteMenuItem("Tools/Apply Web Release Settings");
@@ -93,7 +95,7 @@ Do not "prove" the save is unnecessary in batch mode: `-quit` saves settings on 
 
 ### Settings, compression, stripping, textures
 
-Read [references/player-settings.md](references/player-settings.md) for the full release table, compression and server rules, exception modes, and shader stripping. Read [references/assets-and-delivery.md](references/assets-and-delivery.md) for package removal, the Web Stripping Tool, quality levels, KTX2, Addressables streaming, video, and audio.
+Read [references/player-settings.md](references/player-settings.md) for the full release table, compression and server rules, exception modes, and shader stripping. Read [references/assets-and-delivery.md](references/assets-and-delivery.md) for package removal, the Web Stripping Tool, quality levels, KTX2, Addressables streaming, video, and audio. [scripts/toktx-examples.sh](scripts/toktx-examples.sh) has ready `toktx` command lines for ETC1S/UASTC KTX2 conversion.
 
 ### Frame pacing
 
@@ -135,5 +137,5 @@ Read [references/profiling-and-memory.md](references/profiling-and-memory.md) wh
 
 - `optimize-audio` — audio import settings; Web plays audio through the browser and skips mixer effects.
 - `memory-snapshot-profiling` — Unity-side memory snapshots from a development web build.
-- `unity-cli` — Editor connection and `eval`.
+- `unity-cli` (unity-editor-tooling plugin) — Editor connection, `eval` syntax and prerequisites.
 - Addressables package docs for remote groups; Graphics settings for shader stripping.

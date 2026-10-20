@@ -1,6 +1,6 @@
 ---
 name: splines-paths
-description: Creates, edits and samples Unity Splines 2.x (com.unity.splines, namespace UnityEngine.Splines) in Unity 6 - SplineContainer, Spline, BezierKnot and TangentMode, world vs local evaluation (EvaluatePosition / EvaluateTangent / EvaluateUpVector), arc-length and nearest-point queries with SplineUtility, NativeSpline for jobs, and the SplineAnimate, SplineExtrude and SplineInstantiate components. Use when the user wants a path, rail, track, road, river or patrol route, an object or camera that moves along a curve at constant speed, objects placed along a path, mesh extruded along a curve, closest point on a path, or reports objects drifting off the spline, wrong positions after moving the container, or uneven speed.
+description: Creates, edits and samples Unity Splines 2.x in Unity 6 - SplineContainer and knots, world vs local evaluation, arc-length and nearest-point queries, NativeSpline for jobs, and the SplineAnimate, SplineExtrude and SplineInstantiate components. Use for paths, rails, roads, rivers or patrol routes, constant-speed movement along a curve, placing or extruding objects along a path, or when objects drift off the spline after the container moves or travel at uneven speed.
 license: MIT
 metadata:
   category: gameplay-systems

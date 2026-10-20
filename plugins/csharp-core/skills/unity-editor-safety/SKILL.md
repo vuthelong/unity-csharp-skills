@@ -1,6 +1,6 @@
 ---
 name: unity-editor-safety
-description: Safety rules and recovery steps for an agent changing a Unity 6 project from outside or inside the Editor - verifying C# edits actually compiled, reading CSxxxx errors from Editor.log, recovering from Safe Mode, stale assemblies, domain reload and Enter Play Mode Options side effects, never launching a second Editor on the same project, never hand-editing an open or dirty scene, preserving GUIDs and fileIDs when touching .unity/.prefab/.asset/.meta YAML, and running tests headless. Use after editing .cs files, when Unity shows compile errors or "Enter Safe Mode?", when changes "don't take effect", when tests fail exactly as before a fix, before editing or moving scene/prefab/asset/.meta files by hand, before deleting assets, or when the Editor hangs or a batchmode run reports success but did nothing.
+description: "Safety rules and recovery steps for an agent changing a Unity 6 project: confirming C# edits really compiled via Editor.log, Safe Mode and stale-assembly recovery, domain reload side effects, one Editor per project, never hand-editing open scenes, preserving GUIDs/fileIDs in .unity/.prefab/.meta YAML, and headless tests. Use after editing .cs files or when Unity shows \"Enter Safe Mode?\", changes \"don't take effect\", tests fail exactly as before a fix, or before moving or deleting assets."
 license: MIT
 metadata:
   category: csharp-core
@@ -18,7 +18,7 @@ Unity projects have two copies of the truth: files on disk and the Editor's in-m
 2. **Never hand-edit an open or dirty scene/prefab.** The Editor holds its own copy and will overwrite your edit on save, or prompt to reload and discard the user's unsaved work. Prefer Editor APIs or a live-Editor tool (see `unity-cli`). Edit YAML only when the Editor is closed or the file is not loaded, and say so explicitly.
 3. **Preserve GUIDs and fileIDs.** Never delete, regenerate or hand-write `.meta` files for existing assets; move and rename assets together with their `.meta`. Never renumber `fileID`s. See [references/asset-files.md](references/asset-files.md).
 4. **Compile errors first.** After any `.cs` edit, confirm a fresh compile with zero `error CS` before running tests, entering Play Mode or concluding a fix works.
-5. **A tool or command returning success is not proof.** Verify the post-state: assembly timestamps, console errors, the asset actually changed, tests actually ran.
+5. **A tool or command returning success is not proof.** Verify the post-state: the newest compile result in `Editor.log`, console errors, the asset actually changed, tests actually ran.
 6. **Never discard user state without asking:** unsaved scenes, `Library/` deletion (forces a full reimport that can take hours), `git checkout`/`clean` over user changes, `AssetDatabase.DeleteAsset`, `EditorApplication.Exit`.
 7. **Never block the Editor main thread** from editor code (`Thread.Sleep`, `.Result`, `.Wait()`, spin-waiting on a callback). The Editor freezes and must be killed.
 
@@ -31,7 +31,7 @@ Unity projects have two copies of the truth: files on disk and the Editor's in-m
    - macOS `~/Library/Logs/Unity/Editor.log`
    - Linux `~/.config/unity3d/Editor.log`
    Errors look like `Assets/Scripts/Foo.cs(12,5): error CS0103: The name 'bar' does not exist in the current context`.
-4. Confirm the errors are current, not historical: the relevant `Library/ScriptAssemblies/<Assembly>.dll` (for example `Assembly-CSharp.dll` or your asmdef name) must be newer than your last `.cs` edit. If the DLL is older than the source, no compile has completed since your edit; any error block or "clean" result in the log is stale.
+4. Confirm the result is current, not historical: the authority is a compile block in `Editor.log` that started after your last `.cs` edit and finished (CSxxxx errors, or a clean finish). The `Library/ScriptAssemblies/<Assembly>.dll` timestamp is only a hint: a DLL newer than your edit suggests a compile ran, but an older DLL does not prove one did not, because comment-only or other no-IL-change edits can compile without rewriting the DLL.
 5. Fix the first error, then repeat. Later errors are often cascades.
 
 Detailed triage (Safe Mode, stale logs, wrong-version logs, local packages, hangs): [references/compile-recovery.md](references/compile-recovery.md).
@@ -71,14 +71,14 @@ Every script recompile (and, by default, entering Play Mode) reloads the scripti
 
 - Use the exact Editor version from `ProjectSettings/ProjectVersion.txt`. A different version silently upgrades project files, packages and serialized assets.
 - Close the interactive Editor first; a headless run fails with a project-lock error while it is open.
-- Tests: `Unity -batchmode -nographics -projectPath <p> -runTests -testPlatform EditMode -testResults r.xml -logFile run.log`. Never add `-quit` to `-runTests` (the Editor exits before tests run and still returns 0). Exit 0 = passed, 2 = failures, 3 = run error. Check that `r.xml` exists and the test count is non-zero; a filter that matches nothing "passes".
+- Tests: pick the runner with the rule in `unity-cli` → "Run tests headless" (live Editor via `unity command run_tests`; Editor closed via `unity test`, exit 8 = failures; raw fallback below). Raw: `Unity -batchmode -nographics -projectPath <p> -runTests -testPlatform EditMode -testResults r.xml -logFile run.log`. Never add `-quit` to `-runTests` (the Editor exits before tests run and still returns 0). Raw exit 0 = passed, 2 = failures, 3 = run error. Check that `r.xml` exists and the test count is non-zero; a filter that matches nothing "passes".
 - Always pass `-logFile`; the headless run does not write to the interactive `Editor.log`, so read its own log for errors.
 - Some tests only fail under `-nographics` (GPU readback, SceneView, screenshots). Confirm them in the GUI Editor before "fixing" them.
 - Run one test session at a time per project.
 
 ## Verification checklist before reporting done
 
-- [ ] `Library/ScriptAssemblies/*.dll` newer than the last `.cs` edit, and no `error CS` in the newest compile.
+- [ ] `Editor.log` shows a finished compile after the last `.cs` edit with no `error CS` (DLL timestamps are a hint only).
 - [ ] Console has no new errors (missing script, missing reference, import errors) after asset changes.
 - [ ] Edited assets reimported; hand-edited YAML reserialized and reloaded without warnings.
 - [ ] Affected tests ran (non-zero count) and passed.

@@ -1,6 +1,6 @@
 ---
 name: optimize-text-mesh-pro
-description: Optimizes TextMeshPro memory, quality, CPU cost, and build size in Unity 6 — static main font plus dynamic fallback chains, atlas size and multi-atlas, Clear Dynamic Data On Build, padding-to-sampling ratios, SDF16 render mode, font asset Scale, Dynamic OS atlas population with system fonts, AutoSize cost, per-Canvas rebuild isolation, world-space `TextMeshPro` vs `TextMeshProUGUI`, material presets, sprite assets, and Memory Profiler font captures. Use for TMP font assets, atlas memory bloat, fuzzy or inconsistent glyphs, missing glyphs (tofu) from fallbacks, CJK or mixed-script alignment, text-driven CPU spikes or Canvas rebuilds, or shipped font size. Not for UI Toolkit text (`ui-uitk`) or per-locale font swapping (`localization`).
+description: Optimizes TextMeshPro font assets in Unity 6 for memory, quality, CPU and build size - static main font plus dynamic fallback chains, atlas sizing, padding and sampling ratios, SDF16, Dynamic OS fonts, AutoSize cost and Canvas rebuilds - and imports TMP Essential Resources headlessly. Use for atlas memory bloat, fuzzy or misaligned glyphs, fallback-chain design for mixed scripts, or text-driven CPU spikes. Per-locale font swapping and translation belong to localization.
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: ui
@@ -111,13 +111,27 @@ The `.ttf`/`.otf` importer's **Include Font Data** (on by default) embeds the so
 
 ## TMP Essential Resources
 
-If `TMPro.TMP_Settings.instance` is null, TMP Essential Resources are missing and TMP APIs throw `NullReferenceException`. Import non-interactively:
+If `TMPro.TMP_Settings.instance == null`, TMP Essential Resources were never imported and TMP APIs (including `TMP_FontAsset.CreateFontAsset`) throw a bare `NullReferenceException`. Import non-interactively:
 
 ```csharp
 TMPro.TMP_PackageResourceImporter.ImportResources(importEssentials: true, importExamples: false, interactive: false);
 ```
 
-Avoid `EditorApplication.ExecuteMenuItem("Window/TextMeshPro/Import TMP Essential Resources")` in automation — it opens a modal dialog.
+If that API is unavailable in the project's uGUI version, import the package file directly. TMP ships inside `com.unity.ugui` in Unity 6 and the cache folder name carries a hash, so search for it:
+
+```csharp
+string package = null;
+var cache = System.IO.Path.GetFullPath(System.IO.Path.Combine(
+    UnityEngine.Application.dataPath, "..", "Library", "PackageCache"));
+foreach (var dir in System.IO.Directory.GetDirectories(cache))
+{
+    var candidate = System.IO.Path.Combine(dir, "Package Resources", "TMP Essential Resources.unitypackage");
+    if (System.IO.File.Exists(candidate)) { package = candidate; break; }
+}
+UnityEditor.AssetDatabase.ImportPackage(package, false);
+```
+
+Then poll `TMP_Settings.instance != null` in a **later** call. Never use `EditorApplication.ExecuteMenuItem("Window/TextMeshPro/Import TMP Essential Resources")` in automation: it opens a dialog that waits for a human. The import lands in `Assets/TextMesh Pro` within a few seconds.
 
 ## Common pitfalls
 

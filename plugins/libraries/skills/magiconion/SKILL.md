@@ -1,6 +1,6 @@
 ---
 name: magiconion
-description: Builds client-server networking for Unity with Cysharp MagicOnion (gRPC + MessagePack RPC over HTTP/2): a shared C# interface project, an ASP.NET Core server and a Unity client. Covers install (NuGetForUnity MagicOnion.Client, the com.cysharp.magiconion.client.unity UPM git URL, YetAnotherHttpHandler, GrpcChannelx, GrpcChannelProviderHost), the [MagicOnionClientGeneration] source generator required for IL2CPP, Unary services (IService<T>, UnaryResult<T>, ServiceBase<T>, MagicOnionClient.Create), StreamingHub (IStreamingHub<THub,TReceiver>, StreamingHubBase, Group.AddAsync, IGroup All/Except/Only/Single, StreamingHubClient.ConnectAsync, DisposeAsync, WaitForDisconnectAsync, heartbeat), filters, JWT auth, cancellation, reconnect, main-thread receivers, AddMagicOnion / MapMagicOnionService, HTTP/2 and TLS, WebGL, and MessagePack vs MemoryPack. Use when the user mentions MagicOnion, StreamingHub, UnaryResult, gRPC in Unity, or real-time RPC between Unity and a .NET server.
+description: "Builds real-time client-server networking between Unity and an ASP.NET Core server with Cysharp MagicOnion (gRPC + MessagePack over HTTP/2): shared interface project, Unary services, StreamingHub rooms and groups, YetAnotherHttpHandler transport, auth, reconnect. Use when the user mentions MagicOnion, StreamingHub, UnaryResult, gRPC in Unity, or a hub/client that works in the Editor but fails on IL2CPP ('formatter not found', missing [MagicOnionClientGeneration])."
 license: MIT
 metadata:
   category: libraries
@@ -34,13 +34,12 @@ MyApp.Shared  (netstandard2.1 classlib + package.json + MyApp.Shared.Unity.asmde
 
 1. Server and Shared: follow `references/server-setup.md` (`dotnet new grpc`, replace `Grpc.AspNetCore` with `MagicOnion.Server`, `builder.Services.AddMagicOnion()`, `app.MapMagicOnionService()`).
 2. Unity packages:
-   - NuGetForUnity: `https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity` (UPM git URL).
-   - NuGet > Manage NuGet Packages: `MagicOnion.Client` (depends on `MagicOnion.Abstractions`, `MagicOnion.Shared`, `MagicOnion.Serialization.MessagePack`, `MessagePack`, `Grpc.Net.Client`, `Grpc.Core.Api`), plus `System.IO.Pipelines` for YetAnotherHttpHandler. The Shared package compiles against `MagicOnion.Abstractions` from the same NuGet install.
+   - NuGetForUnity (setup in `r3` -> "NuGetForUnity setup"): `MagicOnion.Client` (depends on `MagicOnion.Abstractions`, `MagicOnion.Shared`, `MagicOnion.Serialization.MessagePack`, `MessagePack`, `Grpc.Net.Client`, `Grpc.Core.Api`), plus `System.IO.Pipelines` for YetAnotherHttpHandler. The Shared package compiles against `MagicOnion.Abstractions` from the same NuGet install.
    - UPM git URL, pin the same version as the NuGet package: `https://github.com/Cysharp/MagicOnion.git?path=src/MagicOnion.Client.Unity/Assets/Scripts/MagicOnion.Client.Unity#7.11.0` (package `com.cysharp.magiconion.client.unity`, namespaces `MagicOnion` / `MagicOnion.Unity`).
    - UPM git URL: `https://github.com/Cysharp/YetAnotherHttpHandler.git?path=src/YetAnotherHttpHandler#1.11.6` (`Cysharp.Net.Http.YetAnotherHttpHandler`, native HTTP/2 via Rust/hyper; the old C-core `Grpc.Core` Unity package is discontinued).
-   - Optional, for Unity types in DTOs: UPM `https://github.com/MessagePack-CSharp/MessagePack-CSharp.git?path=src/MessagePack.UnityClient/Assets/Scripts/MessagePack#v3.1.7`, matching the `MessagePack` NuGet version (MagicOnion 7.11.0 builds against 3.1.7); the server then needs NuGet `MessagePack.UnityShims`.
+   - Optional, for Unity types in DTOs: UPM `https://github.com/MessagePack-CSharp/MessagePack-CSharp.git?path=src/MessagePack.UnityClient/Assets/Scripts/MessagePack#v3.1.11`. MagicOnion 7.11.0 requires `MessagePack` 3.1.7 or later; the project-wide pin is 3.1.11 (see `messagepack-csharp`), so install NuGet `MessagePack` 3.1.11 explicitly and keep the UPM tag identical to the NuGet version; the server then needs NuGet `MessagePack.UnityShims`.
    - Shared: `"com.yourco.myapp.shared.unity": "file:../../MyApp.Shared"` in `Packages/manifest.json` (not "Add package from disk", which stores an absolute path).
-3. Add one bootstrap file to the Unity client (below): channel provider + source generator + resolver registration.
+3. Add one bootstrap file to the Unity client (below): channel provider + source generator; add the generated resolver to the shared MessagePack resolver bootstrap.
 4. Define a Unary service or StreamingHub in Shared, implement on the server, call from Unity.
 5. Make an IL2CPP player build early. The Editor runs on Mono, where MagicOnion falls back to `DynamicMagicOnionClientFactoryProvider` (Reflection.Emit); only an IL2CPP build proves the generated code and resolvers are wired.
 
@@ -51,8 +50,6 @@ using Cysharp.Net.Http;
 using Grpc.Net.Client;
 using MagicOnion.Client;
 using MagicOnion.Unity;
-using MessagePack;
-using MessagePack.Resolvers;
 using UnityEngine;
 
 [MagicOnionClientGeneration(typeof(MyApp.Shared.Services.IMyFirstService))]
@@ -60,26 +57,10 @@ internal partial class MagicOnionGeneratedClientInitializer { }
 
 internal static class MagicOnionBootstrap
 {
-    #region Fields
-    private static bool _resolversRegistered;
-    #endregion
-
     #region Initialization
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
     {
-        if (!_resolversRegistered)
-        {
-            StaticCompositeResolver.Instance.Register(
-                MagicOnionGeneratedClientInitializer.Resolver,
-                MessagePack.Unity.UnityResolver.Instance,
-                StandardResolver.Instance);
-            _resolversRegistered = true;
-        }
-
-        MessagePackSerializer.DefaultOptions = MessagePackSerializer.DefaultOptions
-            .WithResolver(StaticCompositeResolver.Instance);
-
         GrpcChannelProviderHost.Initialize(new DefaultGrpcChannelProvider(() => new GrpcChannelOptions
         {
             HttpHandler = new YetAnotherHttpHandler { Http2Only = true },
@@ -91,9 +72,13 @@ internal static class MagicOnionBootstrap
 ```
 
 - `[MagicOnionClientGeneration(params Type[])]` takes any type from each assembly that contains service/hub interfaces; it scans the whole assembly. The source generator ships inside the `MagicOnion.Client` NuGet package (no `moc` tool, no build step). The class must be `partial`.
-- Generated code auto-registers its client factory on Unity (`DisableAutoRegistration = false` default). You still register `.Resolver` with MessagePack yourself. The official sample uses `StaticCompositeResolver` (its comment says `CompositeResolver` does not work on IL2CPP).
-- `StaticCompositeResolver.Register` throws `InvalidOperationException` once any formatter has been resolved, and it survives Play sessions when domain reload is disabled; the static guard keeps the second Play session from throwing.
-- Replacing the resolver drops the `UnityResolver` that the MessagePack.Unity package installs at `SubsystemRegistration`; include `MessagePack.Unity.UnityResolver.Instance` (needs the `com.github.messagepack-csharp` UPM package, see `messagepack-csharp`) if any DTO uses `Vector3`, `Quaternion`, `Color`, or remove that line if you only use plain types.
+- Generated code auto-registers its client factory on Unity (`DisableAutoRegistration = false` default). You still register `.Resolver` with MessagePack yourself, via `StaticCompositeResolver` (the official sample's comment says `CompositeResolver` does not work on IL2CPP).
+- **Resolver registration:** do not call `StaticCompositeResolver.Instance.Register` or set `MessagePackSerializer.DefaultOptions` in this bootstrap. Each `Register` call replaces the whole list, so a second bootstrap (MessagePack, MasterMemory) silently drops the MagicOnion resolver and IL2CPP fails with "formatter not found". Add your resolver to the single bootstrap in `messagepack-csharp` -> "Resolver bootstrap", ahead of `StandardResolver` (keep `UnityResolver` there if DTOs use `Vector3`, `Quaternion`, `Color`):
+
+  ```csharp
+  MagicOnionGeneratedClientInitializer.Resolver,
+  ```
+  The shared bootstrap must live in an assembly that can see `MagicOnionGeneratedClientInitializer` (same asmdef, or declare it `public`).
 - `Http2Only = true` is for `http://` (h2c). For `https://` drop it; HTTP/2 is negotiated via ALPN. YetAnotherHttpHandler has its own root store: dev certificates fail with `invalid peer certificate: UnknownIssuer` unless you configure its root-certificate options (see the YetAnotherHttpHandler README) or use the h2c port in development.
 - `GrpcChannelProviderHost` creates a `DontDestroyOnLoad` GameObject that calls `ShutdownAllChannels()` in `OnDestroy` and `OnApplicationQuit`; never destroy it. Its `Initialize` calls `FindObjectsOfType`, which compiles with an obsolete warning (CS0618) on Unity 6.
 - Create channels with `GrpcChannelx.ForAddress("http://host:5000")` or `GrpcChannelx.ForTarget(new GrpcChannelTarget(host, port, isInsecure: true))` so they are tracked (and visible under `Window > MagicOnion > gRPC Channels`) and shut down on quit.
@@ -161,7 +146,7 @@ Rules, with a full reconnecting component in `references/hub-recipes.md`:
 ## Pitfalls
 
 - **Interface drift**: hub method IDs are FNV1a32 hashes of the method name; Unary routes are `IService/Method`. Renaming, reordering parameters or changing types on one side only breaks calls at runtime (`Unimplemented`, deserialization errors), not at compile time. Keep one Shared source of truth, deploy server first with additive changes, use `[MethodId]` only to keep an old ID after a rename. Mixed v6/v7 peers lose heartbeat and client results.
-- **Works in Editor, fails on device**: missing `[MagicOnionClientGeneration]` or resolver registration. IL2CPP has no Reflection.Emit, so the dynamic client and `DynamicGenericResolver` paths throw (`NotSupportedException`, "formatter not found") only in the player. Register the generated resolver in `StaticCompositeResolver` before the first call (`BeforeSceneLoad`).
+- **Works in Editor, fails on device**: missing `[MagicOnionClientGeneration]` or resolver registration. IL2CPP has no Reflection.Emit, so the dynamic client and `DynamicGenericResolver` paths throw (`NotSupportedException`, "formatter not found") only in the player. Add the generated resolver to the single shared bootstrap (`messagepack-csharp`); a second `StaticCompositeResolver.Register` call elsewhere replaces it.
 - **Leaked connections**: every `ConnectAsync` holds an HTTP/2 stream and a server hub instance until `DisposeAsync`. Forgetting it on scene unload leaves zombie players in groups until the server notices (heartbeat timeout or TCP reset). Always dispose in `OnDestroy` and keep one hub per feature, not per object.
 - **Blocking calls**: never `.Result`, `.Wait()` or `GetAwaiter().GetResult()` on `UnaryResult`/`Task` on the main thread; the continuation needs the main thread and deadlocks the Editor. Do not `await` a hub method from inside a receiver callback and wait for a reply that needs another callback.
 - **Large payloads**: gRPC's default max receive size is 4 MB (`GrpcChannelOptions.MaxReceiveMessageSize`, server `AddGrpc(o => o.MaxReceiveMessageSize = ...)`), and each hub connection queue is capped at 1,024 messages / 16 MiB (`StreamingHubResponseQueueMaxLength` / `StreamingHubResponseQueueMaxSize`); exceeding the queue aborts the connection. Send assets over HTTP/CDN, chunk large data, and keep per-tick hub messages small (deltas, `struct` DTOs, MessagePack int keys).

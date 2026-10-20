@@ -1,6 +1,6 @@
 ---
 name: cinemachine-cameras
-description: Builds and scripts gameplay and cutscene cameras with Cinemachine 3.x (com.unity.cinemachine, namespace Unity.Cinemachine) in Unity 6 - CinemachineBrain, CinemachineCamera priority and blending, Follow / LookAt targets, position and rotation components (CinemachineFollow, OrbitalFollow, ThirdPersonFollow, PositionComposer, RotationComposer, PanTilt, SplineDolly), noise and impulse shake, Deoccluder / Confiner, InputAxisController, and migration from Cinemachine 2 (CinemachineVirtualCamera, FreeLook, Transposer, FramingTransposer, POV). Use when the user asks for a follow cam, third-person or orbit camera, top-down camera, camera shake, camera switching or blends, dolly track, keeping the camera out of walls, or reports Cinemachine 2 API compile errors, jittery follow, or a Main Camera that ignores scripts.
+description: Builds and scripts gameplay and cutscene cameras with Cinemachine 3.x in Unity 6 - CinemachineBrain, CinemachineCamera priority and blends, follow, orbit, third-person and top-down rigs, composers, noise and impulse shake, Deoccluder and Confiner, input axis control, and migration from Cinemachine 2. Use for follow or orbit cameras, camera shake, camera switching, keeping the camera out of walls, or Cinemachine 2 API compile errors and jittery follow.
 license: MIT
 metadata:
   category: gameplay-systems

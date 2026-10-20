@@ -1,6 +1,6 @@
 ---
 name: zbase-pubsub
-description: Sets up and reviews Zitga-Tech ZBase.Foundation.PubSub (com.zbase.foundation.pubsub, namespace ZBase.Foundation.PubSub), a DI-free, UniTask-based messenger for Unity. Covers install via OpenUPM and its dependencies (UniTask, com.zbase.foundation, com.zbase.collections.pooled, System.Runtime.CompilerServices.Unsafe), the Messenger object with MessagePublisher / MessageSubscriber / AnonPublisher / AnonSubscriber, scopes (Global(), Scope<TScope>(), UnityScope(obj), GlobalScope), IMessage and ZBASE_FOUNDATION_PUBSUB_RELAX_MODE, sync and async (Func<..., UniTask>) handlers, handler order, Publish vs PublishAsync, PublishWithContext / PublishingContext / CallerInfo, CachedPublisher, WithState, ISubscription and unsubscribeToken, Compress, and DISABLE_ZBASE_PUBSUB_DEBUG. Use when the user mentions ZBase PubSub, Messenger.MessagePublisher, MessageSubscriber.Global(), ISubscription, IMessage constraint errors, "Found no subscription for", or compares it with MessagePipe.
+description: "Sets up Zitga-Tech ZBase.Foundation.PubSub, a DI-free, UniTask-based messenger: Messenger object, typed publishers/subscribers, global and object-bound scopes, sync and async handlers, ordering, CachedPublisher. Choose it over messagepipe when the project has no DI container or wants a plain object it owns; choose messagepipe for container-injected brokers. Triggers: ZBase PubSub, Messenger, UnityScope, IMessage constraint errors, leaked subscriptions."
 license: MIT
 metadata:
   category: libraries
@@ -27,6 +27,8 @@ openupm add com.zbase.foundation.pubsub
 ```
 
 This pulls `com.cysharp.unitask`, `com.zbase.collections.pooled`, `com.zbase.foundation` and `org.nuget.system.runtime.compilerservices.unsafe`. Without openupm-cli, add a scoped registry `https://package.openupm.com` with scopes `com.zbase`, `com.cysharp`, `org.nuget` to `Packages/manifest.json`, then add `"com.zbase.foundation.pubsub": "1.5.2"`.
+
+**System.Runtime.CompilerServices.Unsafe:** install once via NuGetForUnity (package `System.Runtime.CompilerServices.Unsafe` 6.0.0, usually pulled in as a dependency); if the project already has it from another route (a `.unitypackage` DLL, the `org.nuget.system.runtime.compilerservices.unsafe` UPM package), keep that one and don't add a second copy (duplicate-assembly errors). Here the UPM package arrives as a hard dependency of the ZBase package, so it is the copy to keep; remove a NuGetForUnity copy if one exists.
 
 A git URL install (`https://github.com/Zitga-Tech/ZBase.Foundation.PubSub.git?path=Packages/ZBase.Foundation.PubSub`) works only if that scoped registry is already present, because UPM cannot resolve the dependencies from git. The repo's own README documents only the OpenUPM dependency list.
 
@@ -118,7 +120,7 @@ public static class GameMessenger
 
 ## Pitfalls
 
-- **Unity 6000.5+ compile error**: `UnityObjectRef<T>` calls `Object.GetInstanceID()` and `Resources.InstanceIDToObject`. Per repo guidance `GetInstanceID()` becomes CS0619 on 6000.5+ (use `GetEntityId()`). The package has no fix at HEAD; embed it (copy into `Packages/`) and patch `UnityObjectRef<T>` with `#if UNITY_6000_4_OR_NEWER` branches, or avoid `UnityScope` and use your own scope struct.
+- **Instance-ID deprecation on newer Unity 6**: `UnityObjectRef<T>` calls `Object.GetInstanceID()` and `Resources.InstanceIDToObject`. Newer Unity 6 releases move to `EntityId` and deprecate `GetInstanceID`; check your version's docs for whether it is a warning or an error. The package has no fix at HEAD; if your Unity version flags it, embed the package (copy into `Packages/`) and patch `UnityObjectRef<T>` with a version-gated `#if` branch, or avoid `UnityScope` and use your own scope struct.
 - **Samples do not compile as-is**: `BasicUsage` refers to `PublishContext` (the type is `PublishingContext`), uses `Input.GetKeyUp` (fails when only the Input System is enabled), and `TMPro`. Treat samples as reading material.
 - **"must be retrieved via MessageSubscriber.Scope API"**: a `default(Subscriber<T>)` struct was used. Always obtain views from `messenger.MessageSubscriber` / `MessagePublisher`.
 - **Constraint errors (CS0315/CS0311)**: the message type lacks `IMessage`, or `Publish<T>()` without argument is used on a type without a parameterless constructor.

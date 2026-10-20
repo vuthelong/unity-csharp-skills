@@ -1,6 +1,6 @@
 ---
 name: csharp-unity
-description: Writes and refactors Unity 6 C# code to a consistent house style (naming, `this.` on fields, `var`, `#region` layout, early return, no LINQ) with GC-free, lifecycle-correct patterns. Use for any Unity C# authoring task - MonoBehaviour, ScriptableObject, editor scripts, custom inspectors, game systems, state machines, object pooling, events, coroutines, async/await (UniTask or Awaitable), serialization ([SerializeField], [SerializeReference], [FormerlySerializedAs]), Unity Test Framework tests, and fixing obsolete APIs (FindObjectOfType, Rigidbody.velocity, GetInstanceID). Triggers on "write a script", "make a component", "refactor this MonoBehaviour", SOLID/patterns in Unity, GC allocations, object pooling. For reviewing existing code for bugs and leaks use review-unity-csharp; for compile errors, domain reload and editing scene/asset files use unity-editor-safety.
+description: "Writes and refactors Unity 6 C# (MonoBehaviours, ScriptableObjects, editor scripts, game systems, UniTask/Awaitable async, serialization, pooling, tests) with GC-free, lifecycle-correct patterns and Unity 6 API fixes. Use when writing or refactoring Unity C# and no more specific skill applies; it defers to the project's .editorconfig and CLAUDE.md/AGENTS.md conventions. Triggers: \"write a MonoBehaviour\", \"refactor this script\", \"add an object pool\", \"replace FindObjectOfType\"."
 license: MIT
 metadata:
   category: csharp-core
@@ -16,7 +16,7 @@ metadata:
    - Unity version in `ProjectSettings/ProjectVersion.txt` (API availability differs across 6000.x minors).
    - Async library: `com.cysharp.unitask` in `Packages/manifest.json` means UniTask; otherwise use the built-in `Awaitable`.
    - Input handling: `activeInputHandler` in `ProjectSettings/ProjectSettings.asset` (0 = legacy, 1 = Input System, 2 = both).
-   - Style: always apply the house style below, regardless of `.editorconfig` or the style of surrounding files.
+   - Style: project config wins. Follow `.editorconfig`, `CLAUDE.md`/`AGENTS.md` and the style of surrounding files first; apply the house style below only to new files or projects with no established convention.
    - Assembly definitions: put new code in the asmdef that owns the folder; editor code goes in an `Editor` folder or an Editor-only asmdef.
 2. Write the code following the rules below. Prefer the smallest set of components with one responsibility each.
 3. Check Unity 6 API drift against [references/unity6-api-changes.md](references/unity6-api-changes.md) before using any API you are not sure about.
@@ -29,7 +29,7 @@ metadata:
 2. One responsibility per class; depend on interfaces or serialized references, not global lookups.
 3. No comments that restate the code. Rename before you comment. Only comment a non-obvious *why*.
 4. Optimize by default: no per-frame allocations, cached component lookups, no per-frame `Find*`.
-5. No LINQ anywhere, including editor tooling, build scripts and tests. Plain `for`/`foreach` loops.
+5. No LINQ in runtime hot paths (`Update`, per-frame and allocation-sensitive code); use plain `for`/`foreach` loops there. LINQ is fine in editor tooling, build scripts, tests and one-off initialization.
 6. `this.` on every instance-field access; never on properties, locals, parameters or statics.
 7. `var` for locals whenever the right-hand side makes the type obvious.
 
@@ -157,7 +157,7 @@ Prefer async over coroutines for new code that returns values or chains work. Fu
 
 - With UniTask: `UniTask`/`UniTask<T>` when awaited, `UniTaskVoid` + `.Forget()` for fire-and-forget.
 - Without UniTask: `Awaitable`/`Awaitable<T>` (Unity 6 built-in). Never await the same `Awaitable` instance twice; instances are pooled.
-- Never `async void` except for UI event handlers that must match a `void` signature, and then wrap the body in `try/catch`.
+- Never `async void`, including Unity message methods: use `async Awaitable Start()` (Awaitable) or a synchronous `Start()` that calls a `UniTaskVoid` method with `.Forget()` (UniTask). The only exception is a UI event handler that must match a `void` signature, and its body is wrapped in `try/catch`.
 - Pass `destroyCancellationToken` into every await that can outlive the object.
 
 ### Object pooling
@@ -179,7 +179,7 @@ private void Awake()
 }
 ```
 
-Reset all per-use state in `actionOnGet`/`actionOnRelease`. Pooled objects never receive `OnDestroy` between uses, so do cleanup in `OnDisable`. Also available: `ListPool<T>.Get()`, `HashSetPool<T>`, `DictionaryPool<TKey,TValue>` (dispose with `using`).
+Reset all per-use state in `actionOnGet`/`actionOnRelease`. Pooled objects never receive `OnDestroy` between uses, so do cleanup in `OnDisable`. Also available: `ListPool<T>`, `HashSetPool<T>`, `DictionaryPool<TKey,TValue>`. `Get()` returns the plain collection, which is not disposable: either pair `Get()` with `Release(list)` in a `try/finally`, or use the handle overload `using (ListPool<T>.Get(out var list)) { }`, which releases on dispose.
 
 ### Events
 
@@ -223,7 +223,7 @@ Rules, callbacks (`ISerializationCallbackReceiver`, `OnValidate`) and Scriptable
 |---|---|
 | No `Find*`, `GetComponent` in `Update` | Cache in `Awake` |
 | No per-frame `new List<>`, closures, string concatenation, boxing | Preallocate, reuse, `ListPool<T>`, `StringBuilder` |
-| No LINQ | Plain loops |
+| No LINQ in hot paths | Plain loops in per-frame code |
 | `CompareTag` | No string alloc |
 | Non-alloc physics queries | Reused buffers |
 | `sealed` leaf classes | Allows devirtualization under IL2CPP |
