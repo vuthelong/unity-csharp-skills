@@ -1,6 +1,6 @@
 ---
 name: unitask
-description: "Writes and reviews allocation-free async/await in Unity with Cysharp UniTask: UniTask/UniTaskVoid return types, PlayerLoop timing, cancellation tied to object lifetime, WhenAll/WhenAny, awaiting Addressables, UnityWebRequest and DOTween, async LINQ and channels, UniTask Tracker. Use for any Unity async code, replacing coroutines or Task, or fixing leaked/pending tasks, OperationCanceledException noise, async void, or exceptions from awaiting the same UniTask twice."
+description: "Writes and reviews allocation-free async/await in Unity with Cysharp UniTask: UniTask/UniTaskVoid return types, PlayerLoop timing, cancellation tied to object lifetime, WhenAll/WhenAny, awaiting Addressables, UnityWebRequest and DOTween, async LINQ and channels, UniTask Tracker. Use when the project already references com.cysharp.unitask or the user asks for UniTask: replacing coroutines or Task, or fixing leaked/pending UniTasks, OperationCanceledException noise, async void, or exceptions from awaiting the same UniTask twice."
 license: MIT
 metadata:
   category: libraries
@@ -95,13 +95,12 @@ Coroutine equivalents:
 
 ## UniTask vs Unity 6 Awaitable
 
-| Need | Choose |
+| Project | Choose |
 |---|---|
-| App/game code with `WhenAll` / `WhenAny`, frame delays, explicit `PlayerLoopTiming`, async LINQ, tracker window | UniTask |
-| A library or package that must not depend on a third-party package | `Awaitable` in the public API |
-| Coroutine-level waits only (`NextFrameAsync`, `WaitForSecondsAsync`, `EndOfFrameAsync`, `FixedUpdateAsync`, `MainThreadAsync`, `BackgroundThreadAsync`) | either; Awaitable is built in |
+| References `com.cysharp.unitask` | UniTask everywhere, including coroutine-level waits; do not mix in `Awaitable` |
+| No UniTask | Built-in `Awaitable`; follow `csharp-unity` and ask before adding UniTask |
 
-Both are pooled and both must be awaited only once. Bridge with `awaitable.AsUniTask()` (compiled under `UNITY_2023_1_OR_NEWER`). In files that use both, keep `using UnityEngine;` so `await SceneManager.LoadSceneAsync(...)` and similar resolve without ambiguity between Unity's `AsyncOperation` awaiter and UniTask's.
+Both are pooled and both must be awaited only once. When a third-party API hands you an `Awaitable`, convert it at the call site with `awaitable.AsUniTask()` (compiled under `UNITY_2023_1_OR_NEWER`). In files that use both, keep `using UnityEngine;` so `await SceneManager.LoadSceneAsync(...)` and similar resolve without ambiguity between Unity's `AsyncOperation` awaiter and UniTask's.
 
 ## PlayerLoop setup
 

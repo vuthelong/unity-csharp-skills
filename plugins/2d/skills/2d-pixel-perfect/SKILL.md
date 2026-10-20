@@ -1,7 +1,7 @@
 ---
 name: 2d-pixel-perfect
 description: Sets up, diagnoses, and fixes pixel-perfect 2D rendering with the Pixel Perfect Camera in URP or the Built-in pipeline, plus point-filtered, uncompressed sprite import. Use when a pixel-art 2D game looks blurry, shimmers, jitters while the camera moves, shows tilemap seams or non-integer scaling, or when choosing a reference resolution, PPU, or a Cinemachine pixel-perfect setup. Not for HD 2D art, UI-only scenes, or HDRP.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: 2d
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/2d-pixel-perfect"
@@ -88,7 +88,7 @@ Tilemap setup itself is covered by `tilemap-authoring`.
 Both write the orthographic size every frame. Add the **CinemachinePixelPerfect** extension to each `CinemachineCamera` (Cinemachine 3; Virtual Camera in 2.x) from the Add Extension dropdown. Limitations: blends between cameras are not pixel-perfect mid-transition; `UpscaleRenderTexture` reduces the valid ortho sizes so framing may drift; Target Group + Position Composer (Framing Transposer in 2.x) can look choppy. See `cinemachine-cameras`.
 
 ### Post-processing blurs with `UpscaleRenderTexture`
-Post-processing runs after the upscale. Simple fix: switch to `PixelSnapping`. Advanced (URP): inject a render pass after post-processing so it runs at screen resolution; on 6000.1+ the 2D Renderer also provides `ScriptableRenderPass2D` / `RenderPassEvent2D` for 2D-aware injection. Confirm in the Frame Debugger that the pass actually executes on the 2D Renderer. Review the feature with `validate-urp-render-graph-renderer-feature`.
+Post-processing runs after the upscale. Simple fix: switch to `PixelSnapping`. Advanced (URP): inject a render pass after post-processing so it runs at screen resolution; recent 6000.x releases of the 2D Renderer also provide `ScriptableRenderPass2D` / `RenderPassEvent2D` for 2D-aware injection (documented in the 6000.4+ manual; check that the types exist in your editor before using them). Confirm in the Frame Debugger that the pass actually executes on the 2D Renderer. Review the feature with `validate-urp-render-graph-renderer-feature`.
 
 ### Blurry UI text with `UpscaleRenderTexture`
 Known Unity issue, still present in Unity 6. Causes: the Canvas renders into the low-res buffer, and TMP's SDF threshold is miscalibrated at low reference resolutions. Fixes, most reliable first:

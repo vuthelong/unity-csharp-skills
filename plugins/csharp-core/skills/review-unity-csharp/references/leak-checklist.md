@@ -66,7 +66,7 @@ private void ApplySkin(Color32[] pixels)
 }
 ```
 
-Every call leaks a texture and the first call also creates a material instance. Keep the texture in a field, `Destroy` the previous one before replacing, destroy both in `OnDestroy`, and prefer `MaterialPropertyBlock` over `renderer.material`.
+Every call leaks a texture and the first call also creates a material instance. Keep the texture in a field, `Destroy` the previous one before replacing, destroy both in `OnDestroy`. Under URP keep that single owned material instance rather than switching to `MaterialPropertyBlock`, which takes the renderer out of the SRP Batcher and GPU Resident Drawer (see `optimize-3d-rendering`); a property block is the better fix only on Built-in or other non-SRP-Batcher paths.
 
 `renderer.material`, `renderer.materials` and `meshFilter.mesh` create a per-renderer copy on first access. Reading them in loops or on many renderers multiplies copies. Use `sharedMaterial`/`sharedMesh` for reads.
 
@@ -86,7 +86,7 @@ private static readonly HashSet<Enemy> Active = new();
 private void OnEnable() => Active.Add(this);
 ```
 
-Without a matching `Remove` in `OnDisable`, destroyed enemies stay in the set forever. Pair `Add`/`Remove` in `OnEnable`/`OnDisable`, not `Awake`/`OnDestroy`, so pooled and deactivated objects are handled too. Use the object reference as the key; do not key by `GetInstanceID()` (newer Unity 6 releases deprecate it in favor of `EntityId`). Clear static collections in a `SubsystemRegistration` reset hook.
+Without a matching `Remove` in `OnDisable`, destroyed enemies stay in the set forever. Pair `Add`/`Remove` in `OnEnable`/`OnDisable`, not `Awake`/`OnDestroy`, so pooled and deactivated objects are handled too. Use the object reference as the key; do not key by `GetInstanceID()` (CS0619 on 6000.5+; `GetEntityId()` replaces it). Clear static collections in a `SubsystemRegistration` reset hook.
 
 ### 6. Closures capturing `this` in long-lived owners
 

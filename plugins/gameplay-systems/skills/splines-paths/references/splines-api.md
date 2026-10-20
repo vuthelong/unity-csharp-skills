@@ -110,7 +110,7 @@ public class SplineMover : MonoBehaviour
 
 `ConvertIndexUnit` on a raw `Spline` works in local units, so the world distance is rescaled to local before converting. For a ready-made component use `SplineAnimate` with `AnimationMethod = Speed`.
 
-## Nearest point (local space in, local space out)
+## Nearest point (world space in, world space out)
 
 ```csharp
 public static Vector3 ClosestPointOnPath(SplineContainer container, Vector3 worldPoint, out float t)

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEngine;
 
 namespace SpriteEditorTools
@@ -63,3 +64,4 @@ namespace SpriteEditorTools
         }
     }
 }
+#endif

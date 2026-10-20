@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.U2D.Sprites;
 using UnityEngine;
@@ -40,3 +41,4 @@ namespace SpriteEditorTools
         }
     }
 }
+#endif

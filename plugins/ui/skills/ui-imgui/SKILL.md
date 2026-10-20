@@ -1,7 +1,7 @@
 ---
 name: ui-imgui
 description: Maintains and writes Unity IMGUI code - EditorWindow OnGUI, OnInspectorGUI custom editors, IMGUI PropertyDrawers, ScriptableWizards, Handles scene GUI and runtime OnGUI debug overlays. Use when editing an existing OnGUI or OnInspectorGUI script, when the user explicitly asks for IMGUI, for a quick debug overlay, or for errors like "Invalid GUILayout state". New editor tools default to UI Toolkit (ui-uitk).
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: ui
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/ui-imgui"
@@ -68,5 +68,5 @@ If "inspector" is ambiguous, ask whether it is a custom `Editor` for one compone
 ## Unity 6 notes
 
 - `FindObjectOfType`/`FindObjectsOfType` are obsolete: use `FindFirstObjectByType`, `FindAnyObjectByType`, `FindObjectsByType`.
-- Newer Unity 6 releases move to `EntityId` and deprecate `Object.GetInstanceID()` (check your version's docs). Key persistent editor caches and `EditorPrefs` entries by asset GUID (`AssetDatabase.AssetPathToGUID`); instance IDs were never stable across sessions anyway.
+- `Object.GetInstanceID()` is CS0619 on 6000.5+: use `GetEntityId()` and guard with `UNITY_6000_5_OR_NEWER`. Key persistent editor caches and `EditorPrefs` entries by asset GUID (`AssetDatabase.AssetPathToGUID`); instance IDs were never stable across sessions anyway.
 - An IMGUI-only `PropertyDrawer` still works inside Unity 6 UI Toolkit inspectors (hosted in an `IMGUIContainer`), at some performance cost; drawers used in many lists or UI Toolkit inspectors benefit from also implementing `CreatePropertyGUI` (see `ui-uitk`).

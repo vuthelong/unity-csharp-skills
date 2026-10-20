@@ -280,7 +280,7 @@ static T AddPersistentOverride<T>(VolumeProfile profile) where T : VolumeCompone
     if (profile.TryGet<T>(out var existing) && existing != null)
         return existing;
 
-    var component = profile.Add<T>(true);
+    var component = profile.Add<T>(false);
     component.name = typeof(T).Name;
     AssetDatabase.AddObjectToAsset(component, profile);
     EditorUtility.SetDirty(component);
@@ -288,6 +288,8 @@ static T AddPersistentOverride<T>(VolumeProfile profile) where T : VolumeCompone
     return component;
 }
 ```
+
+`Add<T>(false)` leaves every parameter's `overrideState` off, so an unmapped override does not silently replace the Default Volume Profile with defaults (Tonemapping None, Bloom intensity 0, Depth of Field Off). When writing each value mapped from PPv2, set the parameter with `Override(value)` (which turns `overrideState` on) and leave the rest untouched.
 
 After using this pattern, also verify the representative scene has a `UnityEngine.Rendering.Volume` component whose `sharedProfile` points to the reloaded profile. A scene Volume with an empty profile, missing common mappable overrides, or `{fileID: 0}` component references is not active migrated post-processing.
 

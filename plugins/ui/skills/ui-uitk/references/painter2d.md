@@ -11,7 +11,7 @@
 
 USS cannot draw gradients, arbitrary shapes, arcs, or procedural patterns. For these, use the **Painter2D** API via the `generateVisualContent` callback.
 
-> **Version check:** core path drawing (`BeginPath`, `Arc`, `Fill`, `Stroke`, `fillColor`, `strokeColor`) exists in all 6000.x. Gradient fills (`fillGradient`, `strokeGradient`, `FillGradient`) and `fillTexture` arrived in later minors — confirm they exist in the project's version (CS1061/CS0103 otherwise). Fallback for older minors: a pre-made gradient texture as USS `background-image`, or a vertex-colored mesh via `ctx.Allocate(...)`.
+> **Version check:** core path drawing (`BeginPath`, `Arc`, `Fill`, `Stroke`, `fillColor`, `strokeColor`) exists in all 6000.x. `strokeGradient` exists in 6000.0. `fillGradient`, `strokeFillGradient`, `fillTexture`, `SetDashPattern`/`GetDashPattern`, `dashOffset` and `PushClip`/`PopClip` are not in 6000.0 and are documented by 6000.3 — confirm they exist in the project's version (CS1061/CS0103 otherwise). Fallback for older minors: a pre-made gradient texture as USS `background-image`, or a vertex-colored mesh via `ctx.Allocate(...)`.
 
 Painter2D is modeled on the **HTML Canvas 2D** context — `BeginPath`, `MoveTo`, `LineTo`, `Arc`, `BezierCurveTo`, `Fill`, `Stroke` all map directly. Key differences from Canvas: text is drawn via `ctx.DrawText()` on the `MeshGenerationContext` (not on Painter2D itself), no `drawImage()` (use `fillTexture` or child elements with USS `background-image`), angles use `Angle.Degrees()` / `Angle.Turns()` structs, arc direction is an enum (`ArcDirection.Clockwise` / `.CounterClockwise`), and coordinates are local to the element's content rect.
 

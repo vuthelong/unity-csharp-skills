@@ -127,6 +127,8 @@ public sealed class MasterDataBootstrap : MonoBehaviour
 Mark `master.bytes` Addressable (address `master-data`, label `masterdata`). See `addressables-asset-loading` for groups, catalog updates and handle rules.
 
 ```csharp
+using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -140,13 +142,25 @@ public sealed class MasterDataBootstrap : MonoBehaviour
 
     #region Unity Lifecycle
 
-    private async Awaitable Start()
+    private void Start()
+    {
+        this.LoadAsync().Forget();
+    }
+
+    #endregion
+
+    #region Loading
+
+    private async UniTaskVoid LoadAsync()
     {
         var handle = Addressables.LoadAssetAsync<TextAsset>(MasterDataAddress);
         try
         {
-            var asset = await handle.Task;
+            var asset = await handle.WithCancellation(this.destroyCancellationToken);
             MasterDataService.Load(asset.bytes);
+        }
+        catch (OperationCanceledException)
+        {
         }
         finally
         {
@@ -157,6 +171,8 @@ public sealed class MasterDataBootstrap : MonoBehaviour
     #endregion
 }
 ```
+
+Without UniTask, use `async Awaitable Start()` and `await handle.Task`, then check `this.destroyCancellationToken.IsCancellationRequested` before calling `Load`.
 
 - Remote master data and app code must agree on the schema. Bundle a schema version (a `meta` table or the build number) and refuse or fall back when it does not match the client. See "Schema changes need a data rebuild" in SKILL.md.
 - Construction is synchronous and CPU-bound. For multi-megabyte binaries, construct on a worker thread (`unitask` `UniTask.RunOnThreadPool`, or `Awaitable.BackgroundThreadAsync()`), then publish the reference on the main thread. Avoid that on WebGL.

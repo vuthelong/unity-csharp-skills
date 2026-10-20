@@ -1,7 +1,7 @@
 ---
 name: optimize-text-mesh-pro
 description: Optimizes TextMeshPro font assets in Unity 6 for memory, quality, CPU and build size - static main font plus dynamic fallback chains, atlas sizing, padding and sampling ratios, SDF16, Dynamic OS fonts, AutoSize cost and Canvas rebuilds - and imports TMP Essential Resources headlessly. Use for atlas memory bloat, fuzzy or misaligned glyphs, fallback-chain design for mixed scripts, or text-driven CPU spikes. Per-locale font swapping and translation belong to localization.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: ui
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/optimize-text-mesh-pro"

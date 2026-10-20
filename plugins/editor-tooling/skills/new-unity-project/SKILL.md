@@ -1,7 +1,7 @@
 ---
 name: new-unity-project
 description: "Guides a brand-new Unity 6 game from idea to a running, version-controlled project: asks concept, platforms and monetization while the Editor installs in the background, creates a URP project, sets up Git or UVCS, installs packages, applies a visual baseline and makes the first commit. Use for \"make a new game\", \"bootstrap a Unity project\", \"I want to build a <genre> game\", game jams or greenfield setup. Delegates mechanics to unity-cli and unity-package-management; writes no gameplay code."
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: editor-tooling
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/new-unity-project"
@@ -177,7 +177,7 @@ Built-in.
    `QualitySettings.SetQualityLevel` to the one matching the primary target: the highest tier for
    desktop, the lowest for mobile/WebGL. Leave color space Linear and the Input System as the
    template set them.
-4. **UI stack.** HUD and menus use a uGUI Canvas + TextMeshPro or UI Toolkit — **never `OnGUI`**.
+4. **UI stack.** HUD and menus use a uGUI Canvas + TextMeshPro or UI Toolkit — **never `OnGUI` for player-facing HUD/menus** (runtime debug overlays: see `ui-imgui`).
    **REQUIRED SUB-SKILL:** `ui` picks between them for the project.
 5. **Materials and shaders.** Under URP use `Universal Render Pipeline/Lit`, `…/Unlit`,
    `…/2D/Sprite-Lit-Default` or `…/2D/Sprite-Unlit-Default`. `Standard` and `Unlit/Color` render

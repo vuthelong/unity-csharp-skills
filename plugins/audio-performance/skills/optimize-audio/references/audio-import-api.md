@@ -117,9 +117,10 @@ return $"{path}: channels={clip.channels} loadType={clip.loadType}";
 
 ## Bulk apply under a folder
 
-Group the reimports so the Editor does not refresh per clip.
+Group the reimports so the Editor does not refresh per clip. Load Type and format follow the decision table in [platform-settings.md](platform-settings.md): short clips (≤ ~5 s, decoded ≤ ~200 KB) get ADPCM + Decompress On Load, the rest Vorbis + Compressed In Memory. Force To Mono applies only to the stereo clips that step 4A found exclusively on `spatialBlend == 1` sources; fill `spatialOnlyStereo` from that scan. Stereo UI and 2D SFX keep their channels.
 
 ```csharp
+var spatialOnlyStereo = new System.Collections.Generic.HashSet<string> { "Assets/Audio/SFX/Footstep_Stone.wav" };
 var guids = UnityEditor.AssetDatabase.FindAssets("t:AudioClip", new[] { "Assets/Audio/SFX" });
 var changed = new System.Collections.Generic.List<string>();
 UnityEditor.AssetDatabase.StartAssetEditing();
@@ -129,12 +130,19 @@ try
     {
         var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
         var imp = UnityEditor.AssetImporter.GetAtPath(path) as UnityEditor.AudioImporter;
-        if (imp == null) continue;
+        var clip = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.AudioClip>(path);
+        if (imp == null || clip == null) continue;
+        var decodedBytes = (long)clip.samples * clip.channels * 2;
+        var isShort = clip.length <= 5f && decodedBytes <= 200 * 1024;
+        var loadType = isShort ? UnityEngine.AudioClipLoadType.DecompressOnLoad : UnityEngine.AudioClipLoadType.CompressedInMemory;
+        var format = isShort ? UnityEngine.AudioCompressionFormat.ADPCM : UnityEngine.AudioCompressionFormat.Vorbis;
+        var mono = imp.forceToMono || spatialOnlyStereo.Contains(path);
         var s = imp.defaultSampleSettings;
-        if (s.loadType == UnityEngine.AudioClipLoadType.CompressedInMemory && imp.forceToMono) continue;
-        s.loadType = UnityEngine.AudioClipLoadType.CompressedInMemory;
+        if (s.loadType == loadType && s.compressionFormat == format && imp.forceToMono == mono) continue;
+        s.loadType = loadType;
+        s.compressionFormat = format;
         imp.defaultSampleSettings = s;
-        imp.forceToMono = true;
+        imp.forceToMono = mono;
         imp.SaveAndReimport();
         changed.Add(path);
     }

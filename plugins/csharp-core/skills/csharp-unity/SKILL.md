@@ -235,7 +235,7 @@ Reset all per-use state in `actionOnGet`/`actionOnRelease`. Pooled objects never
 
 ### Runtime-created assets
 
-`new Material/Texture2D/Mesh/RenderTexture`, `Instantiate(material)`, `renderer.material` and `meshFilter.mesh` getters create native objects you must `Destroy` in `OnDestroy`. Use `sharedMaterial` / `sharedMesh` for reads, `MaterialPropertyBlock` or `Renderer.SetPropertyBlock` for per-instance tweaks.
+`new Material/Texture2D/Mesh/RenderTexture`, `Instantiate(material)`, `renderer.material` and `meshFilter.mesh` getters create native objects you must `Destroy` in `OnDestroy`. Use `sharedMaterial` / `sharedMesh` for reads. For per-instance tweaks under URP, use a material instance (destroyed in `OnDestroy`) or instanced material properties: a `MaterialPropertyBlock` takes the renderer out of the SRP Batcher and GPU Resident Drawer (see `optimize-3d-rendering`). Use `MaterialPropertyBlock` only on Built-in or other non-SRP-Batcher paths.
 
 ### Statics and Enter Play Mode Options
 

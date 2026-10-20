@@ -63,18 +63,18 @@ void OnDirectedMessageReceived(VivoxMessage m)
 Retention: **7 days** by default (30 days if Text Evidence Management is enabled), as of the Vivox 16 docs; verify current retention.
 
 ```csharp
-IReadOnlyCollection<VivoxMessage> GetChannelTextMessageHistoryAsync(
+Task<IReadOnlyCollection<VivoxMessage>> GetChannelTextMessageHistoryAsync(
     string channelName,
     int requestSize = 10,
     ChatHistoryQueryOptions options = null);
 
-IReadOnlyCollection<VivoxMessage> GetDirectTextMessageHistoryAsync(
+Task<IReadOnlyCollection<VivoxMessage>> GetDirectTextMessageHistoryAsync(
     string playerId,
     int requestSize = 10,
     ChatHistoryQueryOptions options = null);
 ```
 
-Both return messages **newest-first**. Reverse when rendering a chat log.
+Both are awaited and return messages **newest-first**. Reverse when rendering a chat log.
 
 ## Edit and Delete
 

@@ -52,7 +52,7 @@ public sealed class AtlasSpriteCache : IDisposable
                     : clone.name;
 
                 if (m_Sprites.ContainsKey(key))
-                    UnityEngine.Object.Destroy(clone);
+                    DestroySprite(clone);
                 else
                     m_Sprites[key] = clone;
             }
@@ -68,11 +68,19 @@ public sealed class AtlasSpriteCache : IDisposable
         foreach (var sprite in m_Sprites.Values)
         {
             if (sprite != null)
-                UnityEngine.Object.Destroy(sprite);
+                DestroySprite(sprite);
         }
         m_Sprites.Clear();
         m_AllCached = false;
     }
 
     public void Dispose() => Clear();
+
+    static void DestroySprite(Sprite sprite)
+    {
+        if (Application.isPlaying)
+            UnityEngine.Object.Destroy(sprite);
+        else
+            UnityEngine.Object.DestroyImmediate(sprite);
+    }
 }

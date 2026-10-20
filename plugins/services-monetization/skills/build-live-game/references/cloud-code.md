@@ -27,9 +27,9 @@ Call `UnityServices.InitializeAsync()` from `com.unity.services.core` and sign i
 |---|---|
 | `CallModuleEndpointAsync("Module", "Function", args)` | `CallEndpointAsync` for modules |
 | `CallEndpointAsync("scriptName", args)` | `CallEndpointAsync` for modules -- scripts only |
-| `SubscribeToPlayerMessagesAsync()` -- no parameters | `SubscribeToPlayerMessagesAsync(callbacks)` |
-| `SubscribeToProjectMessagesAsync()` -- no parameters | `SubscribeToGeneralMessagesAsync`, `SubscribeToProjectMessagesAsync(callbacks)` |
-| `subscription.Callbacks.MessageReceived += handler` | Passing callbacks as constructor/method arg |
+| `SubscribeToPlayerMessagesAsync(callbacks)` with a `SubscriptionEventCallbacks` | `SubscribeToPlayerMessagesAsync()` with no arguments |
+| `SubscribeToProjectMessagesAsync(callbacks)` with a `SubscriptionEventCallbacks` | `SubscribeToGeneralMessagesAsync`, `SubscribeToProjectMessagesAsync()` with no arguments |
+| Attach handlers to `SubscriptionEventCallbacks` before subscribing | Subscribing first and attaching handlers afterwards |
 | Non-generic `CallEndpointAsync` returns `Task<string>` | Returns `Task` (void) -- it returns a string |
 | Non-generic `CallModuleEndpointAsync` returns `Task<string>` | Returns `Task` (void) -- it returns a string |
 | `EventConnectionState` enum | `SubscriptionEventConnectionState` |
@@ -66,11 +66,11 @@ Task<string> CallModuleEndpointAsync(string module, string function,
 Task<TResult> CallModuleEndpointAsync<TResult>(string module, string function,
     Dictionary<string, object> args = default, CloudCodeModuleScope scope = default)
 
-// Subscribe to real-time messages sent to the current player. Requires Wire. NO PARAMETERS.
-Task<ISubscriptionEvents> SubscribeToPlayerMessagesAsync()
+// Subscribe to real-time messages sent to the current player. Requires Wire.
+Task<ISubscriptionEvents> SubscribeToPlayerMessagesAsync(SubscriptionEventCallbacks callbacks)
 
-// Subscribe to real-time project-wide messages. Requires Wire. NO PARAMETERS.
-Task<ISubscriptionEvents> SubscribeToProjectMessagesAsync()
+// Subscribe to real-time project-wide messages. Requires Wire.
+Task<ISubscriptionEvents> SubscribeToProjectMessagesAsync(SubscriptionEventCallbacks callbacks)
 ```
 
 **CRITICAL:** The first argument to `CallModuleEndpointAsync` is the **module name**, the second is the **function name**. Do NOT confuse the parameter order.
@@ -94,7 +94,7 @@ Cloud Code Subscriptions require `com.unity.services.wire`. Subscribe to real-ti
 ```csharp
 public interface ISubscriptionEvents
 {
-    SubscriptionEventCallbacks Callbacks { get; }  // Wire up handlers here
+    SubscriptionEventCallbacks Callbacks { get; }  // The callbacks passed to Subscribe*MessagesAsync
     Task SubscribeAsync();      // Re-subscribe after unsubscribing
     Task UnsubscribeAsync();    // Stop receiving messages
 }
@@ -102,15 +102,16 @@ public interface ISubscriptionEvents
 
 ### `SubscriptionEventCallbacks`
 
-Wire up callbacks on the `Callbacks` property of the returned `ISubscriptionEvents`:
+Create the callbacks, attach handlers, then pass them to the subscribe call:
 
 ```csharp
-var subscription = await CloudCodeService.Instance.SubscribeToPlayerMessagesAsync();
-subscription.Callbacks.MessageReceived += OnMessageReceived;       // Action<IMessageReceivedEvent>
-subscription.Callbacks.MessageBytesReceived += OnBytesReceived;    // Action<byte[]>
-subscription.Callbacks.ConnectionStateChanged += OnStateChanged;   // Action<EventConnectionState>
-subscription.Callbacks.Kicked += OnKicked;                         // Action
-subscription.Callbacks.Error += OnError;                           // Action<string>
+var callbacks = new SubscriptionEventCallbacks();
+callbacks.MessageReceived += OnMessageReceived;       // Action<IMessageReceivedEvent>
+callbacks.MessageBytesReceived += OnBytesReceived;    // Action<byte[]>
+callbacks.ConnectionStateChanged += OnStateChanged;   // Action<EventConnectionState>
+callbacks.Kicked += OnKicked;                         // Action
+callbacks.Error += OnError;                           // Action<string>
+var subscription = await CloudCodeService.Instance.SubscribeToPlayerMessagesAsync(callbacks);
 ```
 
 ### `IMessageReceivedEvent` Properties
@@ -481,17 +482,16 @@ ISubscriptionEvents subscription;
 
 async Task SubscribeToMessages()
 {
-    // Subscribe first -- no parameters
-    subscription = await CloudCodeService.Instance.SubscribeToPlayerMessagesAsync();
-
-    // Then wire up callbacks via the Callbacks property
-    subscription.Callbacks.MessageReceived += OnMessageReceived;
-    subscription.Callbacks.ConnectionStateChanged += state =>
+    var callbacks = new SubscriptionEventCallbacks();
+    callbacks.MessageReceived += OnMessageReceived;
+    callbacks.ConnectionStateChanged += state =>
         Debug.Log($"Subscription state: {state}");
-    subscription.Callbacks.Error += error =>
+    callbacks.Error += error =>
         Debug.LogError($"Subscription error: {error}");
-    subscription.Callbacks.Kicked += () =>
+    callbacks.Kicked += () =>
         Debug.LogWarning("Kicked from subscription");
+
+    subscription = await CloudCodeService.Instance.SubscribeToPlayerMessagesAsync(callbacks);
 }
 
 void OnMessageReceived(IMessageReceivedEvent evt)

@@ -1,6 +1,6 @@
 ---
 name: messagepipe
-description: "Sets up Cysharp MessagePipe for DI-integrated, typed pub/sub and request/response in Unity (VContainer, Zenject or built-in container): IPublisher/ISubscriber, keyed, buffered and async messages, request handlers, filters, subscription disposal. Choose it over zbase-pubsub when the project already uses a DI container and wants brokers injected per scope. Triggers: MessagePipe, RegisterMessageBroker, GlobalMessagePipe, leaked subscriptions, unregistered message types."
+description: "Sets up Cysharp MessagePipe for DI-integrated, typed pub/sub and request/response in Unity (VContainer, Zenject or built-in container): IPublisher/ISubscriber, keyed, buffered and async messages, request handlers, filters, subscription disposal. Choose it over zbase-pubsub when the project already uses a DI container and wants brokers injected per scope. Triggers: MessagePipe, RegisterMessageBroker, GlobalMessagePipe, leaked MessagePipe subscriptions, unregistered message types."
 license: MIT
 metadata:
   category: libraries

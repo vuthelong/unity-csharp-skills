@@ -1,7 +1,7 @@
 ---
 name: project-auditor-fixes
 description: "Runs Unity Project Auditor through the unity CLI (unity command audit / audit_status), reads its issue CSV and fixes the flagged code, asset-import and project-setting issues in small, compiling, reviewable batches with a before/after test case. Use for \"run Project Auditor\", \"fix the auditor issues\", working through an audit CSV, or cleaning up import and player settings flagged by analysis. Needs a connected Editor with com.unity.pipeline and Project Auditor rules."
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: editor-tooling
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/project-auditor-fixes"
@@ -69,7 +69,7 @@ unity command audit_status                       # repeat until a terminal statu
 |---|---|---|
 | Import settings on many assets (texture Read/Write, mipmaps on UI sprites, max size, compression, mesh Read/Write, audio load type) | Editor script over `AssetImporter.GetAtPath(path)` cast to `TextureImporter` / `ModelImporter` / `AudioImporter`, set fields, `SaveAndReimport()`; wrap the loop in `AssetDatabase.StartAssetEditing()` / `StopAssetEditing()` in a `try/finally` | Set per-platform overrides with `GetPlatformTextureSettings` / `SetPlatformTextureSettings`. For recurring rules, add an `AssetPostprocessor` or a Preset so new assets stay fixed |
 | Project / player settings | `PlayerSettings` with `NamedBuildTarget` overloads (e.g. `PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP)`), `QualitySettings`, `GraphicsSettings` | The `BuildTargetGroup` overloads are obsolete on Unity 6 |
-| Obsolete or slow API calls | Edit the flagged line | `FindObjectOfType` → `FindFirstObjectByType` / `FindAnyObjectByType`; `Object.GetInstanceID()` → `GetEntityId()` where the Editor flags it (newer Unity 6 releases deprecate it in favor of `EntityId`; check the Console/API docs for your version); cache `GetComponent` results and `Shader.PropertyToID` instead of calling them per frame. `Camera.main` is cached internally since 2020.2, so per-frame use is fine; leave it unless the auditor row says otherwise |
+| Obsolete or slow API calls | Edit the flagged line | `FindObjectOfType` → `FindFirstObjectByType` / `FindAnyObjectByType`; `Object.GetInstanceID()` → `GetEntityId()` (CS0619 on 6000.5+; guard with `UNITY_6000_5_OR_NEWER` if the project also builds on older minors); cache `GetComponent` results and `Shader.PropertyToID` instead of calling them per frame. `Camera.main` is cached internally since 2020.2, so per-frame use is fine; leave it unless the auditor row says otherwise |
 | Per-frame allocations (LINQ, string concat, boxing, closures in `Update`) | Hoist allocations, reuse collections, use `StringBuilder` or cached strings | Keep behavior identical; the test case must still pass |
 
 Locate affected assets interactively with `generate-editor-search-query` (e.g. `t:texture dir:Assets/UI`).

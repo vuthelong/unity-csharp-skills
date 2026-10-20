@@ -34,7 +34,7 @@
 - **World sprites**: tight packing on saves space; rotation is safe for `SpriteRenderer` but gains little.
 - **Pixel art / tiles**: point filter, no mipmaps, uncompressed, padding >= 4, tight packing off (prevents seams; see `2d-pixel-perfect`).
 - **Alpha dilation** fills transparent padding with edge colors to stop dark fringes under bilinear filtering; leave off for point-filtered art.
-- **Mipmaps** off for UI and 2D cameras that do not zoom out; on for world sprites seen at many scales.
+- **Mipmaps** off for UI and 2D cameras that do not zoom out; on for world sprites seen at many scales (`ConfigureImporter(..., worldMipMaps: true)` with `AtlasPreset.World`; the other presets always turn them off).
 - **Readable** off unless code reads pixels; it doubles memory.
 - Group atlases by what is on screen together (one per screen/level/character), not by type; a 4096 atlas loaded for one icon wastes memory.
 - Keep atlases at or below 2048 on mobile; let multiple pages form rather than forcing 4096.

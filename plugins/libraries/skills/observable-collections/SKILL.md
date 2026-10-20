@@ -16,7 +16,7 @@ Read `references/api.md` for full member lists of every collection, the view int
 
 ## Workflow
 
-1. Install with NuGetForUnity (no UPM package; setup in `r3` -> "NuGetForUnity setup"): `ObservableCollections`, plus `ObservableCollections.R3` if you use R3 (it pulls `R3`; also add `R3.Unity` per `r3`).
+1. Install with NuGetForUnity (no UPM package; add NuGetForUnity once from git URL `https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity`, then **NuGet > Manage NuGet Packages**; analyzer DLLs need no platforms ticked and the `RoslynAnalyzer` label; on assembly version conflicts clear **Player > Assembly Version Validation**): `ObservableCollections`, plus `ObservableCollections.R3` if you use R3 (it pulls `R3`; also add `R3.Unity` per `r3`).
    - **System.Runtime.CompilerServices.Unsafe:** install once via NuGetForUnity (package `System.Runtime.CompilerServices.Unsafe` 6.0.0, usually pulled in as a dependency); if the project already has it from another route (a `.unitypackage` DLL, the `org.nuget.system.runtime.compilerservices.unsafe` UPM package), keep that one and don't add a second copy (duplicate-assembly errors).
 2. Hold the model as an `ObservableList<T>` (or another collection) in a plain C# class or presenter.
 3. For UI, create a view: `var view = list.CreateView(item => SpawnRow(item));`. The transform runs once per added item.
@@ -116,6 +116,12 @@ public sealed class InventoryPanel : MonoBehaviour
         this._view.ViewChanged += this.OnViewChanged;
     }
 
+    public void ClearItems()
+    {
+        foreach (var pair in this._view.Unfiltered) this._rowPool.Release(pair.View);
+        this._items.Clear();
+    }
+
     #endregion
 
     #region Unity Lifecycle
@@ -208,7 +214,7 @@ this._items.ObserveCountChanged(notifyCurrentCount: true)
 ## Pitfalls
 
 - **Undisposed views leak.** A view subscribes to the collection's event; if the collection outlives the UI, the view (and every `TView` it holds) stays alive and keeps receiving events. Dispose views, view lists and notify lists in `OnDestroy`.
-- **`Clear()` loses the views before you see them.** The view clears its internal list and then raises Reset, so `OldViews` is empty. Before clearing, iterate `view.Unfiltered` and release the rows, or call `list.RemoveRange(0, list.Count)` on an `ObservableList` to get a Remove event with `OldViews`.
+- **`Clear()` loses the views before you see them.** The view clears its internal list and then raises Reset, so `OldViews` is empty. Before clearing, iterate `view.Unfiltered` and release the rows (`ClearItems` above), or call `list.RemoveRange(0, list.Count)` on an `ObservableList` to get a Remove event with `OldViews`.
 - **Mutating inside a callback.** Events run inside `lock (SyncRoot)`. The lock is re-entrant on the same thread, so a nested `Add` works but raises nested events while the outer handler is mid-way; views and indices the outer handler captured are stale. Defer mutations (queue them, or R3 `.Delay` / UniTask `UniTask.Yield`).
 - **Thread safety.** Mutations and enumeration-by-view are synchronized on `SyncRoot`, but handlers run on the mutating thread. Unity objects may only be touched on the main thread: mutate on the main thread, or marshal (R3 `ObserveOnMainThread`, a custom `ICollectionEventDispatcher`). For multi-step reads, `lock (list.SyncRoot) { ... }`. Never block the main thread on that lock while a worker raises events that wait for the main thread.
 - **Sort and Move semantics.** `Move(oldIndex, newIndex)` raises one Move. `Sort` / `Reverse` raise a single Reset with `SortOperation.IsSort` / `IsReverse`, not per-item moves; views re-sort their items (including filtered-out ones) and you must re-order the UI yourself. R3 `ObserveMove` does not fire for sorts; use `ObserveSort` / `ObserveReset`.

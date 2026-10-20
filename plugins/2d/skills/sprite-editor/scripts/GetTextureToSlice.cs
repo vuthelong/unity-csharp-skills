@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEditor.U2D.Sprites;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
@@ -17,6 +18,12 @@ namespace SpriteEditorTools
             if (texture != null)
                 texture.hideFlags = HideFlags.HideAndDontSave;
             return texture;
+        }
+
+        public static void ReleaseTextureToSlice(ITextureDataProvider textureDataProvider, Texture2D texture)
+        {
+            if (texture != null && texture != textureDataProvider.GetReadableTexture2D())
+                Object.DestroyImmediate(texture);
         }
 
         public static Texture2D CreateTemporaryDuplicate(Texture2D original, int width, int height)
@@ -46,3 +53,4 @@ namespace SpriteEditorTools
         }
     }
 }
+#endif

@@ -1,13 +1,13 @@
 # Sprite Editor Scripts Guide
 
-All scripts are `static partial class SpriteEditorUtility` (plus `IsometricSliceUtility`) in namespace `SpriteEditorTools`. Save them together in an `Editor` folder, or inline the needed methods into an `eval` snippet with fully qualified types.
+All scripts are `static partial class SpriteEditorUtility` (plus `IsometricSliceUtility`) in namespace `SpriteEditorTools`. Every file is wrapped in `#if UNITY_EDITOR`; still save them together in an `Editor` folder, or inline the needed methods into an `eval` snippet with fully qualified types.
 
 ## Files
 
 | File | Method | Use when |
 |---|---|---|
 | `GetTextureSourceImageSize.cs` | `GetTextureSourceImageSize(Texture2D, out w, out h)` | You need the true source size |
-| `GetTextureToSlice.cs` | `GetTextureToSlice(ITextureDataProvider)` | Before any slicing; returns a readable texture at original size |
+| `GetTextureToSlice.cs` | `GetTextureToSlice(ITextureDataProvider)`, `ReleaseTextureToSlice(...)` | Before any slicing; returns a readable texture at original size. Release it afterwards: an upscaled copy is a `HideAndDontSave` texture that leaks otherwise |
 | `GenerateNewSpriteRects.cs` | `GenerateNewSpriteRects(...)`, `ApplySpriteRects(...)` | Turning `Rect`s into `SpriteRect`s and writing them with file IDs in sync |
 | `AutomaticSliceTexture.cs` | `AutomaticSliceTexture(...)` | Sprites separated by transparency |
 | `GridSliceTexture.cs` | `GridSliceTexture(...)` | Evenly spaced cells (animation strips, tilesets) |
@@ -19,14 +19,21 @@ All scripts are `static partial class SpriteEditorUtility` (plus `IsometricSlice
 
 ```csharp
 var texture = SpriteEditorUtility.GetTextureToSlice(textureProvider);
-IEnumerable<Rect> rects = /* algorithm */;
-var newRects = SpriteEditorUtility.GenerateNewSpriteRects(spriteDataProvider, rects, SpriteEditorUtility.AddNewSpriteMethod.DeleteAll, nameGenerator);
-SpriteEditorUtility.ApplySpriteRects(spriteDataProvider, newRects);
+try
+{
+    IEnumerable<Rect> rects = /* algorithm */;
+    var newRects = SpriteEditorUtility.GenerateNewSpriteRects(spriteDataProvider, rects, SpriteEditorUtility.AddNewSpriteMethod.DeleteAll, nameGenerator);
+    SpriteEditorUtility.ApplySpriteRects(spriteDataProvider, newRects);
+}
+finally
+{
+    SpriteEditorUtility.ReleaseTextureToSlice(textureProvider, texture);
+}
 spriteDataProvider.Apply();
 ((AssetImporter)spriteDataProvider.targetObject).SaveAndReimport();
 ```
 
-The slice helpers already call `ApplySpriteRects`; you still call `Apply()` and `SaveAndReimport()`.
+The slice helpers already call `ApplySpriteRects` and `ReleaseTextureToSlice`; you still call `Apply()` and `SaveAndReimport()`.
 
 ## `AddNewSpriteMethod`
 

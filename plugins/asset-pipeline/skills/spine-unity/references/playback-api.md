@@ -158,7 +158,7 @@ animationState.Apply(skeleton);
 - Show/hide by name: `skeleton.SetAttachment("weapon", "sword")`; pass `null` as the attachment name to hide the slot.
 - Swap into a custom skin: `skin.SetAttachment(data.FindSlot("weapon").Index, "weapon", attachment)`, where `attachment` comes from `skin.GetAttachment(slotIndex, placeholder)` of another skin, or from a Unity `Sprite` with `sprite.ToRegionAttachment(material)` (extension in `Spine.Unity.AttachmentTools`).
 - Read the current one: `slot.AppliedPose.Attachment` (4.3; `slot.Attachment` in 4.2).
-- Tint: `slot.SetColor(Color)` extension (Spine.Unity) or `skeleton.SetColor(r, g, b, a)`; `PMA Vertex Colors` must be enabled on the renderer for tint to apply.
+- Tint: `slot.SetColor(Color)` extension (Spine.Unity) or `skeleton.SetColor(r, g, b, a)`. Tint applies either way; the renderer's `PMA Vertex Colors` setting only controls whether vertex colors are premultiplied, and must match the shader (on for the default premultiplied-alpha shaders, off for straight-alpha ones).
 
 ## Following bones
 

@@ -47,7 +47,7 @@ Toggle (Toggle)                         targetGraphic = Background, graphic = Ch
 ```
 
 - Radio buttons: add a `ToggleGroup` to a parent and assign it to each Toggle's `group`; set `allowSwitchOff` as needed.
-- Listen with `toggle.onValueChanged.AddListener(bool isOn => ...)`; use `SetIsOnWithoutNotify` to set state from data without firing callbacks.
+- Listen with `toggle.onValueChanged.AddListener(isOn => ...)`; use `SetIsOnWithoutNotify` to set state from data without firing callbacks.
 
 ## Slider
 

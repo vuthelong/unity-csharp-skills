@@ -1,7 +1,7 @@
 ---
 name: migrate-birp-to-urp
 description: Plans and runs a phased, verified migration of a Unity 6 project from the Built-in Render Pipeline to URP - URP asset setup, Render Pipeline Converter, material and particle conversion that keeps textures, PPv2 to Volume profiles, lighting rebakes, and custom shader triage. Use when the user wants to switch a project, scene, or material to URP, sees pink/magenta materials after switching, or wants a migration risk audit first. Needs a live Editor with eval.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: rendering-vfx
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/migrate-birp-to-urp"

@@ -1,7 +1,7 @@
 ---
 name: manage-sprite-atlas
 description: Creates, configures, and loads Sprite Atlas V2 assets from editor C#, by default through a prebuild generator - packables, packing and per-platform texture settings, HD/SD variants, late binding with Addressables, and runtime GetSprite caching. Use when the user wants to create or optimize sprite atlases, cut draw calls or texture memory for 2D/UI sprites, fix sprites missing at runtime because of atlases, or load atlases on demand.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: 2d
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/manage-sprite-atlas, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/spriteatlas"

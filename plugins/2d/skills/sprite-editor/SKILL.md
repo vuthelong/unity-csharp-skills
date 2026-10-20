@@ -1,7 +1,7 @@
 ---
 name: sprite-editor
 description: Edits sprite metadata (rects, names, pivots, 9-slice borders, outlines, physics shapes) and slices sprite sheets (automatic, grid, isometric) through ISpriteEditorDataProvider, run in the Editor via unity command eval or as a generated Editor script. Use when the user asks to slice a sprite sheet, set pivots or borders, rename sprites, set custom outlines, or extract a sprite to PNG. Not for atlas packing or texture compression.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: 2d
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/sprite-editor"
@@ -16,7 +16,7 @@ Sprite metadata lives inside the asset importer, not in a file you can safely ed
 
 1. **Prefer a connected Editor with `eval`.** Follow `unity-cli` to connect and confirm `eval` is in the command catalog. If `eval` is unavailable (no Editor reachable, no Pipeline package, or a Pipeline version that does not compile on this Editor), use the fallback below instead of stopping.
 2. **Build the snippet from the Safe Core Pattern** in [references/templates.md](references/templates.md): get the data provider, check edit capabilities, modify, `Apply()`, `SaveAndReimport()`.
-3. **Abort on a failed capability check.** Never bypass it, even if you think the call would work; that is how importer data gets corrupted.
+3. **Abort on a failed capability check.** Never bypass it, even if you think the call would work; that is how importer data gets corrupted. The only exception is a package too old to define the capability types (see the note under the Safe Core Pattern).
 4. **Verify**: re-read `GetSpriteRects()` (or the Console / Project window) and report what changed.
 
 **Fallback without `eval`:** write the same code as an Editor script under an `Editor` folder with a `[MenuItem]` entry point, and tell the user which menu item to run and what to check afterwards. Never hand-edit `.meta` files to change sprite data.

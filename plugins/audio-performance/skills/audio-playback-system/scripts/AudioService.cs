@@ -163,16 +163,16 @@ public sealed class AudioService : IDisposable
 
     #region Playback
 
-    public AudioHandle Play(AudioCue cue, Vector3 position) => PlayInternal(cue, position, null);
+    public AudioHandle Play(AudioCue cue, Vector3 position) => PlayInternal(cue, position, null, false);
 
     public AudioHandle Play(AudioCue cue, Transform follow)
     {
         if (follow == null) return AudioHandle.None;
 
-        return PlayInternal(cue, follow.position, follow);
+        return PlayInternal(cue, follow.position, follow, false);
     }
 
-    public AudioHandle Play2D(AudioCue cue) => PlayInternal(cue, this._root.position, null);
+    public AudioHandle Play2D(AudioCue cue) => PlayInternal(cue, this._root.position, null, true);
 
     public void PlayOneShot(AudioCue cue)
     {
@@ -187,7 +187,7 @@ public sealed class AudioService : IDisposable
         this._lastPlayTime[cue] = Time.unscaledTimeAsDouble;
     }
 
-    private AudioHandle PlayInternal(AudioCue cue, Vector3 position, Transform follow)
+    private AudioHandle PlayInternal(AudioCue cue, Vector3 position, Transform follow, bool force2D)
     {
         if (cue == null || this._disposed) return AudioHandle.None;
         if (!PassesCooldown(cue)) return AudioHandle.None;
@@ -211,6 +211,7 @@ public sealed class AudioService : IDisposable
 
         var source = voice.Source;
         cue.ApplyTo(source);
+        if (force2D) source.spatialBlend = 0f;
         source.clip = clip;
         source.volume = cue.PickVolume();
         source.pitch = cue.PickPitch();

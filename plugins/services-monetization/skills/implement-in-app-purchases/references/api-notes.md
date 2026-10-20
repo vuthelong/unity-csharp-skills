@@ -105,13 +105,22 @@ IGooglePlayStoreExtendedPurchaseService? GooglePlayStoreExtendedPurchaseService 
 When this event fires, Unity IAP **clears the cached product list and purchase list before raising the event**. Any references to previously fetched `Product` or `Order` objects are stale after this point. Re-run the full init sequence in the handler:
 
 ```csharp
-store.OnAuthAccountChanged += async () =>
+store.OnAuthAccountChanged += OnAuthAccountChanged;
+
+async void OnAuthAccountChanged()
 {
-    // Products and purchases have already been cleared — re-fetch everything
-    await catalogProvider.FetchRemoteCatalog();       // D2C only
-    store.FetchProducts(productDefinitions);          // standard IAP
-    store.FetchPurchases();
-};
+    try
+    {
+        // Products and purchases have already been cleared — re-fetch everything
+        await catalogProvider.FetchRemoteCatalog();       // D2C only
+        store.FetchProducts(productDefinitions);          // standard IAP
+        store.FetchPurchases();
+    }
+    catch (Exception e)
+    {
+        Debug.LogException(e);
+    }
+}
 ```
 
 Do not read from `GetProducts()` or `GetPurchases()` inside `OnAuthAccountChanged` — they will be empty.
@@ -170,10 +179,22 @@ async void Awake()
     m_StoreController.OnPurchaseFailed += (failed) => Debug.LogError($"{failed.FailureReason} - {failed.Details}");
     m_StoreController.OnPurchaseDeferred += (deferred) => Debug.Log("Purchase deferred (e.g., Ask-to-Buy)");
 
+    m_StoreController.OnProductsFetched += (fetched) => Debug.Log("Products ready");
+    m_StoreController.OnProductsFetchFailed += (failure) => Debug.LogError($"Product fetch failed: {failure.FailureReason}");
+    m_StoreController.OnPurchasesFetched += (orders) => Debug.Log($"Restored {orders.PendingOrders.Count} pending purchases");
+    m_StoreController.OnPurchasesFetchFailed += (failure) => Debug.LogError($"Purchase fetch failed: {failure.Message}");
+
     m_StoreController.OnStoreConnected += OnStoreConnected;
     m_StoreController.OnStoreDisconnected += (failure) => Debug.LogError($"Store disconnected: {failure.Message}");
 
-    await m_StoreController.Connect();
+    try
+    {
+        await m_StoreController.Connect();
+    }
+    catch (Exception e)
+    {
+        Debug.LogException(e);
+    }
 }
 
 void OnStoreConnected()
@@ -185,12 +206,7 @@ void OnStoreConnected()
         new ProductDefinition("com.mygame.vip_monthly", ProductType.Subscription)
     };
 
-    m_StoreController.OnProductsFetched += (fetched) => Debug.Log("Products ready");
-    m_StoreController.OnProductsFetchFailed += (failure) => Debug.LogError($"Product fetch failed: {failure.FailureReason}");
     m_StoreController.FetchProducts(products);
-
-    m_StoreController.OnPurchasesFetched += (orders) => Debug.Log($"Restored {orders.PendingOrders.Count} pending purchases");
-    m_StoreController.OnPurchasesFetchFailed += (failure) => Debug.LogError($"Purchase fetch failed: {failure.Message}");
     m_StoreController.FetchPurchases();
 }
 ```
@@ -205,8 +221,8 @@ new ProductDefinition("com.mygame.coins100", ProductType.Consumable)
 new ProductDefinition("com.mygame.coins100", ProductType.Consumable,
     new StoreSpecificIds
     {
-        { AppleAppStore.Name, "apple_coins_100" },
-        { GooglePlay.Name, "google_coins_100" }
+        { "apple_coins_100", AppleAppStore.Name },
+        { "google_coins_100", GooglePlay.Name }
     })
 ```
 
@@ -222,7 +238,7 @@ Product coinsPack = store.GetProductById("com.mygame.coins100");
 
 ### CatalogListings and uSku (v5.4+)
 
-In v5.4, `Product` exposes two new members. Prefer these for new code — `product.definition.id` and `productId` remain backwards compatible but point new users toward `CatalogListings`:
+v5.4 adds catalog listings and uSKUs. The member names below are not confirmed against the package API; check them in your installed `com.unity.purchasing` source before use, and fall back to `product.definition.id` if they are missing:
 
 ```csharp
 // product.uSku — the Unity-side identifier for the product (cross-platform canonical ID)
@@ -247,21 +263,21 @@ foreach (var (listingId, listing) in product.catalogListings)
 | `definition` | `ProductDefinition` | Store-side definition (id, storeSpecificId, type, payouts) |
 | `metadata` | `ProductMetadata` | Localized title, description, price, currency |
 
-When initiating a purchase by listing rather than by product ID, pass the `CatalogListing` directly to avoid a second lookup.
+If your package version has a `PurchaseProduct` overload that takes a `CatalogListing`, pass the listing directly to avoid a second lookup; otherwise purchase by `Product`.
 
 ## Two-Step Purchase Flow
 
 ```csharp
-// Step 1: Initiate purchase
-store.PurchaseProduct(product);
-
-// Step 2: Handle pending purchase (validate, grant content, then confirm)
+// Step 1: Handle pending purchase (validate, grant content, then confirm); subscribe once, before purchasing
 store.OnPurchasePending += (pendingOrder) =>
 {
-    var product = pendingOrder.CartOrdered.Items().FirstOrDefault()?.Product;
-    GrantContent(product);
+    var purchased = pendingOrder.CartOrdered.Items().FirstOrDefault()?.Product;
+    GrantContent(purchased);
     store.ConfirmPurchase(pendingOrder);
 };
+
+// Step 2: Initiate purchase
+store.PurchaseProduct(product);
 
 // Step 3: Purchase confirmed — Order can be ConfirmedOrder OR FailedOrder
 store.OnPurchaseConfirmed += (order) =>
@@ -311,20 +327,18 @@ Each restored purchase triggers `OnPurchasePending`.
 ## Entitlement Checking
 
 ```csharp
-store.CheckEntitlement(product);
-
 store.OnCheckEntitlement += (entitlement) =>
 {
     if (entitlement.Status == EntitlementStatus.FullyEntitled)
         Debug.Log($"Player owns: {entitlement.Product.definition.id}");
 };
+
+store.CheckEntitlement(product);
 ```
 
 ## Fetch Existing Purchases
 
 ```csharp
-store.FetchPurchases();
-
 store.OnPurchasesFetched += (orders) =>
 {
     foreach (var confirmedOrder in orders.ConfirmedOrders)
@@ -333,6 +347,8 @@ store.OnPurchasesFetched += (orders) =>
         Debug.Log($"Existing purchase: {product?.definition.id}");
     }
 };
+
+store.FetchPurchases();
 ```
 
 ## Receipt Validation
@@ -483,12 +499,12 @@ long     GetIntroductoryPricePeriodCycles()
 
 ## Failure Description Property Names
 
-Each type has public fields and read-only properties. Both compile, but prefer the PascalCase properties:
+Where a type has both a public field and a read-only property, both compile; prefer the PascalCase property. Names in the NOT column do not exist and cause CS1061:
 
 | Type | Field (lowercase) | Property (PascalCase) | NOT |
 |---|---|---|---|
 | `StoreConnectionFailureDescription` | `.message` | `.Message` | ~~`.reason`~~ |
-| `ProductFetchFailed` | — | `.FailureReason`, `.FailedFetchProducts` | — |
+| `ProductFetchFailed` | — | `.FailureReason`, `.FailedFetchProducts` | ~~`.Message`~~ |
 | `FailedOrder` | — | `.FailureReason`, `.Details` | — |
 | `PurchasesFetchFailureDescription` | `.message`, `.failureReason` | `.Message`, `.FailureReason` | — |
 

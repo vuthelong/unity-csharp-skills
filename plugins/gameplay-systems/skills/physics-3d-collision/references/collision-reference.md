@@ -76,8 +76,8 @@ Colliders stop with a small gap equal to the contact offset (default `0.01`, **P
 
 ## Sleeping and time
 
-- A Rigidbody sleeps when its kinetic energy per mass stays below `Rigidbody.sleepThreshold` (default from `Physics.sleepThreshold`) for a few steps. Sleeping bodies ignore tiny forces and stop sending `OnCollisionStay`.
-- Detect with `rb.IsSleeping()`. Fix with `rb.WakeUp()`, a larger force, or `rb.sleepThreshold = 0` on that body only.
+- A Rigidbody sleeps when its kinetic energy per mass stays below `Rigidbody.sleepThreshold` (default from `Physics.sleepThreshold`) for a few steps. Sleeping bodies stop sending `OnCollisionStay`. `AddForce`/`AddTorque` with a non-zero vector wakes the body by default.
+- Detect with `rb.IsSleeping()`. Wake bodies that get no force (moved by script, resting on a moving static collider) with `rb.WakeUp()`, or set `rb.sleepThreshold = 0` on that body only.
 - Moving a static collider (no Rigidbody) does not wake bodies resting on it; give moving platforms a kinematic Rigidbody and move them with `MovePosition` in `FixedUpdate`.
 - `Time.timeScale = 0` stops simulation and callbacks; queries keep working. Physics steps advance in scaled time, so slow motion lowers the real-time step rate and looks choppy; for smooth slow motion also set `Time.fixedDeltaTime = baseFixedDelta * Time.timeScale` and restore it afterwards.
 

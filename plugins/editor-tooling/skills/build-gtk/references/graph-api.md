@@ -304,8 +304,8 @@ static void AddGraphMenuEntries(GraphMenuContext context)
 }
 ```
 
-`MenuContext`: `object ClickedObject`, `Vector2 MousePosition`, `AppendAction(name, Action)`,
-`AppendAction(name, Action<DropdownMenuAction>[, status callback])`, `AppendSeparator(subMenuPath)`.
+`GraphMenuContext`: `object ClickedObject`, `Vector2 MousePosition`, `AppendAction(name, Action)`,
+`AppendAction(name, Action<DropdownMenuAction>[, status callback])`, `AppendSeparator([subMenuPath])`.
 `[BlackboardMenu(typeof(MyGraph))]` receives the same context for the Blackboard.
 
 ## 12. Node look: colors, accent, USS, custom UI

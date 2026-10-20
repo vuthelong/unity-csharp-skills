@@ -1,7 +1,7 @@
 ---
 name: build-gtk
 description: "Builds node-based Editor tools with Unity Graph Toolkit (Unity.GraphToolkit.Editor): Graph and Node subclasses, ports and options, subgraphs, blackboard variables, validation, and ScriptedImporters that compile graphs into runtime assets, plus the State Machine API on 6000.7+. Use for dialogue, quest or behaviour graph editors, node-based content tools, or migrating a GraphView tool. Triggers: \"make a node editor\", \"empty Add menu\". Targets 6000.6+; not for Shader Graph, VFX Graph or Animator."
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: editor-tooling
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/build-gtk"

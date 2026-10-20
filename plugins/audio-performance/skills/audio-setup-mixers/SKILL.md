@@ -1,7 +1,7 @@
 ---
 name: audio-setup-mixers
 description: Routes scene AudioSources into the right AudioMixerGroup (Music, SFX, Foley, Voice, UI, Ambience) by classifying what each plays, and covers runtime mixer control - exposed parameters, snapshots, ducking, and dB-correct volume sliders. Use when cleaning up or setting outputAudioMixerGroup, deciding which group a sound belongs in, or wiring a settings slider to AudioMixer.SetFloat. Mixer and group creation stay manual (no public API).
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: audio-performance
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/audio-setup-mixers, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/audio"

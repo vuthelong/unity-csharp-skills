@@ -1,6 +1,6 @@
 ---
 name: unity-editor-safety
-description: "Safety rules and recovery steps for an agent changing a Unity 6 project: confirming C# edits really compiled via Editor.log, Safe Mode and stale-assembly recovery, domain reload side effects, one Editor per project, never hand-editing open scenes, preserving GUIDs/fileIDs in .unity/.prefab/.meta YAML, and headless tests. Use after editing .cs files or when Unity shows \"Enter Safe Mode?\", changes \"don't take effect\", tests fail exactly as before a fix, or before moving or deleting assets."
+description: "Safety rules and recovery steps for an agent changing a Unity 6 project: confirming C# edits really compiled via Editor.log, Safe Mode and stale-assembly recovery, domain reload side effects, one Editor per project, never hand-editing open scenes, preserving GUIDs/fileIDs in .unity/.prefab/.meta YAML. Use after editing .cs files or when Unity shows \"Enter Safe Mode?\", changes \"don't take effect\", tests fail exactly as before a fix, or before moving or deleting assets. Not for `unity` CLI connection failures or running builds/tests (use unity-cli)."
 license: MIT
 metadata:
   category: csharp-core
@@ -40,7 +40,7 @@ Detailed triage (Safe Mode, stale logs, wrong-version logs, local packages, hang
 
 - While any assembly has compile errors, Unity keeps running the last successfully compiled assemblies. New code, new `[MenuItem]`s, new tests and `[InitializeOnLoad]` changes do not exist yet. Tests "failing exactly as before your fix" usually mean the fix never compiled.
 - An error in one asmdef blocks every assembly that references it.
-- Opening a project with compile errors shows "Enter Safe Mode?". In Safe Mode only scripts are imported; fix the CS errors and Unity leaves Safe Mode after a clean compile. Do not launch another instance to "get past" the dialog.
+- Opening a project with compile errors shows "Enter Safe Mode?". In Safe Mode only scripts are imported; fix the CS errors and Unity leaves Safe Mode on its own after a clean recompile. The Pipeline package does not load in Safe Mode, so a `unity` CLI connection may still need an Editor restart afterwards (see `unity-cli`). Do not launch another instance to "get past" the dialog.
 - `-batchmode` runs fail on compile errors. `-ignorecompilererrors` exists but runs stale code; do not use it to make a run "pass".
 
 ## Domain reload
@@ -51,7 +51,7 @@ Every script recompile (and, by default, entering Play Mode) reloads the scripti
 - Editor state that must survive belongs in `SessionState` (per session) or `EditorPrefs` (per machine), or in serialized `ScriptableSingleton<T>`.
 - With Enter Play Mode Settings set to skip domain reload, statics are **not** reset between Play sessions. Every mutable static needs a `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]` reset (see `csharp-unity`).
 - A reload triggered by your own action (saving a script, adding a package, editing an asmdef) can cut off the response of the tool that triggered it. Assume the change applied; verify state before retrying, or you may apply it twice.
-- Editing scripts during Play Mode follows Preferences > General > Script Changes While Playing; the default recompiles after Play Mode ends. Scene changes made during Play Mode are lost when it ends.
+- Editing scripts during Play Mode follows Preferences > General > Script Changes While Playing; check that setting before saving a script mid-Play, because some options recompile (and reload the domain) immediately. Scene changes made during Play Mode are lost when it ends.
 
 ## Scenes and prefabs
 

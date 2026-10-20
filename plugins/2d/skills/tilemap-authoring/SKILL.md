@@ -1,7 +1,7 @@
 ---
 name: tilemap-authoring
 description: Builds 2D tile levels with Unity Tilemap and Rule Tiles from C# - Grid and Tilemap hierarchies, Tile and RuleTile assets, rectangular, isometric, and hex Tile Palettes, painting with SetTile/SetTiles, tilemap colliders, and tiling rules generated from terrain sprites. Use when the user wants a tilemap level, a tile palette, auto-tiling walls or terrain, neighbor rules, an empty RuleTile template, or isometric/hex sorting fixes.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: 2d
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/tilemap-palette-create, https://github.com/Unity-Technologies/skills/tree/main/skills/tilemap-ruletile-createempty, https://github.com/Unity-Technologies/skills/tree/main/skills/tilemap-ruletile-createfromsegment, https://github.com/Unity-Technologies/skills/tree/main/skills/sprite-segment-3x3grid, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/tilemap"

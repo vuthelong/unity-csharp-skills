@@ -13,7 +13,7 @@ If a new Importer does not need to be created, skip to Step 3
 - Check what kind of file (eg. point cloud, CAD) is it. Find the Importer type that would best match it.
 
 ### Step 2: Create Importer
-- Create the appropriate Importer asset with the path to the file to be imported. The path must be relative to the Application.dataPath.
+- Create the appropriate Importer asset with the path to the file to be imported. The path must be an absolute system path to the source file (see `CreateImporter` below).
 - If there are issues, fix and revalidate. Do not exceed 3 iterations.
 Do not continue if this step cannot be completed successfully.
 

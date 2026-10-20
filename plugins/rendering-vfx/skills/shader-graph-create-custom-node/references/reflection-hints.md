@@ -7,11 +7,11 @@ Hints are XML-like tags inside `///` doc comments placed directly above a functi
 | Tag | Required | Meaning |
 |---|---|---|
 | `sg:ProviderKey` | yes | Unique, stable ID for the node. Graphs reference nodes by this key; never change it after release. Use a namespaced value such as `MyStudio.Remap01`. |
-| `sg:DisplayName` | yes | Node title. |
-| `sg:SearchCategory` | yes | Create Node menu path, `/`-separated. |
-| `sg:SearchTerms` | yes | Comma-separated search keywords. |
+| `sg:DisplayName` | no | Node title. Defaults to a formatted version of the HLSL function name. |
+| `sg:SearchCategory` | no | Create Node menu path, `/`-separated. Defaults to the namespace, or the source file path without one. |
+| `sg:SearchTerms` | no | Comma-separated search keywords. |
 | `sg:SearchName` | no | Name shown in search results if different from the display name. |
-| `sg:ReturnDisplayName` | no | Label for the return-value output port. |
+| `sg:ReturnDisplayName` | no | Label for the return-value output port (default `Out`). |
 | `Precision` | no | Node gets a precision selector; pair with `Dynamic` parameters. |
 
 ## Parameter hints (`<paramhints name="param">`)

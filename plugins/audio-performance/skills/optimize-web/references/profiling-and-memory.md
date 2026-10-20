@@ -26,7 +26,7 @@ Editor Play Mode does not represent browser runtime. Always measure a build in t
 Browser profilers show mangled names by default. Options:
 
 - Development builds: Player > Publishing Settings > Debug Symbols = External or Embedded.
-- Function names only, minimal overhead: add [../scripts/WebProfilingBuildProcessor.cs](../scripts/WebProfilingBuildProcessor.cs) under `Assets/Editor/`. It adds `--compiler-flags=--profiling-funcs` to the IL2CPP arguments for WebGL development builds and removes it for release builds, preserving any other arguments.
+- Function names only, minimal overhead (unverified on Unity 6): `--profiling-funcs` is an Emscripten link flag, and it is not confirmed that IL2CPP's `--compiler-flags` forwards it to the link step. [../scripts/Editor/WebProfilingBuildProcessor.cs](../scripts/Editor/WebProfilingBuildProcessor.cs), saved under `Assets/Editor/`, adds `--compiler-flags=--profiling-funcs` to the IL2CPP arguments for WebGL development builds and removes it for release builds, preserving any other arguments. Check that the profile actually shows names; if it still shows `wasm-function[N]`, use Debug Symbols above, or try `--profiling-funcs` in `PlayerSettings.WebGL.emscriptenArgs` like the profilers below.
 
 ## Emscripten profilers
 

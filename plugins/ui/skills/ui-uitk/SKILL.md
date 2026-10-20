@@ -1,7 +1,7 @@
 ---
 name: ui-uitk
 description: Understands, edits and generates Unity 6 UI Toolkit UI - UXML layouts, USS styling, UIDocument and PanelSettings, runtime data binding, custom controls, manipulators, Painter2D and SVG icons, plus editor UI via CreateGUI and CreateInspectorGUI. Use for .uxml, .uss or .tss files, UI Builder, UIElements, binding questions, or any new EditorWindow, custom inspector or PropertyDrawer (the default for new editor tools).
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: ui
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/ui-uitk"

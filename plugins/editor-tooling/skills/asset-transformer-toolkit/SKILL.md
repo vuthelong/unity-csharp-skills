@@ -1,7 +1,7 @@
 ---
 name: asset-transformer-toolkit
 description: "Imports CAD, 3D model and point-cloud files with Unity Asset Transformer Toolkit (formerly the Pixyz Plugin, com.unity.industry.toolkit 4.0+) and creates, edits and runs its RuleSets, Rules and Actions (decimate, merge, repair, LOD generation) by running C# in the open Editor. Use when the user mentions Pixyz, Asset Transformer, importing CAD/STEP or point clouds, building an importer or RuleSet, or generating LODs on imported models. Not for Pixyz Studio."
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: editor-tooling
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/asset-transformer-toolkit"

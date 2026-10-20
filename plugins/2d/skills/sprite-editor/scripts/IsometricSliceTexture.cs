@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using UnityEditor.U2D.Sprites;
@@ -17,8 +18,17 @@ namespace SpriteEditorTools
             if (texture == null)
                 return false;
 
-            var rects = GetIsometricRects(texture, size, offset, isAlternate, keepEmptyRects);
-            var newRects = SpriteEditorUtility.GenerateNewSpriteRects(spriteDataProvider, rects, slicingMethod, nameGenerator, kOverlapTolerance, kBestFitTolerance, bestFit);
+            List<SpriteRect> newRects;
+            try
+            {
+                var rects = GetIsometricRects(texture, size, offset, isAlternate, keepEmptyRects);
+                newRects = SpriteEditorUtility.GenerateNewSpriteRects(spriteDataProvider, rects, slicingMethod, nameGenerator, kOverlapTolerance, kBestFitTolerance, bestFit);
+            }
+            finally
+            {
+                SpriteEditorUtility.ReleaseTextureToSlice(textureProvider, texture);
+            }
+
             foreach (var spriteRect in newRects)
             {
                 spriteRect.alignment = alignment;
@@ -114,3 +124,4 @@ namespace SpriteEditorTools
         }
     }
 }
+#endif

@@ -231,7 +231,7 @@ namespace MyGame.MasterData.Editor
                         records.Add(record);
                         record = new List<string>();
                         break;
-                    case '﻿':
+                    case '\uFEFF':
                         break;
                     default:
                         cell.Append(c);

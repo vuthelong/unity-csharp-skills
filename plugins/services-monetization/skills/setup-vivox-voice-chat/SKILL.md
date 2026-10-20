@@ -1,7 +1,7 @@
 ---
 name: setup-vivox-voice-chat
 description: Adds in-game voice and text chat with Unity Vivox 16+ (VivoxService) - init and login with Unity Authentication, party, team or lobby channels, positional proximity voice, push-to-talk, mute and volume controls, VAD tuning, speaking indicators, direct messages, chat history, and mobile/WebGL mic permissions. Use when the user asks for voice chat, mic support, proximity or team voice, mute buttons or DMs, or is migrating from legacy Vivox v15 (Client.Instance, ILoginSession).
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: services-monetization
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/setup-vivox-voice-chat"

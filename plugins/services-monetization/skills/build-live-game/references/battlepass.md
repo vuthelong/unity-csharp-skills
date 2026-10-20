@@ -493,6 +493,7 @@ Attach to the same GameObject as `BattlePassManager` in your test scene. Wire `m
 the Inspector, or let it fall back to `GetComponent`.
 
 ```csharp
+using System;
 using System.Text;
 using UnityEngine;
 
@@ -526,10 +527,17 @@ public class BattlePassTester : MonoBehaviour
         Debug.Log($"[BattlePassTester] Awarding 100 XP to '{firstPass.PassId}' " +
             $"(source: match_complete) ...");
 
-        var result = await m_Manager.AwardXpAsync(firstPass.PassId, 100, "match_complete");
+        try
+        {
+            var result = await m_Manager.AwardXpAsync(firstPass.PassId, 100, "match_complete");
 
-        Debug.Log($"[BattlePassTester] After award — " +
-            $"XP={result.CurrentXp}, Tier={result.CurrentTier}");
+            Debug.Log($"[BattlePassTester] After award — " +
+                $"XP={result.CurrentXp}, Tier={result.CurrentTier}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+        }
     }
 
     void LogState(string label)

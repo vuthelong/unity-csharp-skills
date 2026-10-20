@@ -67,6 +67,7 @@ public class RigidbodyCharacterMotor : MonoBehaviour
         this._rigidbody = GetComponent<Rigidbody>();
         this._capsule = GetComponent<CapsuleCollider>();
         if (this.cameraTransform == null && Camera.main != null) this.cameraTransform = Camera.main.transform;
+        if (gameObject.layer != 0) this.groundMask &= ~(1 << gameObject.layer);
 
         this._rigidbody.isKinematic = false;
         this._rigidbody.useGravity = true;
@@ -101,10 +102,10 @@ public class RigidbodyCharacterMotor : MonoBehaviour
 
     private void Update()
     {
-        this._moveInput = this.moveAction != null ? this.moveAction.action.ReadValue<Vector2>() : Vector2.zero;
-        this._sprintHeld = this.sprintAction != null && this.sprintAction.action.IsPressed();
+        this._moveInput = this.moveAction != null && this.moveAction.action != null ? this.moveAction.action.ReadValue<Vector2>() : Vector2.zero;
+        this._sprintHeld = this.sprintAction != null && this.sprintAction.action != null && this.sprintAction.action.IsPressed();
 
-        if (this.jumpAction != null && this.jumpAction.action.WasPressedThisFrame())
+        if (this.jumpAction != null && this.jumpAction.action != null && this.jumpAction.action.WasPressedThisFrame())
         {
             this._lastJumpPressedTime = Time.time;
         }
@@ -153,8 +154,14 @@ public class RigidbodyCharacterMotor : MonoBehaviour
         var hasHit = Physics.SphereCast(origin, probeRadius, Vector3.down, out var hit, distance, this.groundMask, QueryTriggerInteraction.Ignore);
         var movingUp = Vector3.Dot(this._rigidbody.linearVelocity, Vector3.up) > 0.1f && Time.time - this._lastGroundedTime > this.coyoteTime;
 
-        this._isGrounded = hasHit && !movingUp && Vector3.Angle(hit.normal, Vector3.up) <= this.maxSlopeAngle;
-        this._groundNormal = this._isGrounded ? hit.normal : Vector3.up;
+        var normal = hit.normal;
+        if (hasHit && Physics.Raycast(hit.point + Vector3.up * 0.1f, Vector3.down, out var faceHit, 0.2f, this.groundMask, QueryTriggerInteraction.Ignore))
+        {
+            normal = faceHit.normal;
+        }
+
+        this._isGrounded = hasHit && !movingUp && Vector3.Angle(normal, Vector3.up) <= this.maxSlopeAngle;
+        this._groundNormal = this._isGrounded ? normal : Vector3.up;
         this._groundBody = this._isGrounded ? hit.rigidbody : null;
 
         if (this._isGrounded) this._lastGroundedTime = Time.time;

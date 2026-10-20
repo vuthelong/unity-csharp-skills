@@ -99,8 +99,8 @@ If `PlatformIdOverrides` has separate Apple and Google IDs, use `StoreSpecificId
 new ProductDefinition("coins_100", ProductType.Consumable,
     new StoreSpecificIds
     {
-        { AppleAppStore.Name, "apple_coins_100" },
-        { GooglePlay.Name, "google_coins_100" }
+        { "apple_coins_100", AppleAppStore.Name },
+        { "google_coins_100", GooglePlay.Name }
     })
 ```
 

@@ -1,7 +1,7 @@
 ---
 name: implement-in-app-purchases
 description: Implements, debugs and migrates real-money purchases with Unity IAP 5.x (StoreController) - store connection, product catalog, consumables, non-consumables, subscriptions, pending/confirm flow, receipt validation, restore, Apple and Google extensions, and D2C web payments (Stripe/Coda). Use for shops, microtransactions or "restore purchases", or when migrating from IAP v4, native BillingClient/StoreKit, RevenueCat, Adapty, Essential Kit or UniPay. Not for virtual currency or ads.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: services-monetization
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/implement-in-app-purchases"
@@ -144,7 +144,7 @@ Subscribe to events **BEFORE** calling `Connect()` — pending purchases from a 
 
 ## Failure Description Property Names
 
-These property names are NOT interchangeable — using the wrong one causes CS1061:
+Where a type has both a field and a property, both compile; prefer the property. Names in the NOT column do not exist and cause CS1061:
 
 | Type | Field | Property | NOT |
 |---|---|---|---|

@@ -78,7 +78,7 @@ Entry points registered in the child start right after it is created. Keep the r
 
 ### Async / background build
 
-Set `autoRun = false`, load the scene, then `await UniTask.Run(() => scope.Build());`. Unity-dependent registrations such as `RegisterComponentInHierarchy` must not run on a worker thread; collect scene references in an overridden `Awake` (call `base.Awake()`) and use `RegisterInstance` in `Configure`. The `VCONTAINER_PARALLEL_CONTAINER_BUILD` define builds registrations in parallel (only worth it for many registrations).
+Set `autoRun = false`, load the scene, then `await UniTask.RunOnThreadPool(() => scope.Build(), cancellationToken: ct);`. Unity-dependent registrations such as `RegisterComponentInHierarchy` must not run on a worker thread; collect scene references in an overridden `Awake` (call `base.Awake()`) and use `RegisterInstance` in `Configure`. The `VCONTAINER_PARALLEL_CONTAINER_BUILD` define builds registrations in parallel (only worth it for many registrations).
 
 ## Entry points (`VContainer.Unity`)
 

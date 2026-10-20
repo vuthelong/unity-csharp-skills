@@ -77,6 +77,7 @@ public class CharacterControllerMotor : MonoBehaviour
     {
         this._controller = GetComponent<CharacterController>();
         if (this.cameraTransform == null && Camera.main != null) this.cameraTransform = Camera.main.transform;
+        if (gameObject.layer != 0) this.groundMask &= ~(1 << gameObject.layer);
     }
 
     private void OnEnable()
@@ -95,10 +96,10 @@ public class CharacterControllerMotor : MonoBehaviour
         ApplyPlatformMotion();
         ProbeGround();
         UpdateVertical(deltaTime);
-        RotateTowardsInput(deltaTime);
 
         if (this.useRootMotion) return;
 
+        RotateTowardsInput(deltaTime);
         UpdateHorizontal(deltaTime);
         var horizontalMotion = this._horizontalVelocity * deltaTime;
         MoveController(horizontalMotion, deltaTime);
@@ -239,7 +240,7 @@ public class CharacterControllerMotor : MonoBehaviour
 
     private void UpdateVertical(float deltaTime)
     {
-        if (this._hasGround && this._verticalVelocity <= 0f)
+        if (this._hasGround && this._controller.isGrounded && this._verticalVelocity <= 0f)
         {
             this._verticalVelocity = GroundedStickVelocity;
         }

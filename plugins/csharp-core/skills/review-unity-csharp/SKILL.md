@@ -15,7 +15,7 @@ Read every in-scope file completely. Leaks and lifecycle bugs are found by pairi
 ## Workflow
 
 1. **Scope.** Confirm the files. For "my changes" / "this branch", list changed `.cs` files with `git diff --name-only` against the base branch instead of guessing.
-2. **Context.** Read `ProjectSettings/ProjectVersion.txt` (API drift), `Packages/manifest.json` (UniTask, Addressables, DOTween, Input System), and whether Enter Play Mode Options disable domain reload (`m_EnterPlayModeOptionsEnabled` / `m_EnterPlayModeOptions` in `ProjectSettings/EditorSettings.asset`).
+2. **Context.** Read `ProjectSettings/ProjectVersion.txt` (API drift), `Packages/manifest.json` (UniTask, Addressables, DOTween, Input System), and whether Enter Play Mode Options disable domain reload (`m_EnterPlayModeOptions` in `ProjectSettings/EditorSettings.asset`, plus `m_EnterPlayModeOptionsEnabled` where that key is present).
 3. **Read fully** every in-scope file, plus the declarations of any events, singletons or managers they subscribe to.
 4. **Widen the net.** Use IDE diagnostics if an IDE integration is available, otherwise grep the project with the sweep patterns in [references/leak-checklist.md](references/leak-checklist.md). Use `git log -p` / `git blame` to tell new problems from pre-existing ones.
 5. **Pair lifecycles.** For every subscribe/allocate/register, find its cleanup. Missing cleanup is a finding.
@@ -44,7 +44,7 @@ Details and before/after code: [references/bug-checklist.md](references/bug-chec
 - Magic tag/layer/scene/animator strings instead of constants or cached hashes
 - `UnityEngine.Input` used while the project is Input System only (throws)
 - Runtime script referencing `UnityEditor` without `#if UNITY_EDITOR` (breaks player builds)
-- Obsolete Unity 6 APIs: `FindObjectOfType`, `FindObjectsOfType`, `Rigidbody.velocity`/`drag`, `GetInstanceID` (newer Unity 6 releases deprecate it in favor of `EntityId`; check the Console/API docs for the exact version). Full list: `csharp-unity` reference `unity6-api-changes.md`
+- Obsolete Unity 6 APIs: `FindObjectOfType`, `FindObjectsOfType`, `Rigidbody.velocity`/`drag`, `GetInstanceID` (CS0619 on 6000.5+; use `GetEntityId()`, guarded with `UNITY_6000_5_OR_NEWER` in code shared with older minors). Full list: `csharp-unity` reference `unity6-api-changes.md`
 - C# 10+ syntax (file-scoped namespace, `global using`, `record struct`, `required`) that Unity 6's C# 9 compiler rejects
 
 ## Checklist 2: memory and resource leaks

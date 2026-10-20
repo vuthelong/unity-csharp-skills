@@ -20,7 +20,7 @@ Reference files, read when needed:
 ## Workflow
 
 1. Install in Unity (both steps, not one):
-   - NuGet `MessagePack` with NuGetForUnity (setup in `r3` -> "NuGetForUnity setup"). This brings `MessagePack.Annotations` and `MessagePackAnalyzer` (analyzers + source generator).
+   - NuGet `MessagePack` with NuGetForUnity (add NuGetForUnity once from git URL `https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity`, then **NuGet > Manage NuGet Packages**; analyzer DLLs need no platforms ticked and the `RoslynAnalyzer` label; on assembly version conflicts clear **Player > Assembly Version Validation**). This brings `MessagePack.Annotations` and `MessagePackAnalyzer` (analyzers + source generator).
    - UPM git URL, same version as the NuGet package: `https://github.com/MessagePack-CSharp/MessagePack-CSharp.git?path=src/MessagePack.UnityClient/Assets/Scripts/MessagePack#v3.1.11` (package `com.github.messagepack-csharp`, asmdef `MessagePack.Unity`, `allowUnsafeCode: true`). Tags are `vX.Y.Z`.
    - **One MessagePack version for the whole project: 3.1.11** (minimum 3.1.7, required by MagicOnion 7.11.0; MasterMemory 3.0.4 needs 3.1.3+). The `MessagePack` NuGet version and the MessagePack.Unity UPM tag must be identical; when NuGetForUnity resolves a higher `MessagePack` for MagicOnion or MasterMemory, bump the UPM `#vX.Y.Z` to match.
    - .NET server sharing Unity types: NuGet `MessagePack.UnityShims` (shim `UnityEngine.Vector3` etc. plus the same `UnityResolver`).
@@ -157,8 +157,6 @@ public static class MessagePackBootstrap
         {
             StaticCompositeResolver.Instance.Register(
                 GeneratedMessagePackResolver.Instance,
-                MyGame.MasterData.MasterMemoryResolver.Instance,
-                MagicOnionGeneratedClientInitializer.Resolver,
                 UnityResolver.Instance,
                 StandardResolver.Instance);
             _registered = true;
@@ -173,7 +171,7 @@ public static class MessagePackBootstrap
 }
 ```
 
-- Keep only the lines you use: `GeneratedMessagePackResolver` (your DTO assembly), `MasterMemoryResolver` (`mastermemory`, in the namespace set by `MasterMemoryGeneratorOptions`), `MagicOnionGeneratedClientInitializer.Resolver` (`magiconion`), `UnityResolver` (only with the MessagePack.Unity UPM package and Unity types in DTOs). Order matters: the first resolver that returns a formatter wins, so specific/generated resolvers go first and `StandardResolver` last.
+- Resolver list: `GeneratedMessagePackResolver` (your DTO assembly), `UnityResolver` (only with the MessagePack.Unity UPM package and Unity types in DTOs; drop it otherwise). With `mastermemory` installed, add its generated `MasterMemoryResolver.Instance` (namespace set by `MasterMemoryGeneratorOptions`) after `GeneratedMessagePackResolver`. With `magiconion` installed, add `MagicOnionGeneratedClientInitializer.Resolver` there too. Order matters: the first resolver that returns a formatter wins, so specific/generated resolvers go first and `StandardResolver` last.
 - Every resolver listed must be accessible from the bootstrap's assembly. `GeneratedMessagePackResolver` is `internal` and generated per assembly, and the MagicOnion initializer is usually declared `internal`, so put the bootstrap in the asmdef that owns them (typically the client/DTO asmdef) or declare the initializer `public`.
 - `GeneratedMessagePackResolver` (namespace `MessagePack`, internal `partial class`) holds only its own assembly's formatters. Types in other asmdefs are still found through `StandardResolver` -> `SourceGeneratedFormatterResolver`. Rename it with `[GeneratedMessagePackResolver] partial class MyResolver { }`; aggregate formatters/resolvers at compile time with `[CompositeResolver(typeof(...), ...)] partial class MyCompositeResolver { }`.
 - `StaticCompositeResolver.Register` throws after the first `GetFormatter` call, and the static instance survives Play sessions when domain reload is disabled. The `_registered` guard handles both.

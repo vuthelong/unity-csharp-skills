@@ -21,7 +21,7 @@ Skill names are unique across the whole repo, kebab-case, and match the folder n
    ---
    name: skill-name
    description: What it does and when to trigger. Third person. Name concrete triggers (APIs, package ids, file types, user phrasings). Under 1024 chars.
-   license: MIT | Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+   license: MIT   # or exactly: Unity Companion License
    metadata:
      category: <category>
      sources: "<origin repo>/<path>[, <origin repo>/<path>]"

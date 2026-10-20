@@ -1,7 +1,7 @@
 ---
 name: initialize-ai-navigation
 description: Sets up, scripts and troubleshoots Unity AI Navigation (com.unity.ai.navigation 2.x) in Unity 6 - NavMeshSurface baking at edit time or runtime, NavMeshAgent, obstacle carving, NavMeshLink, modifiers, agent types, areas and costs. Use for pathfinding, patrol routes, click-to-move, chase AI, jump or drop links, procedural-level navmesh or agent-driven animation, or when an agent will not move, a path is partial or invalid, or agents slide through obstacles.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: gameplay-systems
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/initialize-ai-navigation, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/navigation"

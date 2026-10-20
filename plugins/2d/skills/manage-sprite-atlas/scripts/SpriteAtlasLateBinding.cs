@@ -61,9 +61,13 @@ public static class SpriteAtlasLateBinding
             return;
         }
 
+        if (!s_Handles.TryGetValue(tag, out var stored) || !stored.Equals(handle))
+            return;
+
         Debug.LogError($"[SpriteAtlas] Failed to load atlas '{tag}': {handle.OperationException}");
         s_Handles.Remove(tag);
-        Addressables.Release(handle);
+        if (handle.IsValid())
+            Addressables.Release(handle);
     }
 
     public static AsyncOperationHandle<SpriteAtlas> Preload(string atlasAddress)

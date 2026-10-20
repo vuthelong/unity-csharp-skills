@@ -8,7 +8,7 @@ Misclassifying the Editor's state is the most common agent mistake. Work through
 |---|---|---|
 | No Unity process for the project, no `Temp/UnityLockfile` (or a stale one from a crash) | Not running | Open the project, or use a headless run with the exact version |
 | Process alive, Editor log still growing with import/compile lines | Booting, importing or compiling | Wait. Do not edit more files or start tests |
-| Process alive, "Enter Safe Mode?" dialog or Safe Mode banner | Compile errors at startup | Read errors from `Editor.log`, fix source, let it recompile |
+| Process alive, "Enter Safe Mode?" dialog or Safe Mode banner | Compile errors at startup | Read errors from `Editor.log`, fix source, let it recompile; Unity leaves Safe Mode on its own after a clean recompile, but restart the Editor if the `unity` CLI still cannot connect |
 | Process alive, log idle, Editor unresponsive | Modal dialog (unsaved changes, "modified externally", import error) or hang | Ask the user to look at the Editor; a modal cannot be closed from outside |
 | Process alive, log shows `Could not register to wait for file descriptor` / `Bee.BeeDriver` / `Unhandled exception during build` | Build driver crashed (see below) | Save work, restart the Editor |
 | Process alive, responsive, edits not taking effect | Not refreshed or stale assembly | See "Edits do not take effect" |

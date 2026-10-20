@@ -9,7 +9,7 @@
 | iOS | Vorbis or MP3 | `AudioCompressionFormat.AAC` exists in the enum but is not offered by the iOS importer; read the override back after setting it |
 | Xbox | XMA | Platform override |
 | PlayStation | ATRAC9 | Platform override |
-| Web | Vorbis | Browser decodes; the Web importer exposes a reduced format list, so read the override back |
+| Web | AAC (automatic) | Unity imports AudioClips as AAC for Web builds and the browser decodes them; tune Load Type, sample rate and Force To Mono instead of the format |
 
 ADPCM: ~3.5x smaller than PCM, very cheap to decode, adds noise. Good for footsteps, impacts, UI clicks. Bad for music or anything tonal.
 PCM: no decode cost, largest size. Only for tiny clips where latency matters.

@@ -59,7 +59,7 @@ capsule.sharedMaterial = material;
 ## Interpolation and the camera
 
 - Interpolation only changes the rendered `transform`; `Rigidbody.position` stays at the physics pose. Read `rigidbody.position` in `FixedUpdate`, `transform.position` in `Update`/`LateUpdate`.
-- Writing `transform.position` on an interpolated body breaks interpolation for that frame; use `Rigidbody.position` (teleport) or `MovePosition` (swept for kinematic).
+- Writing `transform.position` on an interpolated body breaks interpolation for that frame; use `Rigidbody.position` (teleport) or `MovePosition`.
 - Cinemachine: leave the Brain on `SmartUpdate` or `LateUpdate` when the target is interpolated. `FixedUpdate` on the Brain plus an interpolated target produces jitter.
 
 ## Slopes and steps
@@ -94,4 +94,4 @@ private void OnAnimatorMove()
 }
 ```
 
-Set the Animator **Update Mode** to **Animate Physics** so `OnAnimatorMove` runs in the physics step and `deltaPosition` matches `Time.fixedDeltaTime`. The Animator must be on the same GameObject as the script.
+Set the Animator **Update Mode** to **Fixed** (`AnimatorUpdateMode.Fixed`, formerly Animate Physics) so `OnAnimatorMove` runs in the physics step and `deltaPosition` matches `Time.fixedDeltaTime`. The Animator must be on the same GameObject as the script.

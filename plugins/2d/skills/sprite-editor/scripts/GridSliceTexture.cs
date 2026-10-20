@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using UnityEditor.U2D.Sprites;
 using UnityEngine;
@@ -14,10 +15,18 @@ namespace SpriteEditorTools
             if (texture == null)
                 return false;
 
-            var rects = UnityEditorInternal.InternalSpriteUtility.GenerateGridSpriteRectangles(texture, offset, size, padding, keepEmptyRects);
-            var newRects = GenerateNewSpriteRects(spriteDataProvider, rects, addNewSpriteMethod, nameGenerator, kOverlapTolerance, kBestFitTolerance, bestFit);
-            ApplySpriteRects(spriteDataProvider, newRects);
-            return true;
+            try
+            {
+                var rects = UnityEditorInternal.InternalSpriteUtility.GenerateGridSpriteRectangles(texture, offset, size, padding, keepEmptyRects);
+                var newRects = GenerateNewSpriteRects(spriteDataProvider, rects, addNewSpriteMethod, nameGenerator, kOverlapTolerance, kBestFitTolerance, bestFit);
+                ApplySpriteRects(spriteDataProvider, newRects);
+                return true;
+            }
+            finally
+            {
+                ReleaseTextureToSlice(textureProvider, texture);
+            }
         }
     }
 }
+#endif

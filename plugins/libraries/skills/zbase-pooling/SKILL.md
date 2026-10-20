@@ -1,6 +1,6 @@
 ---
 name: zbase-pooling
-description: "Sets up Zitga-Tech ZBase.Foundation.Pooling for pooling C# objects, collections, GameObjects and Components, including UniTask async pools, prepooling and Addressables pools, and chooses between it and UnityEngine.Pool. Use when adding object pooling for bullets, VFX, UI rows or enemies, wiring Addressables-backed pools, or fixing pooled objects that leak, double-return or keep stale state between uses."
+description: "Sets up Zitga-Tech ZBase.Foundation.Pooling for pooling C# objects, collections, GameObjects and Components, including UniTask async pools, prepooling and Addressables pools, and chooses between it and UnityEngine.Pool. Use when the project already depends on ZBase or UniTask and needs async/Addressables-backed or inspector-configured prefab pools, or when fixing ZBase pooled objects that leak, double-return or keep stale state. Default pooling with UnityEngine.Pool belongs to csharp-unity."
 license: MIT
 metadata:
   category: libraries
@@ -23,7 +23,7 @@ Related skills: `unitask` (all Unity-object rents return `UniTask<T>`), `csharp-
 - OpenUPM (resolves dependencies): `openupm add com.zbase.foundation.pooling`.
 - Git URL (README): first add the Unity NuGet scoped registry (`name: Unity NuGet`, `url: https://unitynuget-registry.azurewebsites.net`, `scopes: ["org.nuget"]`), then add `https://github.com/Zitga-Tech/ZBase.Foundation.Pooling.git?path=Packages/ZBase.Foundation.Pooling`. `com.cysharp.unitask` and `com.zbase.collections.pooled` must also resolve, so an OpenUPM scoped registry (`com.cysharp`, `com.zbase`) is still needed.
 - Dependencies: `org.nuget.system.runtime.compilerservices.unsafe` 6.0.0, `com.cysharp.unitask`, `com.zbase.collections.pooled`.
-- **System.Runtime.CompilerServices.Unsafe:** install once via NuGetForUnity (package `System.Runtime.CompilerServices.Unsafe` 6.0.0, usually pulled in as a dependency); if the project already has it from another route (a `.unitypackage` DLL, the `org.nuget.system.runtime.compilerservices.unsafe` UPM package), keep that one and don't add a second copy (duplicate-assembly errors). Here the UPM package arrives as a hard dependency of the ZBase package, so it is the copy to keep; remove a NuGetForUnity copy if one exists.
+- **System.Runtime.CompilerServices.Unsafe:** the `org.nuget.system.runtime.compilerservices.unsafe` UPM package arrives as a hard dependency of the ZBase package, so it is the copy to keep; remove any NuGetForUnity or `.unitypackage` copy to avoid duplicate-assembly errors.
 - Addressables support compiles automatically when `com.unity.addressables` is installed (define `ZBASE_FOUNDATION_POOLING_ADDRESSABLES`, asmdef `ZBase.Foundation.Pooling.Addressables`, also needs `UniTask.Addressables`).
 
 Asmdef to reference: `ZBase.Foundation.Pooling`. Namespaces:

@@ -232,12 +232,12 @@ private async void Start()
     catch (AsyncOperationHandleException<GameObject> e)
     {
         Debug.LogError($"{nameof(EnemySpawner)} failed: {e.Message}", this);
-        e.Handle.Release();
+        if (e.Handle.IsValid()) e.Handle.Release();
     }
 }
 ```
 
-`ToAwaitable(this)` ties the handle to `destroyCancellationToken`: destroying the object releases it, before or after completion. Use `ToAwaitable(token)` with a source created in `OnEnable` and cancelled in `OnDisable` for repeatable loads. `AsyncOperationHandleException` lives in `UnityEngine.ResourceManagement.Exceptions`. `async void` is acceptable here only because `Start` must be `void` and the body catches everything.
+`ToAwaitable(this)` ties the handle to `destroyCancellationToken`: destroying the object releases it, before or after completion. Whether a failed load is also released for you is not confirmed here, so the catch releases only a handle that is still valid, which avoids a double release either way. Use `ToAwaitable(token)` with a source created in `OnEnable` and cancelled in `OnDisable` for repeatable loads. `AsyncOperationHandleException` lives in `UnityEngine.ResourceManagement.Exceptions`. `async void` is acceptable here only because `Start` must be `void` and the body catches everything.
 
 Addressables 2.x, `Awaitable` only:
 

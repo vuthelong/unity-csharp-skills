@@ -477,11 +477,11 @@ public class PrivacyComplianceManager : MonoBehaviour
 
 ## Deprecated / Legacy APIs
 
-**⚠ The APIs below are superseded across all supported versions. Use the current `LevelPlayPrivacySettings` APIs shown in the sections above instead.**
+**⚠ On 9.4.0+ the APIs below are superseded; use the `LevelPlayPrivacySettings` APIs shown in the sections above. Below 9.4.0 `LevelPlay.SetConsent` is the only GDPR API, so keep it there or upgrade (see the version-gate table in SKILL.md).**
 
 > **`SetGDPRConsents(Dictionary)` is NOT in this list.** It is the **current GDPR API on SDK 9.4.x** — not a legacy API. It only becomes `[Obsolete]` on SDK 9.5.0+, where `SetGDPRConsent(bool)` replaces it. See [GDPR Consent Management](#gdpr-consent-management) above for the version-appropriate call. Do not treat the per-network dictionary as deprecated if you are on 9.4.x.
 
-### Legacy GDPR API — LevelPlay.SetConsent (all versions)
+### Legacy GDPR API — LevelPlay.SetConsent (required below 9.4.0)
 
 ```csharp
 // DEPRECATED - Do not use. Marked [Obsolete] in the SDK.
@@ -489,7 +489,7 @@ LevelPlay.SetConsent(true);  // Grants consent for all networks
 LevelPlay.SetConsent(false); // Denies consent for all networks
 ```
 
-**Status:** Marked as `[Obsolete]` in SDK code (all supported versions).
+**Status:** Marked as `[Obsolete]` in SDK code, but still the only GDPR API below 9.4.0.
 
 **Migration:** Use `LevelPlayPrivacySettings.SetGDPRConsents(Dictionary)` on SDK 9.4.x, or `LevelPlayPrivacySettings.SetGDPRConsent(bool)` on SDK 9.5.0+.
 

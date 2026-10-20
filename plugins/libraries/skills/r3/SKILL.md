@@ -1,6 +1,6 @@
 ---
 name: r3
-description: "Writes and reviews reactive code with Cysharp R3, the UniRx successor: Observable, Subject, ReactiveProperty, operators, frame/time providers, subscription disposal, uGUI bindings, UniRx migration. Also hosts the shared NuGetForUnity setup used by the Cysharp NuGet libraries. Use for event streams and single reactive values; prefer observable-collections when binding a whole collection to UI. Triggers: R3, ReactiveProperty, AddTo(this), UniRx port, leaked subscriptions."
+description: "Writes and reviews reactive code with Cysharp R3, the UniRx successor: Observable, Subject, ReactiveProperty, operators, frame/time providers, subscription disposal, uGUI bindings, UniRx migration. Use for event streams and single reactive values; prefer observable-collections when binding a whole collection to UI. Triggers: R3, ReactiveProperty, AddTo(this), UniRx port, leaked R3 subscriptions."
 license: MIT
 metadata:
   category: libraries
@@ -17,9 +17,7 @@ Reference files, read when needed:
 - `references/operators.md` - read when choosing a factory or operator, or checking an exact overload (time, frame and async variants).
 - `references/unirx-migration.md` - read when porting UniRx code or explaining how R3 differs from System.Reactive.
 
-## NuGetForUnity setup (shared)
-
-Canonical setup for every Cysharp library that ships its core as a NuGet DLL (`r3`, `observable-collections`, `memorypack`, `messagepack-csharp`, `mastermemory`, `magiconion`, `zlogger`). Other skills point here.
+## NuGetForUnity setup
 
 1. Install NuGetForUnity once: Package Manager > Add package from git URL `https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity` (or from OpenUPM).
 2. **NuGet > Manage NuGet Packages**, search the package id, Install. Dependencies resolve automatically into `Assets/Packages`.

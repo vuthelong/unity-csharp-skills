@@ -179,10 +179,22 @@ async void Awake()
     m_StoreController.OnPurchaseFailed += (failed) => Debug.LogError($"{failed.FailureReason} - {failed.Details}");
     m_StoreController.OnPurchaseDeferred += (deferred) => Debug.Log("Purchase deferred (e.g., Ask-to-Buy)");
 
+    m_StoreController.OnProductsFetched += (fetched) => Debug.Log("Products ready");
+    m_StoreController.OnProductsFetchFailed += (failure) => Debug.LogError($"Product fetch failed: {failure.FailureReason}");
+    m_StoreController.OnPurchasesFetched += (orders) => Debug.Log($"Restored {orders.PendingOrders.Count} pending purchases");
+    m_StoreController.OnPurchasesFetchFailed += (failure) => Debug.LogError($"Purchase fetch failed: {failure.Message}");
+
     m_StoreController.OnStoreConnected += OnStoreConnected;
     m_StoreController.OnStoreDisconnected += (failure) => Debug.LogError($"Store disconnected: {failure.Message}");
 
-    await m_StoreController.Connect();
+    try
+    {
+        await m_StoreController.Connect();
+    }
+    catch (Exception e)
+    {
+        Debug.LogException(e);
+    }
 }
 
 void OnStoreConnected()
@@ -192,13 +204,9 @@ void OnStoreConnected()
         new ProductDefinition("com.mygame.coins100", ProductType.Consumable)
     };
 
-    m_StoreController.OnProductsFetched += (fetched) => Debug.Log("Products ready");
-    m_StoreController.OnProductsFetchFailed += (failure) => Debug.LogError($"Product fetch failed: {failure.FailureReason}");
     m_StoreController.FetchProducts(products);
 
     // Restore any pending/unfinished purchases from the platform store
-    m_StoreController.OnPurchasesFetched += (orders) => Debug.Log($"Restored {orders.PendingOrders.Count} pending purchases");
-    m_StoreController.OnPurchasesFetchFailed += (failure) => Debug.LogError($"Purchase fetch failed: {failure.Message}");
     m_StoreController.FetchPurchases();
 }
 ```

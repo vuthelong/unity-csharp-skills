@@ -49,7 +49,7 @@ HTTP (the npm `-/v1/search` endpoint is not available — it 404s). For keyword 
 | Need | Package | Notes |
 |---|---|---|
 | Modern input | `com.unity.inputsystem` | Preferred over the legacy Input Manager. |
-| Text / UI | `com.unity.ugui` | uGUI + TextMeshPro (bundled into ugui 2.x on Unity 6; do not add `com.unity.textmeshpro`). UI Toolkit ships with the Editor. Use one of these for HUDs and menus — never `OnGUI`. |
+| Text / UI | `com.unity.ugui` | uGUI + TextMeshPro (bundled into ugui 2.x on Unity 6; do not add `com.unity.textmeshpro`). UI Toolkit ships with the Editor. Use one of these for HUDs and menus — never `OnGUI` for player-facing HUD/menus (runtime debug overlays: see `ui-imgui`). |
 | Camera framing | `com.unity.cinemachine` | Great for almost any 3D and many 2D games. On Unity 6 use 3.x: namespace `Unity.Cinemachine`, `CinemachineCamera` replaces `CinemachineVirtualCamera`; do not pin 2.x. |
 | Testing | `com.unity.test-framework` | Enables `unity test`; usually already present. |
 | Large/streamed assets | `com.unity.addressables` | Add when the game has many assets or needs content updates. |

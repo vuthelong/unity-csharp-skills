@@ -101,6 +101,6 @@ Do **not** embed the Vivox app secret / HMAC signing key in client code. See the
 
 ## Re-init Guard
 
-Calling `VivoxService.Instance.InitializeAsync()` twice throws `5041 VxErrorAlreadyInitialized`. Guard with a static flag as in the bootstrap above, or keep the bootstrap on a `DontDestroyOnLoad` GameObject so `Start` runs once. If the project disables domain reload (Enter Play Mode Options), reset the flag in a `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]` method.
+Calling `VivoxService.Instance.InitializeAsync()` twice throws `5041 VxErrorAlreadyInitialized` (code per Vivox 16 docs; verify). Guard with a static flag as in the bootstrap above, or keep the bootstrap on a `DontDestroyOnLoad` GameObject so `Start` runs once. If the project disables domain reload (Enter Play Mode Options), reset the flag in a `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]` method.
 
 If `VivoxService.Instance.IsLoggedIn` is already `true`, skip `LoginAsync` as well.

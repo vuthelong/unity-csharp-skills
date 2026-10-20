@@ -18,13 +18,14 @@ using UnityEngine;
 
 public sealed class TextureImportRules : AssetPostprocessor
 {
-    const int Version = 2;
+    const int Version = 3;
     const int MobileMaxSize = 2048;
     const string UiFolder = "/UI/";
     const string PixelArtFolder = "/PixelArt/";
     const string NormalsFolder = "/Normals/";
     const string MasksFolder = "/Masks/";
     const string FlipbooksFolder = "/VFX/Flipbooks/";
+    const string LutsFolder = "/LUTs/";
 
     public override uint GetVersion() => Version;
 
@@ -59,17 +60,29 @@ public sealed class TextureImportRules : AssetPostprocessor
             importer.alphaIsTransparency = true;
         }
 
-        if (!WantsMobileCompression(importer))
+        if (!WantsMobileCompression(importer, path))
             return;
 
         ApplyMobileOverride(importer, "Android");
         ApplyMobileOverride(importer, "iPhone");
     }
 
-    static bool WantsMobileCompression(TextureImporter importer)
+    static bool WantsMobileCompression(TextureImporter importer, string path)
     {
-        if (importer.textureType == TextureImporterType.Sprite) return false;
+        switch (importer.textureType)
+        {
+            case TextureImporterType.Sprite:
+            case TextureImporterType.Lightmap:
+            case TextureImporterType.DirectionalLightmap:
+            case TextureImporterType.Shadowmask:
+            case TextureImporterType.SingleChannel:
+            case TextureImporterType.Cookie:
+                return false;
+        }
         if (importer.filterMode == FilterMode.Point) return false;
+        if (path.Contains(LutsFolder)) return false;
+        string ext = System.IO.Path.GetExtension(path).ToLowerInvariant();
+        if (ext == ".exr" || ext == ".hdr") return false;
         return true;
     }
 
@@ -87,7 +100,8 @@ public sealed class TextureImportRules : AssetPostprocessor
 }
 ```
 
-- Textures under a `PixelArt` folder, any `Sprite`-type texture, and anything already set to Point filtering never get an ASTC override. Configure pixel art with `2d-pixel-perfect` (`SpriteImportSettings`), which forces RGBA32 on every platform.
+- Textures under a `PixelArt` folder, any `Sprite`-type texture, and anything already set to Point filtering never get an ASTC override.
+- Lightmaps, directional lightmaps, shadowmasks, cookies, Single Channel textures, HDR sources (`.exr`/`.hdr`) and LUTs under `/LUTs/` are skipped too: an LDR `ASTC_6x6` override would clip HDR data, band LUTs and waste channels on single-channel data. Set those per the type table in SKILL.md (ASTC HDR for HDR skies, uncompressed LUTs, R formats for single channel). Configure pixel art with `2d-pixel-perfect` (`SpriteImportSettings`), which forces RGBA32 on every platform.
 - Bump `Version` when the rules change; Unity reimports affected textures.
 - Do not call `SaveAndReimport` inside a postprocessor; you are already in the import.
 - Respect existing overrides (`settings.overridden`) so manual artist choices survive.

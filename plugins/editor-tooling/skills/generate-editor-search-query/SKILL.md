@@ -1,7 +1,7 @@
 ---
 name: generate-editor-search-query
 description: "Turns natural-language find/locate/list requests into Unity Search (Quick Search) queries (t:, dir:, l:, ref=, search expressions) and opens the Search window pre-filled in the live Editor through unity command eval. Use for read-only lookups of project assets or scene objects and components. Triggers: \"find all materials using X\", \"which prefabs reference this\", \"what Unity Search query should I use\". Not for repo text search, build logs, package installs or modifying results."
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: editor-tooling
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/generate-editor-search-query"

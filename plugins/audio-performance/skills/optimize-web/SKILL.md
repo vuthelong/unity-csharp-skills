@@ -1,9 +1,9 @@
 ---
 name: optimize-web
 description: Audits and optimizes Unity 6 WebGL and WebGPU builds for download size, startup time, browser memory, and frame pacing. Use when a web build is too large or slow to load, Brotli/Gzip or server Content-Encoding is misconfigured, iOS Safari runs out of memory, the build stutters in one browser or drains battery, or textures need KTX2/Basis. Covers Player Settings, stripping, compression hosting, Addressables on a CDN, and browser profiling.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
-  category: web-performance
+  category: audio-performance
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/optimize-web"
   unity: "6000.0+ (live writes need the com.unity.pipeline eval command)"
 ---
@@ -19,7 +19,7 @@ Player Settings reads and writes run in a live Editor through `unity command eva
 When `eval` is unavailable, do not stop:
 
 - Audit read-only from `ProjectSettings/ProjectSettings.asset` (YAML) and report what you find. Never write it: its serialized names differ from the API, several values are per build target, and a hand edit silently disagrees with what the build uses.
-- For changes, hand the user [scripts/WebOptimizer.cs](scripts/WebOptimizer.cs) (or a similar `[MenuItem]` Editor script) to save under `Assets/Editor/` and run from the menu; it logs the resulting values for them to paste back.
+- For changes, hand the user [scripts/Editor/WebOptimizer.cs](scripts/Editor/WebOptimizer.cs) (or a similar `[MenuItem]` Editor script) to save under `Assets/Editor/` and run from the menu; it logs the resulting values for them to paste back.
 
 ### API names that trip people up
 
@@ -66,14 +66,14 @@ Run the pre-flight snippet in [references/player-settings.md](references/player-
 | "KTX", "Basis", "unknown GPU" | KTX2: ETC1S for size, UASTC for quality |
 | "strip unused code/packages" | Web Stripping Tool, remove packages, shader stripping |
 | "shader variants" | Graphics settings stripping, audit Always Included Shaders |
-| "audio on web" | Mono, Vorbis, no mixer effects; see `optimize-audio` |
+| "audio on web" | Mono where stereo adds nothing, Compressed In Memory for long clips (Web clips are AAC), no mixer effects; see `optimize-audio` |
 | "can't read Wasm stacks" | Profiling symbols in development builds |
 
 ## 3. Optimize
 
 ### One-click release settings
 
-Offer [scripts/WebOptimizer.cs](scripts/WebOptimizer.cs) only for projects with the Web build-support module installed. Its `UserBuildSettings.codeOptimization` write is wrapped in `#if UNITY_WEBGL`, so it compiles everywhere but only sets Disk Size with LTO while the active build target is Web; switch the target first. It is a project file with a `[MenuItem]`, not `eval` input: save it under `Assets/Editor/`, let Unity compile, then run
+Offer [scripts/Editor/WebOptimizer.cs](scripts/Editor/WebOptimizer.cs) only for projects with the Web build-support module installed. Its `UserBuildSettings.codeOptimization` write is wrapped in `#if UNITY_WEBGL`, so it compiles everywhere but only sets Disk Size with LTO while the active build target is Web; switch the target first. It is a project file with a `[MenuItem]`, not `eval` input: save it under `Assets/Editor/`, let Unity compile, then run
 
 ```csharp
 UnityEditor.EditorApplication.ExecuteMenuItem("Tools/Apply Web Release Settings");
@@ -105,7 +105,7 @@ Read [references/player-settings.md](references/player-settings.md) for the full
 
 ### Profiling and memory
 
-Read [references/profiling-and-memory.md](references/profiling-and-memory.md) when diagnosing stutter, memory growth, Safari/iOS crashes, or unreadable Wasm stacks. It covers browser tools, [scripts/WebProfilingBuildProcessor.cs](scripts/WebProfilingBuildProcessor.cs), Emscripten profilers, `about:memory`, and iOS limits.
+Read [references/profiling-and-memory.md](references/profiling-and-memory.md) when diagnosing stutter, memory growth, Safari/iOS crashes, or unreadable Wasm stacks. It covers browser tools, [scripts/Editor/WebProfilingBuildProcessor.cs](scripts/Editor/WebProfilingBuildProcessor.cs), Emscripten profilers, `about:memory`, and iOS limits.
 
 ## 4. Validate
 

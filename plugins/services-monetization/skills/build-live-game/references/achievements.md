@@ -35,7 +35,7 @@ Achievements combine Remote Config (static definitions), Cloud Save (per-player 
 | Achievement definitions | Remote Config | `"achievements"` key (JSON array) |
 | Player records | Cloud Save (Protected or Public) | `"achievements"` key (JSON array) |
 | Server-authoritative writes | Cloud Code Module | `AchievementModule` |
-| Block direct writes | Access Control | `.ac` policy denying player Cloud Save writes |
+| Lock down the dev path (optional) | Access Control | `.ac` policy denying player Cloud Save writes to Default/Public data |
 
 ### Data Flow
 
@@ -68,7 +68,7 @@ Remote Config                        Cloud Save
                                               (server token bypass)
 ```
 
-**Key principle:** In production, route all writes through the Cloud Code module. The Access Control `.ac` file denies direct player writes to the Protected bucket, so only the server can mutate achievement records.
+**Key principle:** In production, route all writes through the Cloud Code module. Records live in the Protected bucket, which is server-write-only, so only the server can mutate them; no `.ac` file is needed for that. The optional `.ac` policy below only removes the Public-bucket dev path.
 
 ---
 
@@ -282,7 +282,7 @@ async Task SaveRecordsAsync(List<AchievementRecord> records)
 
 ## Server-Authoritative Writes via Cloud Code
 
-In production, route all mutations through Cloud Code module endpoints. The module uses its service token to write to the Protected bucket, bypassing Access Control restrictions that block the player client.
+In production, route all mutations through Cloud Code module endpoints. The module uses its service token to write to the Protected bucket, which player clients cannot write to.
 
 ### Unlock an Achievement
 
@@ -521,7 +521,7 @@ public class AchievementManager : MonoBehaviour
 
 ## Cloud Code Module
 
-The `AchievementModule` reads and writes to the **Protected** Cloud Save bucket using its service token, bypassing Access Control restrictions imposed on the player client.
+The `AchievementModule` reads and writes to the **Protected** Cloud Save bucket using its service token; player clients can only read that bucket.
 
 > **Module scaffolding — follow [cloud-code.md — Module Creation](cloud-code.md#module-creation).**
 > Replace `MyModule` / `MyModuleCCM` with `AchievementModule` / `AchievementsCCM` throughout.
@@ -720,7 +720,9 @@ Deploy via **Services > Deployment** — the Deployment Window auto-discovers `.
 > [cloud-code.md — Module Creation](cloud-code.md#module-creation) for the generic templates;
 > replace `MyModule` / `MyModuleCCM` with `AchievementModule` / `AchievementsCCM`.
 
-### Access Control -- `Assets/Config/DenyPlayerCloudSaveWrites.ac`
+### Access Control (optional) -- `Assets/Config/DenyPlayerCloudSaveWrites.ac`
+
+The Protected bucket needs no policy: it is already server-write-only. Add this policy only to remove the direct-write dev path, so players cannot write achievement data to Default/Public buckets either.
 
 Right-click in the Project window → **Assets > Create > Services > Access Control**. Name the file `DenyPlayerCloudSaveWrites`. Replace the generated contents with:
 
@@ -756,7 +758,7 @@ Deploy all cloud resources via **Services > Deployment** before testing:
 
 - [ ] All packages added to `Packages/manifest.json` with correct minimum versions
 - [ ] `Assets/Config/Achievements.rc` -- Remote Config achievement definitions
-- [ ] `Assets/Config/DenyPlayerCloudSaveWrites.ac` -- Access Control policy blocking direct player writes
+- [ ] `Assets/Config/DenyPlayerCloudSaveWrites.ac` (optional) -- Access Control policy blocking the Public-bucket dev path
 - [ ] Cloud Code module scaffolded with **all required files**: `.sln`, `.csproj`, `ModuleSetup.cs`, `FolderProfile.pubxml`, `.ccmr` (see file table in [Cloud Code Module](#cloud-code-module))
 - [ ] `AchievementModule.cs` added to the module project with `UnlockAchievement`, `UpdateAchievementProgress`, `ResetAchievements` functions
 - [ ] Environment selected in the Deployment Window dropdown
@@ -784,6 +786,6 @@ After implementing achievements, verify:
 3. **Access class match:** If `m_UseTrustedWrites` is true, reads use `ProtectedReadAccessClassOptions()`. If false, reads use `PublicReadAccessClassOptions(playerId)`. Mismatched access classes return empty data.
 4. **Cloud Code module builds:** The `.sln` at `AchievementsCCM/AchievementModule.sln` targets `net9.0` and publishes to `linux-x64`.
 5. **Server-side model uses properties:** The `AchievementRecord` class in the Cloud Code module uses `{ get; set; }` properties (not fields) for JSON serialization compatibility with `Newtonsoft.Json`.
-6. **Access Control deployed:** The `.ac` file denies direct player writes to Cloud Save. Without this, the trusted-write path has no enforcement advantage.
+6. **Trusted writes only in production:** Records are written to the Protected bucket by Cloud Code. If the optional `.ac` file is deployed, `m_UseTrustedWrites` must be true.
 7. **Remote Config key matches:** The `.rc` file key (`"achievements"`) matches the key used in `result.config["achievements"]` on the client and `AchievementsKey` in the module.
-8. **All cloud resources deployable:** The `.rc`, `.ac`, and `.ccmr` files are in the `Assets/` folder hierarchy and appear in the Deployment Window.
+8. **All cloud resources deployable:** The `.rc`, `.ccmr` and (if used) `.ac` files are in the `Assets/` folder hierarchy and appear in the Deployment Window.

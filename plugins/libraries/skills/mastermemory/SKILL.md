@@ -20,7 +20,7 @@ Reference files, read when needed:
 
 ## Workflow
 
-1. **Install (NuGet only).** Install NuGet `MasterMemory` with NuGetForUnity (setup in `r3` -> "NuGetForUnity setup"). This pulls `MessagePack`, `MessagePack.Annotations` and `MessagePackAnalyzer`. Minimum Unity is 2022.3.12f1 (Roslyn 4.3 incremental generators); Unity 6 is fine.
+1. **Install (NuGet only).** Install NuGet `MasterMemory` with NuGetForUnity (add NuGetForUnity once from git URL `https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity`, then **NuGet > Manage NuGet Packages**; analyzer DLLs need no platforms ticked and the `RoslynAnalyzer` label; on assembly version conflicts clear **Player > Assembly Version Validation**). This pulls `MessagePack`, `MessagePack.Annotations` and `MessagePackAnalyzer`. Minimum Unity is 2022.3.12f1 (Roslyn 4.3 incremental generators); Unity 6 is fine.
    - There is no public UPM / git-URL package for v3. The repo's Unity project only uses a local `file:` package for development. The README states the library is "only available through NuGet for Unity".
    - The v2 code generator (MSBuild task, .NET global/local tool `MasterMemory.Generator`) was removed in v3. Do not install it. Generation now happens at compile time. Old CLI flags map to `[assembly: MasterMemoryGeneratorOptions]`. `-addImmutableConstructor` was dropped, so use `record` / `init` instead.
    - Check that `MasterMemory.SourceGenerator.dll` was imported as an analyzer (no platforms ticked, `RoslynAnalyzer` label). NuGetForUnity normally sets this. If `MemoryDatabase` does not exist after a recompile, set it by hand.

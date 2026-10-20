@@ -1,6 +1,6 @@
 ---
 name: zbase-csv-reader
-description: "Bakes CSV files into strongly typed ScriptableObjects at edit time with ZBase.Csv-Reader (Zitga-Tech), with optional Google Sheets download: Csv-Reader window, reader config assets, column attributes, converters, nested arrays, auto-import. Use for small-to-medium designer-edited config tables in the Inspector, or as the Sheets/CSV front end for mastermemory. Triggers: Csv-Reader, CsvColumn, Google Sheets import, CSV columns not mapping or arrays parsed wrong."
+description: "Bakes CSV files into strongly typed ScriptableObjects at edit time with ZBase.Csv-Reader (Zitga-Tech), with optional Google Sheets download: Csv-Reader window, reader config assets, column attributes, converters, nested arrays, auto-import. Requires Odin Inspector (paid asset). Use only when the project uses ZBase.Csv-Reader, or as its Sheets/CSV front end for mastermemory; generic CSV to ScriptableObject baking belongs to game-data-pipeline. Triggers: Csv-Reader, CsvColumn, Google Sheets import, CSV columns not mapping or arrays parsed wrong."
 license: MIT
 metadata:
   category: libraries

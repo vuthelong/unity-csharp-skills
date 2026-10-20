@@ -309,7 +309,7 @@ UNITY=/Applications/Unity/Hub/Editor/6000.3.11f1/Unity.app/Contents/MacOS/Unity
 # Drive it — target the project explicitly (see the status caveat):
 unity command --project-path /path/to/MyProject                            # list what it exposes
 unity list    --project-path /path/to/MyProject                            # discover tools
-unity command eval "return Application.unityVersion;" --project-path /path/to/MyProject
+unity command eval "return UnityEngine.Application.unityVersion;" --project-path /path/to/MyProject
 ```
 
 > **`unity status` caveat (verified):** a batch-mode Editor launched this way *does* serve commands,
@@ -325,7 +325,7 @@ resident). Unlike the batch case, its Pipeline server *does* register with `unit
 ```bash
 unity open /path/to/MyProject
 unity status --until-ready --project-path MyProject --format json   # blocks until state "ready" (exit 6 on timeout)
-unity command eval "return Application.unityVersion;"
+unity command eval "return UnityEngine.Application.unityVersion;"
 ```
 
 Run `unity pipeline install` **before** `unity open` when the project doesn't have the package
@@ -519,11 +519,10 @@ The Pipeline package ships a set of built-in scene/GameObject commands. The comm
 
 The **authoritative** catalog is always `unity command --format json` — every registered command with its full parameter schema. The table above just jump-starts common tasks so you don't have to dump-and-grep first.
 
-Some projects (and Pipeline package versions) register an `eval` — and `eval_file` — command on the
-Editor side, so you can run C# through the connected Editor in a production build:
-`unity command eval "return Application.unityVersion;"` or `unity command eval_file snippet.cs`.
-Availability depends on the Editor/package, so discover it at runtime with `unity command` / `unity list`
-rather than assuming it.
+The `com.unity.pipeline` package registers `eval` and `eval_file` on the Editor side, so you can run C#
+through the connected Editor (Editor only, never in a player build):
+`unity command eval "return UnityEngine.Application.unityVersion;"` or `unity command eval_file snippet.cs`.
+Confirm it is registered with `unity command --query eval` rather than assuming it.
 
 If no editor with a reachable Pipeline server is found, the command errors with guidance (make sure the editor is running and its Pipeline server is up).
 
@@ -699,8 +698,10 @@ first, then fix the compile errors at the source and restart:
    files is correct: the Editor is unreachable, so you can't drive it — edit the `.cs` files to
    resolve the errors reported in step 3.
 
-5. **Restart Unity to leave Safe Mode.** Relaunch the Editor so it recompiles the now-fixed scripts.
-   For a **GUI** Editor, ask the user to save and close it, then `unity open /path/to/MyProject`.
+5. **Get out of Safe Mode.** A GUI Editor recompiles the fixed scripts and leaves Safe Mode on its own
+   after a clean compile (the window may need focus); go to step 6. If the CLI still can't connect, or
+   the Editor is headless, restart it so the Pipeline package loads. For a **GUI** Editor, ask the user
+   to save and close it, then `unity open /path/to/MyProject`.
 
    For a headless/agent box, stop the stuck Editor **by PID** and re-run the persistent-batch launch
    above. `unity pipeline list` reports the PID even in Safe Mode (`data.instances[].pid` under

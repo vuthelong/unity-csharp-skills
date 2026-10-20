@@ -147,40 +147,64 @@ Goal: change numbers in a CSV, publish a new bundle and catalog to a CDN, and ha
 ```csharp
 public static async UniTask<bool> UpdateGameDataAsync(GameDataService gameData, CancellationToken cancellationToken)
 {
+    List<string> catalogs;
     var checkHandle = Addressables.CheckForCatalogUpdates(false);
-    var catalogs = await checkHandle.ToUniTask(cancellationToken: cancellationToken);
-    var hasUpdate = catalogs != null && catalogs.Count > 0;
-    Addressables.Release(checkHandle);
-    if (!hasUpdate) return false;
+    try
+    {
+        catalogs = await checkHandle.ToUniTask(cancellationToken: cancellationToken);
+    }
+    finally
+    {
+        Addressables.Release(checkHandle);
+    }
 
-    gameData.Unload();
+    if (catalogs == null || catalogs.Count == 0) return false;
 
     var updateHandle = Addressables.UpdateCatalogs(catalogs, false);
-    await updateHandle.ToUniTask(cancellationToken: cancellationToken);
-    Addressables.Release(updateHandle);
+    try
+    {
+        await updateHandle.ToUniTask(cancellationToken: cancellationToken);
+    }
+    finally
+    {
+        Addressables.Release(updateHandle);
+    }
 
+    long bytes;
     var sizeHandle = Addressables.GetDownloadSizeAsync((object)GameDataService.DefaultLabel);
-    var bytes = await sizeHandle.ToUniTask(cancellationToken: cancellationToken);
-    Addressables.Release(sizeHandle);
+    try
+    {
+        bytes = await sizeHandle.ToUniTask(cancellationToken: cancellationToken);
+    }
+    finally
+    {
+        Addressables.Release(sizeHandle);
+    }
 
     if (bytes > 0)
     {
         var downloadHandle = Addressables.DownloadDependenciesAsync((object)GameDataService.DefaultLabel, false);
-        await downloadHandle.ToUniTask(cancellationToken: cancellationToken);
-        Addressables.Release(downloadHandle);
+        try
+        {
+            await downloadHandle.ToUniTask(cancellationToken: cancellationToken);
+        }
+        finally
+        {
+            Addressables.Release(downloadHandle);
+        }
     }
 
-    await gameData.ReloadAsync(cancellationToken);
+    if (gameData.IsLoaded) await gameData.ReloadAsync(cancellationToken);
     return true;
 }
 ```
 
-Run it at boot (before the first `LoadAsync`, then skip the `Unload`) or at a safe point such as the main menu. Show progress and a retry path for slow or offline networks; if the check fails, continue with the cached/shipped data.
+The loaded tables stay usable until the very end: `ReloadAsync` unloads them only right before loading the new ones, so a failed or cancelled check, catalog update or download leaves the current data in place. Run it at boot (before the first `LoadAsync`; the reload is then skipped) or at a safe point such as the main menu. Show progress and a retry path for slow or offline networks; if the check fails, continue with the cached/shipped data.
 
 ### What happens to already-loaded SOs
 
 - `UpdateCatalogs` swaps the content catalog only. Tables already loaded stay in memory with the old values, and any code holding their rows keeps seeing old numbers.
-- New values appear only after every handle to the old tables is released (the old bundle unloads) and the tables are loaded again. That is why the snippet calls `Unload()` before and `ReloadAsync` after.
+- New values appear only after every handle to the old tables is released (the old bundle unloads) and the tables are loaded again. That is why the snippet ends with `ReloadAsync`, which releases the old tables and then loads the new ones.
 - If the old bundle is still loaded when the new one loads and both contain the same assets, Unity refuses with "The AssetBundle ... can't be loaded because another AssetBundle with the same files is already loaded". `AppendHash` naming plus releasing first avoids it.
 - Mid-match reloads change rules under running systems. Reload only between sessions, and have systems re-read rows on `Reloaded`.
 

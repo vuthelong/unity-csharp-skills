@@ -1,6 +1,6 @@
 ---
 name: character-controller-3d
-description: Builds and debugs 3D player movement in Unity 6 with CharacterController or a kinematic or dynamic Rigidbody - ground probes, gravity, slopes and steps, jump buffering and coyote time, moving platforms, camera-relative input with Cinemachine 3 and the Input System, and root motion. Use for first- or third-person controllers, or when a character cannot jump, flickers between grounded and falling, bounces down slopes, sticks to walls, ignores teleports or jitters with the camera.
+description: Builds and debugs 3D player movement in Unity 6 with CharacterController or a kinematic or dynamic Rigidbody - ground probes, gravity, slopes and steps, jump buffering and coyote time, moving platforms, camera-relative input with Cinemachine 3 and the Input System, and root motion. Use for first- or third-person controllers, or when a character cannot jump, flickers between grounded and falling, bounces down slopes, sticks to walls, ignores teleports or jitters with the camera. Cinemachine rig setup belongs to cinemachine-cameras; clip and Animator Controller authoring belongs to animation-authoring.
 license: MIT
 metadata:
   category: gameplay-systems
@@ -17,7 +17,7 @@ metadata:
 3. Start from the reference script and tune values in the Inspector:
    - [scripts/CharacterControllerMotor.cs](scripts/CharacterControllerMotor.cs): CharacterController with SphereCast ground probe, slope sliding, coyote time, jump buffer, moving platforms, rigidbody pushing, teleport and optional root motion.
    - [scripts/RigidbodyCharacterMotor.cs](scripts/RigidbodyCharacterMotor.cs): dynamic Rigidbody with `linearVelocity` steering in `FixedUpdate`, frictionless `PhysicsMaterial`, interpolation, platform velocity inheritance.
-   - [scripts/CharacterAnimatorBridge.cs](scripts/CharacterAnimatorBridge.cs): Animator parameters plus `OnAnimatorMove` relay for root motion.
+   - [scripts/CharacterAnimatorBridge.cs](scripts/CharacterAnimatorBridge.cs): Animator parameters plus `OnAnimatorMove` relay for root motion. Works only with `CharacterControllerMotor`; a Rigidbody motor needs its own bridge (see `references/rigidbody-controllers.md`).
 4. Wire input (`Move`, `Jump`, `Sprint`, `Look`) and the camera rig.
 5. Test the failure list at the end: slopes up and down, stairs, ledges, ceilings, platforms, teleport, low frame rate (Application.targetFrameRate = 20) and high frame rate.
 
@@ -50,7 +50,7 @@ metadata:
 - Rigidbody motors: read input in `Update`, write `linearVelocity` once in `FixedUpdate`, rotate with `MoveRotation`, `FreezeRotation` constraints, `Interpolate` on the player only, frictionless `PhysicsMaterial` with `Minimum` combine, gravity off while on walkable ground.
 - Unity 6 names: `linearVelocity`, `linearDamping`, `angularDamping`, `PhysicsMaterial`, `PhysicsMaterialCombine`. `velocity`, `drag`, `PhysicMaterial` are obsolete.
 - Camera-relative input uses the output Camera's flattened forward/right, not the `CinemachineCamera` transform. OrbitalFollow binding mode World Space or Lazy Follow.
-- Root motion: `OnAnimatorMove` on the Animator's GameObject, route `deltaPosition` through `Move` (or Rigidbody velocity) together with your gravity; never write the transform directly.
+- Root motion: `OnAnimatorMove` on the Animator's GameObject, route `deltaPosition` through `Move` (or Rigidbody velocity) together with your gravity; never write the transform directly. Take yaw from one source only: with root motion on, the clips turn the character and input rotation is skipped.
 
 ## References
 

@@ -1,7 +1,7 @@
 ---
 name: build-live-game
-description: Builds live-service backends on Unity Gaming Services - sign-in, Cloud Save, Cloud Code C# modules for server-authoritative writes, Remote Config and Game Overrides, Economy, Leaderboards, Analytics, Access Control and deployment - with blueprints for achievements, battle passes and player accounts. Use for live-ops, player progression, season passes, rankings, feature flags or A/B tests, or when code touches UnityServices.InitializeAsync or .rc/.ac/.ccmr files. Not for sessions or IAP.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+description: Builds live-service backends on Unity Gaming Services - sign-in, Cloud Save, Cloud Code C# modules for server-authoritative writes, Remote Config and Game Overrides, Economy, Leaderboards, Analytics, Access Control and deployment - with blueprints for achievements, battle passes and player accounts. Use for live-ops, player progression, season passes, rankings, feature flags or A/B tests, or when code touches .rc/.ac/.ccmr files. Not for sessions (setup-multiplayer-services), IAP (implement-in-app-purchases), voice/text chat (setup-vivox-voice-chat) or ads (levelplay-unity-integration).
+license: Unity Companion License
 metadata:
   category: services-monetization
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/build-live-game"
@@ -248,7 +248,7 @@ Used by **Battle Pass** and **Achievements**:
 1. **Definitions** in Remote Config (`.rc` file) — what exists in the game
 2. **Player state** in Cloud Save — per-player progress
 3. **Writes via Cloud Code** — server-authoritative mutations
-4. **Access Control** (`.ac` file) — block direct player writes to sensitive keys
+4. **Access Control** (`.ac` file), optional — Protected keys are already server-write-only; add a policy only to stop player writes to Default/Public data
 
 ### Pattern 2: Client-Direct Data
 
@@ -270,7 +270,7 @@ After writing code for a live game feature:
 1. Verify the project compiles without errors.
 2. Check that initialization order is correct: `UnityServices.InitializeAsync()` → Authentication sign-in → service calls.
 3. Confirm sensitive data writes (XP, rewards, currency) are routed through Cloud Code, not written directly from the client.
-4. Verify Access Control `.ac` files deny direct player writes to Protected Cloud Save keys.
+4. Verify sensitive keys live in the Protected bucket, which only Cloud Code can write (no `.ac` needed); any `.ac` file only adds denials for Default/Public data.
 5. Verify all cloud resource files (`.rc`, `.ac`, `.ccmr`, `.lb`, `.ec`) are present and deployable via the Deployment Window.
 6. Confirm Cloud Save reads use the same access class (Default / Public / Protected) the data was written with.
 7. Confirm only one bootstrap signs the player in, and every `async void` entry point catches exceptions.
@@ -280,7 +280,7 @@ After writing code for a live game feature:
 For any live game feature, deploy these cloud resources via the Deployment Window:
 
 - [ ] `.rc` file — Remote Config entries (game definitions, configs)
-- [ ] `.ac` file — Access Control policies (deny direct writes to protected keys)
+- [ ] `.ac` file — Access Control policies (only if you deny player writes outside the Protected bucket)
 - [ ] `.ccmr` file — Cloud Code module reference (pointing to the module `.sln`)
 - [ ] `.lb` file — Leaderboard configuration (if using leaderboards)
 - [ ] `.ec` file — Economy definitions (if using virtual currencies/items)

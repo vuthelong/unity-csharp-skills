@@ -100,7 +100,13 @@ public sealed class AudioOcclusion : MonoBehaviour
         var distance = delta.magnitude;
         if (distance < 0.01f || distance > this._source.maxDistance) return 0f;
 
-        var hits = Physics.RaycastNonAlloc(from, delta / distance, HitBuffer, distance, this.occluderMask, QueryTriggerInteraction.Ignore);
+        var count = Physics.RaycastNonAlloc(from, delta / distance, HitBuffer, distance, this.occluderMask, QueryTriggerInteraction.Ignore);
+        var hits = 0;
+        for (var i = 0; i < count; i++)
+        {
+            if (!HitBuffer[i].transform.IsChildOf(transform)) hits++;
+        }
+
         return Mathf.Clamp01(hits / (float)this.hitsForFullOcclusion);
     }
 

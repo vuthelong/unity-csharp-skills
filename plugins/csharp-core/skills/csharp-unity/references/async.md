@@ -50,13 +50,16 @@ private async Awaitable Start()
 private async Awaitable<Texture2D> DownloadAsync(string url, CancellationToken ct)
 {
     using var request = UnityWebRequestTexture.GetTexture(url);
+    using var registration = ct.Register(request.Abort);
     await request.SendWebRequest();
     ct.ThrowIfCancellationRequested();
+    if (request.result != UnityWebRequest.Result.Success)
+        throw new InvalidOperationException(request.error);
     return DownloadHandlerTexture.GetContent(request);
 }
 ```
 
-Declare async message methods as `async Awaitable`, never `async void`; Unity accepts both, but only `Awaitable` keeps failures observable. Catch `OperationCanceledException` at this top level.
+Declare async message methods as `async Awaitable`, never `async void`; Unity accepts both and logs exceptions from either, but only an `Awaitable` can be awaited, composed and cancelled by a caller. Catch `OperationCanceledException` at this top level.
 
 Key API:
 - `Awaitable.NextFrameAsync(ct)`, `Awaitable.EndOfFrameAsync(ct)`, `Awaitable.FixedUpdateAsync(ct)`
@@ -74,7 +77,7 @@ Pitfalls:
 
 1. Every await that can outlive its object takes a token: `destroyCancellationToken` for component-bound work, `Application.exitCancellationToken` for app-wide work.
 2. After every await, assume the object may have been destroyed or disabled if no token was passed. Check `if (this == null) return;` when you cannot pass a token.
-3. Never `async void`, including Unity message methods: use `async Awaitable Start()` or a synchronous `Start()` that calls a `UniTaskVoid` method with `.Forget()`. The only exception is a UI callback with a fixed `void` signature; wrap its body in `try/catch` and log with `Debug.LogException(e, this)`.
+3. Never `async void`, including Unity message methods: use `async Awaitable Start()` or a synchronous `Start()` that calls a `UniTaskVoid` method with `.Forget()`. The only exception is a UI callback with a fixed `void` signature; wrap its body in `try/catch` and log with `Debug.LogException(e, this)`. With UniTask installed, wrap the handler with `UniTask.UnityAction(...)` instead of writing `async void`.
 4. A `Task` that nobody awaits drops its exception silently. Never discard a `Task` with `_ = DoAsync();`.
 5. Plain `Task` continuations keep running after you exit Play Mode in the Editor. Tie them to `Application.exitCancellationToken`.
 6. Never block the main thread on async work: no `.Result`, `.Wait()`, `GetAwaiter().GetResult()`, or spin-waits. Unity continuations run on the main thread, so this deadlocks the Editor or player.

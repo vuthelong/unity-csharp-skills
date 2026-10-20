@@ -1,7 +1,7 @@
 ---
 name: shader-graph-create-custom-node
 description: Turns HLSL into reusable Shader Graph nodes for URP on Unity 6 - Custom Function nodes (File or String mode, _float/_half suffixes, SHADERGRAPH_PREVIEW guards), Sub Graphs, and reflected function nodes with UNITY_EXPORT_REFLECTION (Shader Graph 17.5+). Use when the user wants a custom Shader Graph node, to call existing HLSL from a graph, to package node clusters for reuse, or to fix 'undeclared identifier' or '_float' errors in a Custom Function node.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: rendering-vfx
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/shader-graph-create-custom-node, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/shadergraph"
@@ -24,7 +24,7 @@ Check the installed version in `Packages/manifest.json` or `Packages/packages-lo
 
 1. **Write the HLSL function** and precede it with `UNITY_EXPORT_REFLECTION`. Return value becomes the main output; `out` parameters become extra outputs; `inout` parameters are both.
 2. **Add hint tags** in `///` doc comments directly above the function:
-   - Required function hints in `<funchints>`: `sg:ProviderKey` (unique and stable; changing it breaks existing graphs), `sg:SearchCategory`, `sg:SearchTerms`, `sg:DisplayName`.
+   - Function hints in `<funchints>`: `sg:ProviderKey` is the only required one (unique and stable; changing it breaks existing graphs). Also set `sg:DisplayName`, `sg:SearchCategory` and `sg:SearchTerms` on user-facing nodes; without them the title falls back to the function name and the menu path to the namespace or file path.
    - Optional parameter hints in `<paramhints name="...">`: display name, default, color, range, dropdown, static (inspector-only), referables (UV, Position, Normal...), linkage.
    - Full tag list and a worked file: [references/reflection-hints.md](references/reflection-hints.md).
 3. **Write it to an asset**:

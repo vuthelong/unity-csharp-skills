@@ -1,7 +1,7 @@
 ---
 name: ui-ugui
 description: Understands, edits and generates Unity uGUI (Canvas-based) UI - Canvas and CanvasScaler setup, RectTransform anchors, Layout Groups, ScrollRect, buttons and input fields, EventSystem and world-space canvases in scenes or UI prefabs. Use when the request mentions Canvas, uGUI, RectTransform or a .prefab UI hierarchy, or reports UI that is invisible, mis-sized, mis-anchored or not receiving clicks.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: ui
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/ui-ugui, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/ui"

@@ -1,7 +1,7 @@
 ---
 name: urp-postprocessing
-description: Sets up, scripts, and debugs URP post-processing with the Volume framework on Unity 6 - global and local Volumes, VolumeProfile overrides such as Bloom, Tonemapping, Color Adjustments, Depth of Field, and Vignette, profile vs sharedProfile, and camera post-processing flags. Use for bloom, color grading, exposure, 'post-processing not showing', PPv2 replacements, or animating effects from C#. Custom fullscreen passes go to validate-urp-render-graph-renderer-feature.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+description: Sets up, scripts, and debugs URP post-processing with the Volume framework on Unity 6 - global and local Volumes, VolumeProfile overrides such as Bloom, Tonemapping, Color Adjustments, Depth of Field, and Vignette, profile vs sharedProfile, and camera post-processing flags. Use for bloom, color grading, exposure, 'post-processing not showing', PPv2 effect equivalents, or animating effects from C#. Converting an existing PPv2 project goes to migrate-birp-to-urp; custom fullscreen passes go to validate-urp-render-graph-renderer-feature.
+license: Unity Companion License
 metadata:
   category: rendering-vfx
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/urp-postprocessing"
@@ -22,7 +22,7 @@ Goal: a visible result in the Game view with zero Console errors.
 
 ## Running C# in the Editor
 
-Editor-side checks and edits run as C# in a live Editor via `unity command eval`. Eval syntax and prerequisites: see the `unity-cli` skill (unity-editor-tooling plugin) → Eval syntax. Here that means `GetComponent<UniversalAdditionalCameraData>()` instead of `GetUniversalAdditionalCameraData()`. Without `eval` (Unity 6000.0-6000.2, or no Pipeline package), save the same code as an Editor script and have the user run it; code saved as a `.cs` file keeps normal `using` directives.
+Editor-side checks and edits run as C# in a live Editor via `unity command eval`. Eval syntax and prerequisites: see the `unity-cli` skill (unity-editor-tooling plugin) → Eval syntax. Here that means `GetComponent<UniversalAdditionalCameraData>()` instead of `GetUniversalAdditionalCameraData()`. Without `eval` (no Pipeline package, or a Pipeline version that fails to compile on this Editor), save the same code as an Editor script and have the user run it; code saved as a `.cs` file keeps normal `using` directives.
 
 ## Pre-flight checks
 

@@ -121,7 +121,7 @@ Emitter notes:
 
 ## EventReference and [EventRef] migration
 
-- `FMODUnity.EventReference` is a serializable struct. At runtime it holds only `Guid` (`FMOD.GUID`). `Path`, `IsNull` and `EventReference.Find(path)` are Editor-only (`#if UNITY_EDITOR`). In runtime code test `reference.Guid.IsNull`. Using `Path` or `IsNull` there compiles in the Editor and fails in the player build.
+- `FMODUnity.EventReference` is a serializable struct. At runtime it holds only `Guid` (`FMOD.GUID`). `Path` and `EventReference.Find(path)` are Editor-only (`#if UNITY_EDITOR`); using them in runtime code compiles in the Editor and fails in the player build. Whether `IsNull` is available in player builds depends on the integration version (check `EventReference.cs` in your copy), so in runtime code test `reference.Guid.IsNull`, which works in both.
 - `EventReference.Find("event:/...")` in `Reset()` gives a component a default event (Editor-only).
 - 2.01 and earlier used `[FMODUnity.EventRef] string`. To migrate:
   1. Add an `EventReference` field next to each `[EventRef]` string.

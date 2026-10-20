@@ -6,7 +6,7 @@ For the authoritative error table, see the Vivox SDK error codes page linked fro
 
 | Code | Name | Cause | Fix |
 |---|---|---|---|
-| `5041` | `VxErrorAlreadyInitialized` | `VivoxService.Instance.InitializeAsync()` called twice | Guard with a static flag or make the bootstrap `DontDestroyOnLoad` (see [init-and-login.md](init-and-login.md#re-init-guard)) |
+| `5041` (per Vivox 16 docs; verify) | `VxErrorAlreadyInitialized` | `VivoxService.Instance.InitializeAsync()` called twice | Guard with a static flag or make the bootstrap `DontDestroyOnLoad` (see [init-and-login.md](init-and-login.md#re-init-guard)) |
 | `20502` | `VxXmppServerErrorServiceUnavailable` | Exceeded 10 non-positional channels per user, or 200 participants per channel | Leave a channel before joining another; for large positional channels use Large 3D Channels setting |
 | Login fails silently | — | Subscribed to `LoggedIn` **after** `LoginAsync` returned, or an `async void` caller swallowed the exception | Subscribe first, then call `LoginAsync`; wrap the entry point in try/catch |
 | `ChannelJoined` handler never runs | — | Handler subscribed after the join call, or on an object destroyed by a scene load | Subscribe before calling `Join*ChannelAsync`; drive channel UI from the event |

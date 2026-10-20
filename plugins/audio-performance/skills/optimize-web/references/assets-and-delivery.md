@@ -46,7 +46,7 @@ Plays only from a URL (CORS-enabled server) or StreamingAssets, not from an impo
 ## Audio
 
 - Browsers play audio through the Web Audio API. AudioMixer groups work for volume, but mixer effects and most DSP filters are not processed. Test mixer-dependent behavior in a browser build.
-- Force To Mono where stereo adds nothing; use Vorbis. If Firefox `about:memory` shows web audio above ~100 MB, clips are likely decompressed or stereo.
+- Force To Mono where stereo adds nothing; Unity encodes Web clips as AAC regardless of the format setting, so tune Load Type and sample rate instead. If Firefox `about:memory` shows web audio above ~100 MB, clips are likely decompressed or stereo.
 - Browsers block audio until a user gesture; start music after the first click or tap.
 - See `optimize-audio` for import-setting recipes.
 

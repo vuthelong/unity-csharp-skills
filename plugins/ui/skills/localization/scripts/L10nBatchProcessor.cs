@@ -70,7 +70,7 @@ public static class L10nBatchProcessor
         var confirmed = EditorUtility.DisplayDialog(
             "Localize all scenes?",
             $"This opens {scenePaths.Count} scene(s) under Assets/, attaches LocalizeStringEvent " +
-            $"components to matching text, and saves each scene. It cannot be undone from here; " +
+            $"components to matching text, and saves each scene it changes. It cannot be undone from here; " +
             $"use version control to revert.\n\n{preview}",
             $"Localize {scenePaths.Count} scene(s)",
             "Cancel");
@@ -87,7 +87,8 @@ public static class L10nBatchProcessor
             foreach (var path in scenePaths)
             {
                 var scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
-                unmatched.AddRange(LocalizeHierarchy(mapping, table, path));
+                unmatched.AddRange(LocalizeHierarchy(mapping, table, path, out var changed));
+                if (!changed) continue;
                 EditorSceneManager.MarkSceneDirty(scene);
                 EditorSceneManager.SaveScene(scene);
             }
@@ -108,9 +109,10 @@ public static class L10nBatchProcessor
     /// but matched no mapping entry, so partial coverage is reported rather than silent.
     /// </summary>
     static List<string> LocalizeHierarchy(
-        Dictionary<string, string> mapping, string table, string scenePath)
+        Dictionary<string, string> mapping, string table, string scenePath, out bool changed)
     {
         var unmatched = new List<string>();
+        changed = false;
 
         // Both component families. TMP_Text is abstract and covers TextMeshProUGUI and TextMeshPro.
         var labels = new List<Component>();
@@ -170,6 +172,7 @@ public static class L10nBatchProcessor
 
                 EditorUtility.SetDirty(lse);
                 matched = true;
+                changed = true;
             }
 
             // A label the mapping never covered is a coverage gap the caller has to see.

@@ -1,7 +1,7 @@
 ---
 name: setup-multiplayer-services
 description: Designs and implements session-based online multiplayer with the Unity Multiplayer Services SDK - topology choice, lobbies, parties and rooms, join codes, session browsing, quick join, matchmaking, Relay or direct connectivity, host migration, reconnect, and dedicated-server sessions. Use when players need to find, group, join or host matches, or code uses MultiplayerService, ISession or CreateSessionAsync. Not for live-ops data (build-live-game) or voice chat (setup-vivox-voice-chat).
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: services-monetization
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/setup-multiplayer-services"

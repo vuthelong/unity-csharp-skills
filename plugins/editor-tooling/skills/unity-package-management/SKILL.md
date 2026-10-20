@@ -1,7 +1,7 @@
 ---
 name: unity-package-management
 description: "Adds, removes, upgrades and discovers Unity Package Manager (UPM) packages: through an open Editor's package_add command or the UnityEditor.PackageManager.Client API, or headless in CI by launching the Editor in -batchmode without -quit. Use for \"install a Unity package\", \"add com.unity.*\", \"pin a package version\", headless or CI package setup, verifying package ids, or \"which packages for a <genre> game\". The unity CLI has no top-level package command."
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: editor-tooling
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/unity-package-management"

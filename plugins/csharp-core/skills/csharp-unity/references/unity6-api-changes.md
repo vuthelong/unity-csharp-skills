@@ -9,12 +9,12 @@ Check the exact editor version in `ProjectSettings/ProjectVersion.txt` (`m_Edito
 | `Object.FindObjectOfType<T>()` | `FindFirstObjectByType<T>()` (deterministic, slower) or `FindAnyObjectByType<T>()` (fastest) | Obsolete since 2023.1 |
 | `Object.FindObjectsOfType<T>()` | `FindObjectsByType<T>(FindObjectsSortMode.None)` | Obsolete since 2023.1 |
 | `FindObjectOfType<T>(true)` (include inactive) | `FindFirstObjectByType<T>(FindObjectsInactive.Include)` | Obsolete |
-| `Object.GetInstanceID()` | `GetEntityId()` returning `EntityId` | Deprecated in newer Unity 6 releases; check the Console/API docs for your exact version |
+| `Object.GetInstanceID()` | `GetEntityId()` returning `EntityId` | Obsolete as an error (CS0619) on 6000.5+ |
 
 Notes:
 - Prefer `FindObjectsSortMode.None`; sorting by ID is slow and tied to the InstanceID-to-EntityId migration.
 - Newer Unity 6 releases move other int-instance-ID APIs to `EntityId` counterparts. Do not persist instance IDs or entity IDs to disk; they change between sessions. Use the object reference itself as a dictionary key where possible.
-- For code shared across Unity 6 minors, guard the `EntityId` path with the `UNITY_6000_x_OR_NEWER` define for the first version where your Console reports `GetInstanceID` as obsolete.
+- For code shared across Unity 6 minors, guard the `EntityId` path with `#if UNITY_6000_5_OR_NEWER`.
 
 ## Physics
 

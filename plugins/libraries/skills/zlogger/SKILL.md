@@ -16,7 +16,7 @@ Read `references/recipes.md` for the bootstrap/LogManager, VContainer registrati
 
 ## Install (Unity 6)
 
-1. Install NuGet `ZLogger` with NuGetForUnity (setup in `r3` -> "NuGetForUnity setup"). It pulls `Microsoft.Extensions.Logging` 8.x, `Microsoft.Extensions.DependencyInjection`, `System.Text.Json`, `System.Threading.Channels`, `Utf8StringInterpolation`, `Microsoft.Bcl.TimeProvider`, `Microsoft.Bcl.AsyncInterfaces` and related DLLs.
+1. Install NuGet `ZLogger` with NuGetForUnity (add NuGetForUnity once from git URL `https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity`, then **NuGet > Manage NuGet Packages**; analyzer DLLs need no platforms ticked and the `RoslynAnalyzer` label; on assembly version conflicts clear **Player > Assembly Version Validation**). It pulls `Microsoft.Extensions.Logging` 8.x, `Microsoft.Extensions.DependencyInjection`, `System.Text.Json`, `System.Threading.Channels`, `Utf8StringInterpolation`, `Microsoft.Bcl.TimeProvider`, `Microsoft.Bcl.AsyncInterfaces` and related DLLs.
    - **System.Runtime.CompilerServices.Unsafe:** install once via NuGetForUnity (package `System.Runtime.CompilerServices.Unsafe` 6.0.0, usually pulled in as a dependency); if the project already has it from another route (a `.unitypackage` DLL, the `org.nuget.system.runtime.compilerservices.unsafe` UPM package), keep that one and don't add a second copy (duplicate-assembly errors).
 2. Add the Unity provider: Package Manager > Add package from git URL `https://github.com/Cysharp/ZLogger.git?path=src/ZLogger.Unity/Assets/ZLogger.Unity` (package id `com.cysharp.zlogger`, 2.5.10, `unity: 2022.3.12f1+`). Its asmdef `ZLogger.Unity` precompile-references the NuGet DLLs, so step 1 comes first. Namespace `ZLogger.Unity` provides `AddZLoggerUnityDebug`.
 3. Enable C# 10 for every assembly that calls `ZLog*`. Unity 6 compiles C# 9 by default, and `ZLog*` methods only accept `ref Z...InterpolatedStringHandler` parameters (C# 10 interpolated string handlers); there is no `string` overload. Under C# 9 a call like `logger.ZLogInformation($"...")` does not compile.
@@ -60,7 +60,7 @@ Each provider has its own `ZLoggerOptions` (formatter, `IncludeScopes`, `Capture
 ## Release builds
 
 - Set `SetMinimumLevel(LogLevel.Warning)` (or higher) in player builds: disabled calls skip formatting, but the call and the `IsEnabled` check remain.
-- To remove calls completely, wrap with `[System.Diagnostics.Conditional("ZLOGGER_VERBOSE")]` static methods that accept a pre-built message or take the logger and arguments, and define the symbol only in development builds. A `[Conditional]` method cannot forward an interpolated string handler, so keep it simple: see recipes.
+- To remove calls completely, wrap with `[System.Diagnostics.Conditional("UNITY_EDITOR"), System.Diagnostics.Conditional("DEVELOPMENT_BUILD")]` static methods that accept a pre-built message or take the logger and arguments; release builds then drop the calls. A `[Conditional]` method cannot forward an interpolated string handler, so keep it simple: see recipes.
 - IL2CPP: providers are created through factory lambdas, but MEL builds `LoggerFactory` through `Microsoft.Extensions.DependencyInjection`, which activates types via reflection. If you get `MissingMethodException` during `LoggerFactory.Create` with Managed Stripping Level Medium/High, add `Assets/link.xml` (the `fullname`s are the NuGet DLL assembly names):
 
   ```xml

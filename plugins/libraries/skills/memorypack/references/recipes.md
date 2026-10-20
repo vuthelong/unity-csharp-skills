@@ -75,13 +75,20 @@ public sealed class SaveService
 
     public async UniTask SaveAsync(SaveData data, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var bytes = MemoryPackSerializer.Serialize(data);
         var tempPath = this._path + ".tmp";
         await UniTask.SwitchToThreadPool();
-        File.WriteAllBytes(tempPath, bytes);
-        if (File.Exists(this._path)) File.Delete(this._path);
-        File.Move(tempPath, this._path);
-        await UniTask.SwitchToMainThread(cancellationToken);
+        try
+        {
+            File.WriteAllBytes(tempPath, bytes);
+            if (File.Exists(this._path)) File.Delete(this._path);
+            File.Move(tempPath, this._path);
+        }
+        finally
+        {
+            await UniTask.SwitchToMainThread();
+        }
     }
 
     public SaveData Load()

@@ -35,7 +35,7 @@ Semantics both backends honor:
 |---|---|---|
 | `Play(cue, position)` | Pooled AudioSource at a point | `CreateInstance`, `set3DAttributes`, `start`, `release` |
 | `Play(cue, follow)` | Copies the transform each `Tick` | Same: `set3DAttributes(To3DAttributes(follow))` each `Tick`. If the follow target is destroyed, the event stays where it was |
-| `PlayOneShot(cue)` | 2D, no handle | `RuntimeManager.PlayOneShot(cue)`, no handle |
+| `PlayOneShot(cue)` | 2D, no handle | `RuntimeManager.PlayOneShot(cue)`, no handle. Plays at the world origin, so use it only for 2D events; 3D events go through `Play(cue, position)` |
 | `Stop(handle, fadeOut)` | Linear fade over `fadeOut` seconds | `fadeOut > 0` means `STOP_MODE.ALLOWFADEOUT` (the AHDSR release authored in Studio sets the length). `0` means `IMMEDIATE` |
 | `StopCue(cue, fadeOut)` | All voices of that cue | All tracked instances with that event GUID |
 | `SetPaused(bool)` | `AudioListener.pause` | `RuntimeManager.PauseAllEvents` |

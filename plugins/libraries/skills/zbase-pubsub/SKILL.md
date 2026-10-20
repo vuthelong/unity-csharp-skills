@@ -1,6 +1,6 @@
 ---
 name: zbase-pubsub
-description: "Sets up Zitga-Tech ZBase.Foundation.PubSub, a DI-free, UniTask-based messenger: Messenger object, typed publishers/subscribers, global and object-bound scopes, sync and async handlers, ordering, CachedPublisher. Choose it over messagepipe when the project has no DI container or wants a plain object it owns; choose messagepipe for container-injected brokers. Triggers: ZBase PubSub, Messenger, UnityScope, IMessage constraint errors, leaked subscriptions."
+description: "Sets up Zitga-Tech ZBase.Foundation.PubSub, a DI-free, UniTask-based messenger: Messenger object, typed publishers/subscribers, global and object-bound scopes, sync and async handlers, ordering, CachedPublisher. Choose it over messagepipe when the project has no DI container or wants a plain object it owns; choose messagepipe for container-injected brokers. Triggers: ZBase PubSub, Messenger, UnityScope, IMessage constraint errors, leaked ZBase PubSub subscriptions."
 license: MIT
 metadata:
   category: libraries
@@ -28,7 +28,7 @@ openupm add com.zbase.foundation.pubsub
 
 This pulls `com.cysharp.unitask`, `com.zbase.collections.pooled`, `com.zbase.foundation` and `org.nuget.system.runtime.compilerservices.unsafe`. Without openupm-cli, add a scoped registry `https://package.openupm.com` with scopes `com.zbase`, `com.cysharp`, `org.nuget` to `Packages/manifest.json`, then add `"com.zbase.foundation.pubsub": "1.5.2"`.
 
-**System.Runtime.CompilerServices.Unsafe:** install once via NuGetForUnity (package `System.Runtime.CompilerServices.Unsafe` 6.0.0, usually pulled in as a dependency); if the project already has it from another route (a `.unitypackage` DLL, the `org.nuget.system.runtime.compilerservices.unsafe` UPM package), keep that one and don't add a second copy (duplicate-assembly errors). Here the UPM package arrives as a hard dependency of the ZBase package, so it is the copy to keep; remove a NuGetForUnity copy if one exists.
+**System.Runtime.CompilerServices.Unsafe:** the `org.nuget.system.runtime.compilerservices.unsafe` UPM package arrives as a hard dependency of the ZBase package, so it is the copy to keep; remove any NuGetForUnity or `.unitypackage` copy to avoid duplicate-assembly errors.
 
 A git URL install (`https://github.com/Zitga-Tech/ZBase.Foundation.PubSub.git?path=Packages/ZBase.Foundation.PubSub`) works only if that scoped registry is already present, because UPM cannot resolve the dependencies from git. The repo's own README documents only the OpenUPM dependency list.
 
@@ -115,7 +115,7 @@ public static class GameMessenger
 - Keep the `Messenger` reachable for as long as anyone publishes or subscribes. Two `new Messenger()` instances never see each other's messages.
 - Always tie subscriptions to a lifetime: store the `ISubscription` and dispose it in `OnDestroy`/`Dispose`, or pass `destroyCancellationToken` as `unsubscribeToken`. Handlers that capture `this` keep MonoBehaviours alive and run on destroyed objects otherwise.
 - Do not assume `UnityScope(obj)` cleans up when `obj` is destroyed; nothing listens for destruction. Unsubscribe explicitly.
-- Prefer `subscriber.WithState(state)` overloads with `static` lambdas to avoid closure allocation: `subscriber.WithState(this).Subscribe<EnemyKilled>(static (self, msg) => self.OnEnemyKilled(msg));`.
+- Prefer `subscriber.WithState(state)` overloads with `static` lambdas to avoid closure allocation: `subscriber.WithState(this).Subscribe<EnemyKilled>(static (self, msg) => self.OnEnemyKilled(msg), unsubscribeToken: this.destroyCancellationToken);`.
 - Use `PublishWithContext` only when handlers need the caller location (`PublishingContext.Caller` with `CallerMemberName`, `CallerFilePath`, `CallerLineNumber`); it captures caller info via compiler attributes.
 
 ## Pitfalls

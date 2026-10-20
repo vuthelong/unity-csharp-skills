@@ -80,7 +80,7 @@ Objects instantiated at runtime run `Awake`/`OnEnable` immediately inside `Insta
 
 ## Async lifetime bugs
 
-- `async void` methods cannot be awaited; exceptions go to the Unity synchronization context (logged) but the caller never sees them and cannot react. Allowed only for Unity messages and fixed-signature UI handlers, with an internal `try/catch`.
+- `async void` methods cannot be awaited; exceptions go to the Unity synchronization context (logged) but the caller never sees them and cannot react. Allowed only for fixed-signature UI callbacks (Button/UnityEvent handlers) with an internal `try/catch`; never on Unity messages (use `async Awaitable Start()` or a `UniTaskVoid` call).
 - A `Task` that nobody awaits (`_ = LoadAsync();`) swallows its exception silently.
 - An await without a lifetime token resumes after the object is destroyed and touches it (`MissingReferenceException`) or keeps running after exiting Play Mode in the Editor.
 - Awaiting the same `Awaitable` twice is undefined; instances are pooled and reused.
@@ -153,4 +153,4 @@ A runtime script with `using UnityEditor;` compiles in the Editor but breaks the
 
 ## Obsolete and removed API
 
-Flag anything in the `csharp-unity` reference `unity6-api-changes.md`: `FindObjectOfType`, `FindObjectsOfType`, `Rigidbody.velocity`/`drag`/`angularDrag`, `PhysicMaterial`, `GraphicsSettings.renderPipelineAsset`, and `GetInstanceID()`, which newer Unity 6 releases deprecate in favor of `EntityId` (check the Console/API docs for the project's exact version). Also flag C# 10+ syntax, which Unity 6's C# 9 compiler rejects.
+Flag anything in the `csharp-unity` reference `unity6-api-changes.md`: `FindObjectOfType`, `FindObjectsOfType`, `Rigidbody.velocity`/`drag`/`angularDrag`, `PhysicMaterial`, `GraphicsSettings.renderPipelineAsset`, and `GetInstanceID()`, which is CS0619 on 6000.5+ (use `GetEntityId()`, guarded with `UNITY_6000_5_OR_NEWER` in code shared with older minors). Also flag C# 10+ syntax, which Unity 6's C# 9 compiler rejects.

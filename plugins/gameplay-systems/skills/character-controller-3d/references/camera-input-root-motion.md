@@ -77,7 +77,7 @@ When the Animator drives displacement (`Apply Root Motion` on, clips with root m
    transform.rotation *= this._animator.deltaRotation;
    ```
 
-4. Animator Update Mode: `Normal` with a CharacterController (moves in the frame loop); `Animate Physics` with a Rigidbody (see `rigidbody-controllers.md`).
+4. Animator Update Mode: `Normal` with a CharacterController (moves in the frame loop); `Fixed` (formerly Animate Physics) with a Rigidbody (see `rigidbody-controllers.md`).
 5. Airborne: root motion clips usually have no horizontal travel, so keep the last grounded velocity while in the air instead of using `deltaPosition`.
 6. Culling Mode: `Always Animate` on the player. `Cull Completely` stops `OnAnimatorMove` when off-screen, and with it your gravity.
 

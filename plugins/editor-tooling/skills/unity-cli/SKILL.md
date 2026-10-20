@@ -1,7 +1,7 @@
 ---
 name: unity-cli
-description: "Drives the official `unity` command-line tool: controls an open Unity Editor live (GameObjects, scenes, assets, C# through `unity command eval` with com.unity.pipeline), installs Editors and modules, manages auth and licenses, creates and opens projects, sets up source control, and runs headless builds and tests. Use for any `unity …` command, \"install Unity 6000.x\", \"build/test from the terminal\", \"edit the scene in the open Editor\", or Safe Mode/connection failures. Owns the canonical eval syntax and test-runner rule."
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+description: "Drives the official `unity` command-line tool: controls an open Unity Editor live (GameObjects, scenes, assets, C# through `unity command eval` with com.unity.pipeline), installs Editors and modules, manages auth and licenses, creates and opens projects, sets up source control, and runs headless builds and tests. Use for any `unity …` command, \"install Unity 6000.x\", \"build/test from the terminal\", \"edit the scene in the open Editor\", or CLI connection failures (including Safe Mode blocking the connection). Owns the canonical eval syntax and test-runner rule. Compile-error diagnosis via Editor.log, domain reload and asset/YAML safety belong to unity-editor-safety."
+license: Unity Companion License
 metadata:
   category: editor-tooling
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/unity-cli"
@@ -60,7 +60,7 @@ unity command eval_file path/to/snippet.cs                   # long snippets
 
 ### Can't connect? Rule out two false negatives
 
-- **Safe Mode.** A project with C# compile errors boots into Safe Mode, where the Pipeline package doesn't load, so `unity command`, `status`, `list` and `recompile` can't connect (`recompile` exits `7`). Run `unity pipeline list` to confirm, fix the compile errors, restart Unity. [Recovery loop](references/integration-advanced.md#recovering-from-safe-mode-connection-fails-because-of-compile-errors).
+- **Safe Mode.** A project with C# compile errors boots into Safe Mode, where the Pipeline package doesn't load, so `unity command`, `status`, `list` and `recompile` can't connect (`recompile` exits `7`). Run `unity pipeline list` to confirm and fix the compile errors. Unity leaves Safe Mode on its own after a clean recompile; if the CLI still can't connect (or the Editor is headless), restart the Editor. [Recovery loop](references/integration-advanced.md#recovering-from-safe-mode-connection-fails-because-of-compile-errors).
 - **A sandboxed agent shell.** A restrictive sandbox can hide a genuinely running Editor from `unity status`. Don't treat "no instances" as proof, and don't improvise a headless Editor as a substitute; say your sandbox may be blocking the view and ask whether an Editor is open. [Details](references/integration-advanced.md#sandboxed-agent-tooling-can-hide-a-running-editor).
 
 ## Install the CLI (if not already installed)

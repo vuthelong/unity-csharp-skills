@@ -1,7 +1,7 @@
 ---
 name: physics-3d-collision
 description: Diagnoses and fixes 3D PhysX collision, trigger and query problems in Unity 6 MonoBehaviour projects - Rigidbody body types, Layer Collision Matrix, MeshCollider rules, collision detection modes, SyncTransforms, contact offset and sleeping. Use when OnCollisionEnter or OnTriggerEnter does not fire, objects tunnel through each other, a Raycast or Overlap query misses, a ragdoll explodes on frame one, AddForce stops working, or physics differs in a build. Physics 2D and DOTS get best-effort answers.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: gameplay-systems
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/physics-3d-collision"
@@ -39,7 +39,7 @@ When a user reports two kinematic triggers not firing, say the setup is valid, d
 | 3 | Two kinematic triggers, no `OnTriggerEnter` | See **Critical fact**. |
 | 4 | Ragdoll / jointed body explodes on frame 1 with no forces | Overlapping colliders at the start pose cause a depenetration spike. Fix: shrink colliders so none overlap. Confirm in **Window > Analysis > Physics Debugger** (overlaps visible on frame 1). Check start-pose overlap before joint limits, projection, mass ratios, drives, or `Enable Collision`; those rarely cause a frame-1 explosion without forces. |
 | 5 | `CharacterController` + `OnCollisionEnter` | Never fires for `CharacterController.Move`. Use `OnControllerColliderHit(ControllerColliderHit hit)`. Do not add a Rigidbody. |
-| 6 | `AddForce` / `AddTorque` stops after the object settled | Rigidbody is asleep. Call `rb.WakeUp()` before the force, or apply more force. Touch nothing else (not Input System). |
+| 6 | `AddForce` / `AddTorque` has no effect after the object settled | A non-zero force wakes a sleeping body, so sleep is rarely the cause. Check that the force is not zero or tiny each step (applied once instead of every `FixedUpdate`, wrong `ForceMode`, scaled by `Time.deltaTime` twice), the body is not kinematic, and `constraints` do not freeze that axis. Touch nothing else (not Input System). |
 | 7 | All physics frozen, raycasts still hit | `Time.timeScale == 0`. Restore `Time.timeScale = 1f` (pause menu / cutscene code). Queries ignore time scale; simulation does not. |
 | 8 | Raycast false, `Debug.DrawRay` starts inside the target | Origin inside the collider: a ray starting inside a primitive collider never detects that collider. Offset the origin outside, or test containment with `Physics.CheckSphere` / `Physics.OverlapSphere` / `Physics.ComputePenetration`. **Queries Hit Backfaces** only affects MeshColliders. |
 | 9 | Raycast misses inactive object / disabled collider | Queries ignore them. Require `activeInHierarchy` and `Collider.enabled`. |
@@ -103,7 +103,7 @@ Use the non-allocating overloads (`RaycastNonAlloc`, `OverlapSphereNonAlloc`) or
 | `Rigidbody.drag` / `angularDrag` | `Rigidbody.linearDamping` / `angularDamping` |
 | `Physics.autoSimulation` | `Physics.simulationMode = SimulationMode.Script` + `Physics.Simulate(dt)` |
 | `FindObjectOfType<Rigidbody>()` | `FindFirstObjectByType` / `FindAnyObjectByType` |
-| `Object.GetInstanceID()` for pair keys | Newer Unity 6 releases move to `EntityId` (`GetEntityId()`) and deprecate `GetInstanceID`; check your version's docs |
+| `Object.GetInstanceID()` for pair keys | `GetEntityId()`; `GetInstanceID` is CS0619 on 6000.5+, guard with `UNITY_6000_5_OR_NEWER` |
 
 The old Rigidbody property names still compile on 6000.0 with obsolete warnings; write the new names.
 

@@ -1,7 +1,7 @@
 ---
 name: levelplay-unity-integration
 description: Integrates LevelPlay ad mediation into Unity through the Ads Mediation package (com.unity.services.levelplay, SDK 9.x) - install/upgrade, Android Gradle and iOS CocoaPods resolution, init, rewarded/interstitial/banner ad units, GDPR/CCPA/COPPA and ATT, impression-level revenue, Test Suite. Use when adding or debugging ads in a Unity game, fixing CS0246 on Unity.Services.LevelPlay, or migrating from IronSource.Agent or Unity Ads (Advertisement Legacy). Not for in-app purchases.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: services-monetization
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/levelplay-unity-integration"

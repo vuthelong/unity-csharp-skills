@@ -38,6 +38,8 @@ dataProvider.Apply();
 
 Throwing ends the snippet; do not add code after a `throw` in the same branch.
 
+`ISpriteFrameEditCapability` and `EEditCapability` are listed in the current `com.unity.2d.sprite` API, but the first Editor version that ships them is not documented. If the snippet fails to compile with CS0234/CS0246 on those types, the installed package predates them: drop the capability block, keep the `dataProvider == null` abort, and tell the user the importer's edit restrictions could not be checked.
+
 ## Capabilities (`EEditCapability`)
 
 Check the one that matches the task; check several with `&&` when the task touches several.

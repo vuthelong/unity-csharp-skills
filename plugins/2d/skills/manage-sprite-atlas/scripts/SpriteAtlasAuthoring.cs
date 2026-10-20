@@ -100,7 +100,8 @@ public static class SpriteAtlasAuthoring
     }
 
     public static void ConfigureImporter(string atlasPath, AtlasPreset preset, bool includeInBuild,
-        IReadOnlyDictionary<string, TextureImporterFormat> platformFormats = null, int maxTextureSize = 2048)
+        IReadOnlyDictionary<string, TextureImporterFormat> platformFormats = null, int maxTextureSize = 2048,
+        bool worldMipMaps = false)
     {
         if (AssetImporter.GetAtPath(atlasPath) is not SpriteAtlasImporter importer)
         {
@@ -109,7 +110,7 @@ public static class SpriteAtlasAuthoring
         }
 
         var textureSettings = importer.textureSettings;
-        textureSettings.generateMipMaps = false;
+        textureSettings.generateMipMaps = preset == AtlasPreset.World && worldMipMaps;
         textureSettings.readable = false;
         textureSettings.sRGB = true;
         textureSettings.filterMode = preset == AtlasPreset.PixelArt ? FilterMode.Point : FilterMode.Bilinear;

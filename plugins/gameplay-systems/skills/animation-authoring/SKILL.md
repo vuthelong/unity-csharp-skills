@@ -48,7 +48,7 @@ API listings and full examples: [references/clip-and-controller-api.md](referenc
 - Smooth with `animator.SetFloat(SpeedId, v, 0.1f, Time.deltaTime)`.
 - Triggers stay set until consumed. Call `ResetTrigger` when the action is cancelled, or the transition fires later unexpectedly.
 - Jump straight to a state with `CrossFadeInFixedTime(stateHash, 0.1f, layer)`; query with `GetCurrentAnimatorStateInfo(layer).shortNameHash` and `IsInTransition(layer)`.
-- Root motion + Rigidbody: set `Animator.updateMode = AnimatorUpdateMode.Fixed` (named "Animate Physics" in the Inspector) and apply `animator.deltaPosition` in `OnAnimatorMove` through `rb.MovePosition`. Implementing `OnAnimatorMove` takes over root motion entirely.
+- Root motion + Rigidbody: set `Animator.updateMode = AnimatorUpdateMode.Fixed` (formerly Animate Physics) and apply `animator.deltaPosition` in `OnAnimatorMove`. Kinematic body: `rb.MovePosition(rb.position + deltaPosition)`. Dynamic body: set `rb.linearVelocity` from `deltaPosition / Time.deltaTime`, keeping the current vertical velocity (see `character-controller-3d`). Implementing `OnAnimatorMove` takes over root motion entirely.
 - Per-character clip variants: `AnimatorOverrideController` built from the base controller; batch changes with `ApplyOverrides(List<KeyValuePair<AnimationClip, AnimationClip>>)` to avoid one rebind per assignment.
 - Off-screen characters: `cullingMode = AlwaysAnimate` if gameplay depends on events or root motion; otherwise `CullUpdateTransforms` or `CullCompletely` to save CPU.
 - Disabling the Animator resets its state unless `keepAnimatorStateOnDisable = true`.

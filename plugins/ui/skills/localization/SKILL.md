@@ -1,7 +1,7 @@
 ---
 name: localization
 description: Sets up and drives Unity Localization (com.unity.localization) - Locales, String and Asset Tables, Smart Strings, LocalizeStringEvent wiring, runtime locale switching, per-locale font swapping through Asset Tables, completeness checks and batch-binding existing scene text. Use when adding languages, building a language menu, extracting hard-coded strings, or fixing "No translation found" text or a CJK locale showing tofu because its font is not swapped. Font atlas tuning belongs to optimize-text-mesh-pro.
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: ui
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/localization"
@@ -45,7 +45,7 @@ Scripts (copy into the project, inside an `Editor` folder for `L10nBatchProcesso
 
 - Add `UnityEngine.Localization.Components.LocalizeStringEvent`, set `StringReference` (table + entry), and route `OnUpdateString` to the text component's `text` setter (`TMP_Text` or legacy `UnityEngine.UI.Text`). The Inspector's "Localize" context menu does this for you; from code see `references/editor-wiring.md`.
 - Do not reflect into the internal `LocalizeComponent_TMPro` / UGUI helpers in `UnityEditor.Localization.Plugins` — internal API with no stability guarantee.
-- In scripts: `[SerializeField] LocalizedString m_Title;` then `m_Title.StringChanged += s => label.text = s;` (unsubscribe in `OnDisable`), or `await m_Title.GetLocalizedStringAsync().Task`. For legacy code, wrap `LocalizationSettings.StringDatabase.GetLocalizedString(table, key)` in a small static helper rather than rewriting callers.
+- In scripts: `[SerializeField] LocalizedString m_Title;` then subscribe a method group, not a lambda: `m_Title.StringChanged += OnTitleChanged;` in `OnEnable`, `m_Title.StringChanged -= OnTitleChanged;` in `OnDisable`, with `void OnTitleChanged(string s) => label.text = s;`, or `await m_Title.GetLocalizedStringAsync().Task`. For legacy code, wrap `LocalizationSettings.StringDatabase.GetLocalizedString(table, key)` in a small static helper rather than rewriting callers.
 - Dynamic values: use **Smart Strings** (`{score}`, plurals `{count:plural:{} item|{} items}`) with arguments or `LocalizedString` local variables instead of concatenating translated fragments.
 - After changing text that drives layout, `UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(parent)` if you read sizes the same frame.
 

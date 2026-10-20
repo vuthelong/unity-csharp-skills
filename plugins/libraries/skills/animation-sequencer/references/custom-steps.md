@@ -78,6 +78,8 @@ public sealed class MaterialFloatDOTweenAction : DOTweenActionBase
     [SerializeField, Range(0f, 1f)] private float value = 1f;
 
     private Material material;
+    private Renderer materialOwner;
+    private bool materialIsInstance;
     private float previousValue;
 
     public override Type TargetComponentType => typeof(Renderer);
@@ -86,7 +88,12 @@ public sealed class MaterialFloatDOTweenAction : DOTweenActionBase
     protected override Tweener GenerateTween_Internal(GameObject target, float duration)
     {
         Renderer renderer = target.GetComponent<Renderer>();
-        material = Application.isPlaying ? renderer.material : renderer.sharedMaterial;
+        if (material == null || materialOwner != renderer || materialIsInstance != Application.isPlaying)
+        {
+            material = Application.isPlaying ? renderer.material : renderer.sharedMaterial;
+            materialOwner = renderer;
+            materialIsInstance = Application.isPlaying;
+        }
         previousValue = material.GetFloat(propertyName);
         return material.DOFloat(value, propertyName, duration);
     }
@@ -105,6 +112,7 @@ Notes:
 - `TargetComponentType` drives the dropdown: the action is disabled unless the target has that component (`Transform` always passes, `RectTransform` requires a UI object). Leave it `null` to allow any target, but then validate in `GenerateTween_Internal`.
 - Return a non-null tween. A null return throws inside `GenerateTween` / `DOTweenAnimationStep`.
 - Edit-mode preview tweens `sharedMaterial` in the example above, which edits the material asset; preview carefully or restrict the action to Play Mode.
+- `renderer.material` creates a new instance on each call, so the example creates it once per renderer and reuses it on replays. Destroy that instance when the target is destroyed.
 - Changing a `Graphic` color in edit mode may not repaint; the built-in `FadeGraphicDOTweenAction` toggles `enabled` in an `OnUpdate` under `#if UNITY_EDITOR` when `!Application.isPlaying`. Copy that pattern for color-type actions.
 - Built-in actions cache the target component (`FadeGraphicDOTweenAction`, `FadeCanvasGroupDOTweenAction`) on first generation. If you retarget at runtime, re-fetch the component every time as in the example instead of caching.
 

@@ -1,7 +1,7 @@
 ---
 name: optimize-audio
 description: Audits and fixes the cost of audio assets in Unity 6 - AudioImporter Load Type, compression format, sample rate, Force To Mono and per-platform overrides, plus DSP cost from deep AudioMixer trees or effects on silent groups. Use when audio memory is high in the Memory Profiler, clips load or stream badly, a stereo clip on a 3D source sounds wrong, or the Profiler Audio module shows DSP spikes. Not for playback code (audio-playback-system) or routing (audio-setup-mixers).
-license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
+license: Unity Companion License
 metadata:
   category: audio-performance
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/optimize-audio, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/audio"

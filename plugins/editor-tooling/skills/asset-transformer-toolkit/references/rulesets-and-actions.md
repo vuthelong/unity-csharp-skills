@@ -20,14 +20,14 @@ It is expected that users will create additional Action classes to extend the Ac
 ## RuleSets
 
 ### Description
-RuleSets are a SerializedObject containing a list of Rule instances, which contain a list of Action instances. RuleSets are used to ensure a set of Actions are executed in a specific order.
+RuleSets are assets containing a list of Rule instances, which contain a list of Action instances. RuleSets are used to ensure a set of Actions are executed in a specific order.
 RuleSets are derived from ScriptableObject and must end with the '.asset' extension.
 RuleSets support conversion to json. This will include information about the Actions they contain.
 
 ### Modifying RuleSets
 
 #### Step 1: Load RuleSet
-- Use AssetDatabase.LoadAssetAtPath to load the asset from memory.
+- Use AssetDatabase.LoadAssetAtPath to load the asset.
 
 #### Step 2: Construct the script
 - Read the API reference for the RuleSet class. Also read the API reference for the Rule and RuleBlock classes if required.
@@ -52,8 +52,21 @@ if (ruleSet.RulesCount == 0)
 
 Rule rule = ruleSet.GetRule(0);
 
-// Decimate Action ID is 277054868
-RuleBlock decimateBlock = new RuleBlock(277054868);
+int decimateId = 0;
+bool found = false;
+foreach (var action in Unity.Pixyz.Plugin4Unity.Editor.AI.ATTAssistantUtilities.GetActionsList())
+{
+    if (action.Name.EndsWith(".Decimate"))
+    {
+        decimateId = action.ID;
+        found = true;
+        break;
+    }
+}
+if (!found)
+    throw new System.Exception("Decimate action not found");
+
+RuleBlock decimateBlock = new RuleBlock(decimateId);
 
 rule.AppendBlock(decimateBlock);
 
@@ -64,7 +77,7 @@ return $"Added Decimate action to {path} (Rule index 0)";
 ```
 
 A proper script for modifying a RuleSet has the following traits:
-- Does not use the ScriptableObject API (this bypasses necessary event triggers).
+- Changes rules through the `RuleSet` / `Rule` methods (`GetRule`, `AppendBlock`), not by writing serialized fields with `SerializedObject` or reflection (this bypasses necessary event triggers). The SerializedObject rule in SKILL.md applies to importer fields, not RuleSets.
 
 #### Step 3: Validation
 - Run the script as C# in a live Editor.
