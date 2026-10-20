@@ -11,7 +11,7 @@
     {
       "name": "unity-csharp-core",
       "source": "./plugins/csharp-core",
-      "description": "C# and Unity coding standards, code review, editor safety."
+      "description": "C# and Unity coding standards, code review, codebase audit, editor safety."
     },
     {
       "name": "unity-editor-tooling",

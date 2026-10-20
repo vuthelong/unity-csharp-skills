@@ -1,8 +1,8 @@
 # Unity C# Skills
 
-Curated, categorized [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for **Unity 6 (6000.x)** and C# development, packaged as a Claude Code plugin marketplace. 86 skills in 11 plugins.
+Curated, categorized [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for **Unity 6 (6000.x)** and C# development, packaged as a Claude Code plugin marketplace. 87 skills in 11 plugins.
 
-Skills are merged, deduplicated and updated from Unity-Technologies/skills, Unity-Open-MCP, a5c-ai/babysitter and original work. Third-party library skills are grounded in each library's source code; where an upstream README disagrees with its source, the skill follows the source.
+Skills are merged, deduplicated and updated from Unity-Technologies/skills, Unity-Open-MCP, a5c-ai/babysitter, DietrichGebert/ponytail and original work. Third-party library skills are grounded in each library's source code; where an upstream README disagrees with its source, the skill follows the source.
 
 ## Install
 
@@ -23,10 +23,11 @@ Many skills here are modified versions of [Unity-Technologies/skills](https://gi
 
 ### C# Core — `unity-csharp-core`
 
-C# and Unity coding standards, code review, editor safety.
+C# and Unity coding standards, code review, codebase audit, editor safety.
 
 | Skill | License | Summary |
 |---|---|---|
+| [`audit-unity-codebase`](plugins/csharp-core/skills/audit-unity-codebase/SKILL.md) | MIT | Audits a whole Unity 6 project or folder in one pass: bugs, lifecycle and native leaks, what breaks at the target frame budget or object count, risky code without tests, slow… |
 | [`csharp-unity`](plugins/csharp-core/skills/csharp-unity/SKILL.md) | MIT | Writes and refactors Unity 6 C# (MonoBehaviours, ScriptableObjects, editor scripts, game systems, UniTask/Awaitable async, serialization, pooling, tests) with GC-free… |
 | [`review-unity-csharp`](plugins/csharp-core/skills/review-unity-csharp/SKILL.md) | MIT | Reviews existing Unity C# for correctness bugs, lifecycle mistakes, memory and native-resource leaks and Unity 6 obsolete APIs, reporting file:line findings with severity and… |
 | [`unity-editor-safety`](plugins/csharp-core/skills/unity-editor-safety/SKILL.md) | MIT | Safety rules and recovery steps for an agent changing a Unity 6 project: confirming C# edits really compiled via Editor.log, Safe Mode and stale-assembly recovery, domain… |
