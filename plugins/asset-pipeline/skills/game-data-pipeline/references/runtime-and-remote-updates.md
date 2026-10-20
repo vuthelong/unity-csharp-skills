@@ -57,7 +57,7 @@ public sealed class Boot : MonoBehaviour
 
     #endregion
 
-    #region Private Methods
+    #region Boot
 
     private static async UniTaskVoid BootAsync(CancellationToken cancellationToken)
     {
@@ -81,7 +81,7 @@ using VContainer.Unity;
 
 public sealed class RootLifetimeScope : LifetimeScope
 {
-    #region Private Methods
+    #region Registration
 
     protected override void Configure(IContainerBuilder builder)
     {
@@ -107,7 +107,7 @@ public sealed class GameDataLoader : IAsyncStartable
 
     #endregion
 
-    #region Public Methods
+    #region Loading
 
     public GameDataLoader(GameDataService gameData)
     {

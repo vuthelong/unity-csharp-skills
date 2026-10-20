@@ -93,11 +93,14 @@ using UnityEngine;
 public sealed class SaveStore
 {
     #region Fields
+
     private readonly string _path;
     private readonly MessagePackSerializerOptions _options;
+
     #endregion
 
     #region Constructors
+
     public SaveStore(string fileName, MessagePackSerializerOptions options)
     {
         this._path = Path.Combine(Application.persistentDataPath, fileName);
@@ -105,9 +108,11 @@ public sealed class SaveStore
             .WithCompression(MessagePackCompression.Lz4BlockArray)
             .WithSecurity(MessagePackSecurity.UntrustedData);
     }
+
     #endregion
 
     #region Public API
+
     public async UniTask SaveAsync(PlayerSave save, CancellationToken cancellationToken)
     {
         var tempPath = this._path + ".tmp";
@@ -136,6 +141,7 @@ public sealed class SaveStore
             return await MessagePackSerializer.DeserializeAsync<PlayerSave>(stream, this._options, cancellationToken);
         }
     }
+
     #endregion
 }
 ```

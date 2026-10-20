@@ -16,41 +16,47 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 public sealed class EnemySpawner : MonoBehaviour
 {
     #region Fields
+
     [SerializeField] private AssetReferenceGameObject enemyPrefab;
     [SerializeField] private Transform spawnPoint;
 
     private AsyncOperationHandle<GameObject> _prefabHandle;
     private GameObject _prefab;
+
     #endregion
 
     #region Properties
+
     public bool IsReady => this._prefab != null;
+
     #endregion
 
     #region Unity Lifecycle
+
     private void Start() => LoadAsync(destroyCancellationToken).Forget();
 
     private void OnDestroy()
     {
         if (this._prefabHandle.IsValid()) Addressables.Release(this._prefabHandle);
     }
+
     #endregion
 
-    #region Public Methods
+    #region Load And Spawn
+
     public GameObject Spawn()
     {
         if (!IsReady) return null;
 
         return Instantiate(this._prefab, this.spawnPoint.position, this.spawnPoint.rotation);
     }
-    #endregion
 
-    #region Private Methods
     private async UniTaskVoid LoadAsync(CancellationToken token)
     {
         this._prefabHandle = Addressables.LoadAssetAsync<GameObject>(this.enemyPrefab);
         this._prefab = await this._prefabHandle.ToUniTask(cancellationToken: token);
     }
+
     #endregion
 }
 ```
@@ -72,10 +78,13 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 public sealed class AddressableScope : System.IDisposable
 {
     #region Fields
+
     private readonly List<AsyncOperationHandle> _handles = new();
+
     #endregion
 
-    #region Public Methods
+    #region Load And Release
+
     public AsyncOperationHandle<T> Load<T>(object key)
     {
         var handle = Addressables.LoadAssetAsync<T>(key);
@@ -100,6 +109,7 @@ public sealed class AddressableScope : System.IDisposable
 
         this._handles.Clear();
     }
+
     #endregion
 }
 ```
@@ -119,11 +129,14 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 public sealed class ItemIconCatalog : System.IDisposable
 {
     #region Fields
+
     private readonly Dictionary<string, Sprite> _byName = new();
     private AsyncOperationHandle<IList<Sprite>> _handle;
+
     #endregion
 
-    #region Public Methods
+    #region Icon Lookup
+
     public async UniTask LoadAsync(AssetLabelReference label, CancellationToken token)
     {
         this._handle = Addressables.LoadAssetsAsync<Sprite>(label, null, true);
@@ -144,6 +157,7 @@ public sealed class ItemIconCatalog : System.IDisposable
         this._byName.Clear();
         if (this._handle.IsValid()) Addressables.Release(this._handle);
     }
+
     #endregion
 }
 ```
@@ -167,10 +181,13 @@ using UnityEngine.SceneManagement;
 public sealed class LevelLoader : MonoBehaviour
 {
     #region Fields
+
     private AsyncOperationHandle<SceneInstance> _sceneHandle;
+
     #endregion
 
-    #region Public Methods
+    #region Scene Loading
+
     public async UniTask LoadAsync(AssetReference scene, CancellationToken token)
     {
         await UnloadAsync();
@@ -188,6 +205,7 @@ public sealed class LevelLoader : MonoBehaviour
         this._sceneHandle = default;
         await unload.ToUniTask();
     }
+
     #endregion
 }
 ```

@@ -82,7 +82,8 @@ using UnityEngine;
 
 public static class AddressablesBuild
 {
-    #region Public Methods
+    #region Content Build
+
     public static void BuildContent()
     {
         var settings = AddressableAssetSettingsDefaultObject.Settings;
@@ -113,6 +114,7 @@ public static class AddressablesBuild
         Debug.LogError($"Addressables update failed: {result?.Error}");
         EditorApplication.Exit(1);
     }
+
     #endregion
 }
 ```

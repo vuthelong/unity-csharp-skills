@@ -38,7 +38,7 @@ public class CharacterAnimatorBridge : MonoBehaviour
 
     #endregion
 
-    #region Unity Callbacks
+    #region Root Motion
 
     private void OnAnimatorMove()
     {

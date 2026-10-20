@@ -45,14 +45,18 @@ namespace MyGame.MasterData.Editor
     public sealed class MasterMemoryPreBuild : IPreprocessBuildWithReport
     {
         #region Properties
+
         public int callbackOrder => 0;
+
         #endregion
 
-        #region Public Methods
+        #region Build
+
         public void OnPreprocessBuild(BuildReport report)
         {
             if (!MasterMemoryCsvBuilder.TryBuild(out var error)) throw new BuildFailedException(error);
         }
+
         #endregion
     }
 }
@@ -65,7 +69,8 @@ namespace MyGame.MasterData.Editor
 {
     public static class CiEntry
     {
-        #region Public Methods
+        #region Build
+
         public static void BuildForCi()
         {
             if (MasterMemoryCsvBuilder.TryBuild(out var error)) return;
@@ -73,6 +78,7 @@ namespace MyGame.MasterData.Editor
             UnityEngine.Debug.LogError(error);
             UnityEditor.EditorApplication.Exit(1);
         }
+
         #endregion
     }
 }
@@ -98,14 +104,18 @@ using UnityEngine;
 public sealed class MasterDataBootstrap : MonoBehaviour
 {
     #region Fields
+
     [SerializeField] private TextAsset masterBytes;
+
     #endregion
 
     #region Unity Lifecycle
+
     private void Awake()
     {
         MasterDataService.Load(this.masterBytes.bytes);
     }
+
     #endregion
 }
 ```
@@ -123,10 +133,13 @@ using UnityEngine.AddressableAssets;
 public sealed class MasterDataBootstrap : MonoBehaviour
 {
     #region Fields
+
     private const string MasterDataAddress = "master-data";
+
     #endregion
 
     #region Unity Lifecycle
+
     private async Awaitable Start()
     {
         var handle = Addressables.LoadAssetAsync<TextAsset>(MasterDataAddress);
@@ -140,6 +153,7 @@ public sealed class MasterDataBootstrap : MonoBehaviour
             Addressables.Release(handle);
         }
     }
+
     #endregion
 }
 ```

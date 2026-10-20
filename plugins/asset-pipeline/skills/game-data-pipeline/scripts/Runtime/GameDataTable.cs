@@ -20,7 +20,7 @@ namespace Game.Data
 
         #endregion
 
-        #region Public Methods
+        #region Construction
 
         public GameDataRefAttribute(Type rowType)
         {
@@ -50,7 +50,7 @@ namespace Game.Data
 
         #endregion
 
-        #region Public Methods
+        #region Table Data
 
         public abstract IGameDataRow GetRow(int index);
 
@@ -89,7 +89,7 @@ namespace Game.Data
 
         #endregion
 
-        #region Public Methods
+        #region Table Data
 
         public override IGameDataRow GetRow(int index) => this.rows[index];
 
@@ -137,7 +137,7 @@ namespace Game.Data
 
         #endregion
 
-        #region Public Methods
+        #region Lookup
 
         public bool TryGet(int id, out TRow row) => this._byId.TryGetValue(id, out row);
 

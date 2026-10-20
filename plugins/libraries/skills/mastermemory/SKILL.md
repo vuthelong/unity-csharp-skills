@@ -117,20 +117,26 @@ using MyGame.MasterData;
 public static class MasterDataService
 {
     #region Fields
+
     public static event Action<MemoryDatabase> Reloaded;
+
     #endregion
 
     #region Properties
+
     public static MemoryDatabase Database { get; private set; }
     public static IFormatterResolver Resolver => StaticCompositeResolver.Instance;
+
     #endregion
 
-    #region Public Methods
+    #region Loading
+
     public static void Load(byte[] bytes)
     {
         Database = new MemoryDatabase(bytes, internString: true, formatterResolver: Resolver);
         Reloaded?.Invoke(Database);
     }
+
     #endregion
 }
 ```

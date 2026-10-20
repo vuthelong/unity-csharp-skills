@@ -14,18 +14,23 @@ using ZLogger.Unity;
 public static class LogManager
 {
     #region Fields
+
     private static ILoggerFactory _factory;
+
     #endregion
 
     #region Public API
+
     public static ILoggerFactory Factory => _factory ??= CreateFactory();
 
     public static ILogger<T> GetLogger<T>() => Factory.CreateLogger<T>();
 
     public static ILogger GetLogger(string categoryName) => Factory.CreateLogger(categoryName);
+
     #endregion
 
     #region Bootstrap
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetStatics()
     {
@@ -79,6 +84,7 @@ public static class LogManager
         _factory?.Dispose();
         _factory = null;
     }
+
     #endregion
 }
 ```
@@ -93,12 +99,15 @@ using ZLogger;
 public sealed class EnemySpawner : MonoBehaviour
 {
     #region Fields
+
     private static readonly ILogger<EnemySpawner> Logger = LogManager.GetLogger<EnemySpawner>();
     [SerializeField] private int maxEnemies = 20;
     private int _alive;
+
     #endregion
 
     #region Spawning
+
     private void Spawn(int enemyId, Vector3 position)
     {
         if (this._alive >= this.maxEnemies)
@@ -110,6 +119,7 @@ public sealed class EnemySpawner : MonoBehaviour
         this._alive++;
         Logger.ZLogDebug($"Spawned {enemyId:@enemyId} at {position}");
     }
+
     #endregion
 }
 ```
@@ -126,26 +136,32 @@ using VContainer.Unity;
 public sealed class RootLifetimeScope : LifetimeScope
 {
     #region Configuration
+
     protected override void Configure(IContainerBuilder builder)
     {
         builder.RegisterInstance(LogManager.Factory);
         builder.Register(typeof(Logger<>), Lifetime.Singleton).As(typeof(ILogger<>));
         builder.Register<InventoryService>(Lifetime.Singleton);
     }
+
     #endregion
 }
 
 public sealed class InventoryService
 {
     #region Fields
+
     private readonly ILogger<InventoryService> _logger;
+
     #endregion
 
     #region Constructors
+
     public InventoryService(ILogger<InventoryService> logger)
     {
         this._logger = logger;
     }
+
     #endregion
 }
 ```
@@ -202,11 +218,13 @@ using ZLogger;
 public static partial class NetworkLog
 {
     #region Messages
+
     [ZLoggerMessage(LogLevel.Information, "Connected to {host} in {elapsedMs} ms")]
     public static partial void Connected(this ILogger logger, string host, long elapsedMs);
 
     [ZLoggerMessage(LogLevel.Error, "Packet {packetId} rejected: {reason}")]
     public static partial void PacketRejected(this ILogger logger, int packetId, string reason);
+
     #endregion
 }
 ```
@@ -225,11 +243,13 @@ using ZLogger;
 public static class DevLog
 {
     #region Public API
+
     [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
     public static void Trace<T>(ILogger logger, string label, T value)
     {
         logger.ZLogTrace($"{label}: {value}");
     }
+
     #endregion
 }
 ```

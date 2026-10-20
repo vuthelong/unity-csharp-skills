@@ -13,6 +13,7 @@ public enum VoiceStealMode
 public sealed class AudioCue : ScriptableObject
 {
     #region Fields
+
     [Header("Clips")]
     [SerializeField] private AudioClip[] clips = Array.Empty<AudioClip>();
     [SerializeField] private bool avoidImmediateRepeat = true;
@@ -41,9 +42,11 @@ public sealed class AudioCue : ScriptableObject
     [SerializeField, Range(0f, 1.1f)] private float reverbZoneMix = 1f;
 
     [NonSerialized] private int _lastIndex = -1;
+
     #endregion
 
     #region Properties
+
     public AudioMixerGroup MixerGroup => this.mixerGroup;
     public int Priority => this.priority;
     public bool Loop => this.loop;
@@ -53,9 +56,11 @@ public sealed class AudioCue : ScriptableObject
     public float Cooldown => this.cooldown;
     public bool IsSpatial => this.spatialBlend > 0f;
     public int ClipCount => this.clips.Length;
+
     #endregion
 
-    #region Public Methods
+    #region Randomization
+
     public AudioClip PickClip()
     {
         var count = this.clips.Length;
@@ -76,6 +81,10 @@ public sealed class AudioCue : ScriptableObject
 
     public float PickPitch() => UnityEngine.Random.Range(this.pitchRange.x, this.pitchRange.y);
 
+    #endregion
+
+    #region Source Setup And Validation
+
     public void ApplyTo(AudioSource source)
     {
         source.outputAudioMixerGroup = this.mixerGroup;
@@ -95,9 +104,7 @@ public sealed class AudioCue : ScriptableObject
             source.SetCustomCurve(AudioSourceCurveType.CustomRolloff, this.customRolloff);
         }
     }
-    #endregion
 
-    #region Unity Callbacks
     private void OnValidate()
     {
         if (this.volumeRange.y < this.volumeRange.x) this.volumeRange.y = this.volumeRange.x;
@@ -105,5 +112,6 @@ public sealed class AudioCue : ScriptableObject
         if (this.pitchRange.x <= 0f) this.pitchRange.x = 0.01f;
         if (this.maxDistance < this.minDistance) this.maxDistance = this.minDistance;
     }
+
     #endregion
 }

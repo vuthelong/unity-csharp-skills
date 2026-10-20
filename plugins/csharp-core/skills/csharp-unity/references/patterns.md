@@ -1,6 +1,6 @@
 # Game-dev patterns in house style
 
-All examples follow the `csharp-unity` conventions (regions, `this.` on fields, `var`).
+All examples follow the `csharp-unity` conventions (feature/purpose regions, `this.` on fields, `var`).
 
 ## State machine
 
@@ -15,14 +15,19 @@ public interface IState
 public sealed class StateMachine
 {
     #region Fields
+
     private IState _current;
+
     #endregion
 
     #region Properties
+
     public IState Current => this._current;
+
     #endregion
 
-    #region Public Methods
+    #region State Control
+
     public void SetState(IState next)
     {
         if (next == this._current) return;
@@ -33,6 +38,7 @@ public sealed class StateMachine
     }
 
     public void Tick() => this._current?.Tick();
+
     #endregion
 }
 ```
@@ -43,11 +49,14 @@ public sealed class StateMachine
 public sealed class EnemyAI : MonoBehaviour
 {
     #region Fields
+
     private StateMachine _machine;
     private IdleState _idle;
+
     #endregion
 
     #region Unity Lifecycle
+
     private void Awake()
     {
         this._machine = new StateMachine();
@@ -56,6 +65,7 @@ public sealed class EnemyAI : MonoBehaviour
     }
 
     private void Update() => this._machine.Tick();
+
     #endregion
 }
 ```
@@ -69,14 +79,19 @@ Allocate states once and reuse them; do not `new` a state on every transition.
 public sealed class GameEvent : ScriptableObject
 {
     #region Fields
+
     private readonly List<IGameEventListener> _listeners = new();
+
     #endregion
 
     #region Unity Lifecycle
+
     private void OnDisable() => this._listeners.Clear();
+
     #endregion
 
-    #region Public Methods
+    #region Listeners
+
     public void Raise()
     {
         for (var i = this._listeners.Count - 1; i >= 0; i--)
@@ -89,6 +104,7 @@ public sealed class GameEvent : ScriptableObject
     }
 
     public void Unregister(IGameEventListener listener) => this._listeners.Remove(listener);
+
     #endregion
 }
 
@@ -112,11 +128,14 @@ public interface ICommand
 public sealed class CommandHistory
 {
     #region Fields
+
     private readonly Stack<ICommand> _done = new();
     private readonly Stack<ICommand> _undone = new();
+
     #endregion
 
-    #region Public Methods
+    #region History
+
     public void Execute(ICommand command)
     {
         command.Execute();
@@ -141,6 +160,7 @@ public sealed class CommandHistory
         command.Execute();
         this._done.Push(command);
     }
+
     #endregion
 }
 ```
@@ -153,10 +173,13 @@ For Editor tooling use Unity's `Undo` API instead of a custom history.
 public static class Services
 {
     #region Fields
+
     private static readonly Dictionary<Type, object> Registry = new();
+
     #endregion
 
-    #region Public Methods
+    #region Registry
+
     public static void Register<T>(T service) where T : class => Registry[typeof(T)] = service;
 
     public static void Unregister<T>() where T : class => Registry.Remove(typeof(T));
@@ -173,11 +196,10 @@ public static class Services
         service = found ? (T)value : null;
         return found;
     }
-    #endregion
 
-    #region Private Methods
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetRegistry() => Registry.Clear();
+
     #endregion
 }
 ```
@@ -190,10 +212,13 @@ Statics take no `this.`. The reset hook keeps the registry clean when domain rel
 public sealed class GameManager : MonoBehaviour
 {
     #region Properties
+
     public static GameManager Instance { get; private set; }
+
     #endregion
 
     #region Unity Lifecycle
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -210,11 +235,14 @@ public sealed class GameManager : MonoBehaviour
     {
         if (Instance == this) Instance = null;
     }
+
     #endregion
 
-    #region Private Methods
+    #region Static Reset
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetInstance() => Instance = null;
+
     #endregion
 }
 ```
@@ -229,17 +257,22 @@ Keep rules in plain C# (fast EditMode tests), and keep the MonoBehaviour a thin 
 public sealed class Health
 {
     #region Fields
+
     public event Action<int> Changed;
     public event Action Died;
+
     #endregion
 
     #region Properties
+
     public int Current { get; private set; }
     public int Max { get; }
     public bool IsDead => Current <= 0;
+
     #endregion
 
-    #region Public Methods
+    #region Health Changes
+
     public Health(int max)
     {
         Max = max;
@@ -254,21 +287,28 @@ public sealed class Health
         Changed?.Invoke(Current);
         if (IsDead) Died?.Invoke();
     }
+
     #endregion
 }
 
 public sealed class HealthComponent : MonoBehaviour
 {
     #region Fields
+
     [SerializeField] private int maxHealth = 100;
+
     #endregion
 
     #region Properties
+
     public Health Health { get; private set; }
+
     #endregion
 
     #region Unity Lifecycle
+
     private void Awake() => Health = new Health(this.maxHealth);
+
     #endregion
 }
 ```

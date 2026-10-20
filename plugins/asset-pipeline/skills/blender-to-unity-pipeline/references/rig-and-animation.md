@@ -102,7 +102,8 @@ using UnityEngine;
 
 public static class ClipSplitter
 {
-    #region Public Methods
+    #region Clip Splitting
+
     public static void Split(string modelPath, string takeName, string[] names, int[] firstFrames, int[] lastFrames, bool[] loops)
     {
         var importer = (ModelImporter)AssetImporter.GetAtPath(modelPath);
@@ -130,6 +131,7 @@ public static class ClipSplitter
         importer.clipAnimations = clips;
         importer.SaveAndReimport();
     }
+
     #endregion
 }
 ```

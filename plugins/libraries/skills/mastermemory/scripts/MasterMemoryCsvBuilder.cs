@@ -14,15 +14,18 @@ namespace MyGame.MasterData.Editor
     public static class MasterMemoryCsvBuilder
     {
         #region Fields
+
         public const string CsvFolder = "Assets/MasterData/Csv";
         public const string OutputPath = "Assets/MasterData/Build/master.bytes";
 
         private const char ArraySeparator = '|';
 
         public static event Action<byte[]> Built;
+
         #endregion
 
-        #region Public Methods
+        #region Build
+
         [MenuItem("Tools/Master Data/Build MasterMemory Binary")]
         public static void BuildFromMenu()
         {
@@ -76,9 +79,11 @@ namespace MyGame.MasterData.Editor
                 return false;
             }
         }
+
         #endregion
 
-        #region Private Methods
+        #region CSV Parsing
+
         private static List<object> ReadTable(MetaTable table, string csvPath)
         {
             var records = ParseCsv(File.ReadAllText(csvPath, Encoding.UTF8));
@@ -252,24 +257,19 @@ namespace MyGame.MasterData.Editor
 
             return true;
         }
+
         #endregion
     }
 
     public sealed class MasterMemoryCsvPostprocessor : AssetPostprocessor
     {
         #region Fields
+
         private static bool _pending;
+
         #endregion
 
-        #region Private Methods
-        private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
-        {
-            if (_pending) return;
-            if (!ContainsCsv(importedAssets) && !ContainsCsv(deletedAssets) && !ContainsCsv(movedAssets)) return;
-
-            _pending = true;
-            EditorApplication.delayCall += Rebuild;
-        }
+        #region Auto Rebuild
 
         private static void Rebuild()
         {
@@ -291,21 +291,30 @@ namespace MyGame.MasterData.Editor
 
             return false;
         }
+
+        private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
+        {
+            if (_pending) return;
+            if (!ContainsCsv(importedAssets) && !ContainsCsv(deletedAssets) && !ContainsCsv(movedAssets)) return;
+
+            _pending = true;
+            EditorApplication.delayCall += Rebuild;
+        }
+
         #endregion
     }
 
     [InitializeOnLoad]
     public static class MasterMemoryHotReload
     {
-        #region Public Methods
+        #region Hot Reload
+
         static MasterMemoryHotReload()
         {
             MasterMemoryCsvBuilder.Built -= OnBuilt;
             MasterMemoryCsvBuilder.Built += OnBuilt;
         }
-        #endregion
 
-        #region Private Methods
         private static void OnBuilt(byte[] bytes)
         {
             if (!EditorApplication.isPlaying) return;
@@ -313,6 +322,7 @@ namespace MyGame.MasterData.Editor
             MasterDataService.Load(bytes);
             Debug.Log("[MasterMemory] Hot-reloaded master data in Play Mode.");
         }
+
         #endregion
     }
 }

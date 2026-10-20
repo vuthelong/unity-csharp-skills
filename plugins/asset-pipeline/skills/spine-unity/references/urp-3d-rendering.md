@@ -58,14 +58,17 @@ using UnityEngine;
 public sealed class SpineBillboard : MonoBehaviour
 {
     #region Fields
+
     private const float MinSqrMagnitude = 0.0001f;
 
     [SerializeField] private Camera targetCamera;
 
     private Transform _cameraTransform;
+
     #endregion
 
     #region Unity Lifecycle
+
     private void Start()
     {
         if (this.targetCamera == null) this.targetCamera = Camera.main;
@@ -82,6 +85,7 @@ public sealed class SpineBillboard : MonoBehaviour
 
         transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
     }
+
     #endregion
 }
 ```

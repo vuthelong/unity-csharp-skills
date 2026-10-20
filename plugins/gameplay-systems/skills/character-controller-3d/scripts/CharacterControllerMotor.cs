@@ -111,7 +111,7 @@ public class CharacterControllerMotor : MonoBehaviour
 
     #endregion
 
-    #region Public Methods
+    #region Movement
 
     public void ApplyRootMotion(Vector3 deltaPosition, Quaternion deltaRotation)
     {
@@ -147,72 +147,64 @@ public class CharacterControllerMotor : MonoBehaviour
         this._platform = null;
     }
 
+    private void UpdateHorizontal(float deltaTime)
+    {
+        var speed = this._sprintHeld ? this.sprintSpeed : this.walkSpeed;
+        var target = GetCameraRelativeDirection() * speed;
+        var acceleration = this._isGrounded ? this.groundAcceleration : this.airAcceleration;
+        this._horizontalVelocity = Vector3.MoveTowards(this._horizontalVelocity, target, acceleration * deltaTime);
+    }
+
+    private void RotateTowardsInput(float deltaTime)
+    {
+        var direction = GetCameraRelativeDirection();
+        if (direction.sqrMagnitude < 0.0001f) return;
+
+        var targetRotation = Quaternion.LookRotation(direction, Vector3.up);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, this.turnSpeed * deltaTime);
+    }
+
+    private void MoveController(Vector3 horizontalMotion, float deltaTime)
+    {
+        var motion = horizontalMotion;
+
+        if (this._isGrounded && horizontalMotion.sqrMagnitude > 0f)
+        {
+            var alongGround = Vector3.ProjectOnPlane(horizontalMotion, this._groundNormal);
+            motion = alongGround.normalized * horizontalMotion.magnitude;
+        }
+
+        if (this._hasGround && !this._isGrounded && this._verticalVelocity <= 0f)
+        {
+            var slideDirection = Vector3.ProjectOnPlane(Vector3.down, this._groundNormal).normalized;
+            motion += slideDirection * (this.steepSlideSpeed * deltaTime);
+        }
+
+        motion += Vector3.up * (this._verticalVelocity * deltaTime);
+
+        var flags = this._controller.Move(motion);
+        if ((flags & CollisionFlags.Above) != 0 && this._verticalVelocity > 0f) this._verticalVelocity = 0f;
+
+        CapturePlatform();
+    }
+
+    private void OnValidate()
+    {
+        this.walkSpeed = Mathf.Max(0f, this.walkSpeed);
+        this.sprintSpeed = Mathf.Max(this.walkSpeed, this.sprintSpeed);
+        this.gravity = Mathf.Min(-0.01f, this.gravity);
+        this.jumpHeight = Mathf.Max(0f, this.jumpHeight);
+    }
+
+    #endregion
+
+    #region Grounding And Jump
+
     public void AddVerticalImpulse(float velocity)
     {
         this._verticalVelocity = velocity;
         this._isGrounded = false;
         this._lastGroundedTime = float.NegativeInfinity;
-    }
-
-    #endregion
-
-    #region Private Methods
-
-    private static void EnableAction(InputActionReference reference)
-    {
-        if (reference == null || reference.action == null) return;
-        reference.action.Enable();
-    }
-
-    private void ReadInput()
-    {
-        this._moveInput = this.moveAction != null && this.moveAction.action != null ? this.moveAction.action.ReadValue<Vector2>() : Vector2.zero;
-        this._sprintHeld = this.sprintAction != null && this.sprintAction.action != null && this.sprintAction.action.IsPressed();
-
-        if (this.jumpAction != null && this.jumpAction.action != null && this.jumpAction.action.WasPressedThisFrame())
-        {
-            this._lastJumpPressedTime = Time.time;
-        }
-    }
-
-    private Vector3 GetCameraRelativeDirection()
-    {
-        var input = Vector2.ClampMagnitude(this._moveInput, 1f);
-        if (this.cameraTransform == null) return new Vector3(input.x, 0f, input.y);
-
-        var forward = Vector3.ProjectOnPlane(this.cameraTransform.forward, Vector3.up);
-        if (forward.sqrMagnitude < 0.0001f) forward = Vector3.ProjectOnPlane(this.cameraTransform.up, Vector3.up);
-        forward.Normalize();
-        var right = Vector3.Cross(Vector3.up, forward);
-
-        return forward * input.y + right * input.x;
-    }
-
-    private void ApplyPlatformMotion()
-    {
-        if (this._platform == null) return;
-
-        var targetPosition = this._platform.TransformPoint(this._platformLocalPosition);
-        var platformDelta = targetPosition - transform.position;
-        var rotationDelta = this._platform.rotation * Quaternion.Inverse(this._platformLastRotation);
-
-        if (platformDelta.sqrMagnitude > 0f) this._controller.Move(platformDelta);
-
-        var yaw = rotationDelta.eulerAngles.y;
-        if (Mathf.Abs(yaw) > 0f) transform.rotation = Quaternion.Euler(0f, yaw, 0f) * transform.rotation;
-    }
-
-    private void CapturePlatform()
-    {
-        if (!this._hasGround || this._groundCollider == null || (this.platformMask.value & (1 << this._groundCollider.gameObject.layer)) == 0)
-        {
-            this._platform = null;
-            return;
-        }
-
-        this._platform = this._groundCollider.transform;
-        this._platformLocalPosition = this._platform.InverseTransformPoint(transform.position);
-        this._platformLastRotation = this._platform.rotation;
     }
 
     private void ProbeGround()
@@ -270,50 +262,36 @@ public class CharacterControllerMotor : MonoBehaviour
         this._platform = null;
     }
 
-    private void UpdateHorizontal(float deltaTime)
-    {
-        var speed = this._sprintHeld ? this.sprintSpeed : this.walkSpeed;
-        var target = GetCameraRelativeDirection() * speed;
-        var acceleration = this._isGrounded ? this.groundAcceleration : this.airAcceleration;
-        this._horizontalVelocity = Vector3.MoveTowards(this._horizontalVelocity, target, acceleration * deltaTime);
-    }
-
-    private void RotateTowardsInput(float deltaTime)
-    {
-        var direction = GetCameraRelativeDirection();
-        if (direction.sqrMagnitude < 0.0001f) return;
-
-        var targetRotation = Quaternion.LookRotation(direction, Vector3.up);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, this.turnSpeed * deltaTime);
-    }
-
-    private void MoveController(Vector3 horizontalMotion, float deltaTime)
-    {
-        var motion = horizontalMotion;
-
-        if (this._isGrounded && horizontalMotion.sqrMagnitude > 0f)
-        {
-            var alongGround = Vector3.ProjectOnPlane(horizontalMotion, this._groundNormal);
-            motion = alongGround.normalized * horizontalMotion.magnitude;
-        }
-
-        if (this._hasGround && !this._isGrounded && this._verticalVelocity <= 0f)
-        {
-            var slideDirection = Vector3.ProjectOnPlane(Vector3.down, this._groundNormal).normalized;
-            motion += slideDirection * (this.steepSlideSpeed * deltaTime);
-        }
-
-        motion += Vector3.up * (this._verticalVelocity * deltaTime);
-
-        var flags = this._controller.Move(motion);
-        if ((flags & CollisionFlags.Above) != 0 && this._verticalVelocity > 0f) this._verticalVelocity = 0f;
-
-        CapturePlatform();
-    }
-
     #endregion
 
-    #region Unity Callbacks
+    #region Platforms And Pushing
+
+    private void ApplyPlatformMotion()
+    {
+        if (this._platform == null) return;
+
+        var targetPosition = this._platform.TransformPoint(this._platformLocalPosition);
+        var platformDelta = targetPosition - transform.position;
+        var rotationDelta = this._platform.rotation * Quaternion.Inverse(this._platformLastRotation);
+
+        if (platformDelta.sqrMagnitude > 0f) this._controller.Move(platformDelta);
+
+        var yaw = rotationDelta.eulerAngles.y;
+        if (Mathf.Abs(yaw) > 0f) transform.rotation = Quaternion.Euler(0f, yaw, 0f) * transform.rotation;
+    }
+
+    private void CapturePlatform()
+    {
+        if (!this._hasGround || this._groundCollider == null || (this.platformMask.value & (1 << this._groundCollider.gameObject.layer)) == 0)
+        {
+            this._platform = null;
+            return;
+        }
+
+        this._platform = this._groundCollider.transform;
+        this._platformLocalPosition = this._platform.InverseTransformPoint(transform.position);
+        this._platformLastRotation = this._platform.rotation;
+    }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
@@ -326,12 +304,38 @@ public class CharacterControllerMotor : MonoBehaviour
         body.WakeUp();
     }
 
-    private void OnValidate()
+    #endregion
+
+    #region Input
+
+    private static void EnableAction(InputActionReference reference)
     {
-        this.walkSpeed = Mathf.Max(0f, this.walkSpeed);
-        this.sprintSpeed = Mathf.Max(this.walkSpeed, this.sprintSpeed);
-        this.gravity = Mathf.Min(-0.01f, this.gravity);
-        this.jumpHeight = Mathf.Max(0f, this.jumpHeight);
+        if (reference == null || reference.action == null) return;
+        reference.action.Enable();
+    }
+
+    private void ReadInput()
+    {
+        this._moveInput = this.moveAction != null && this.moveAction.action != null ? this.moveAction.action.ReadValue<Vector2>() : Vector2.zero;
+        this._sprintHeld = this.sprintAction != null && this.sprintAction.action != null && this.sprintAction.action.IsPressed();
+
+        if (this.jumpAction != null && this.jumpAction.action != null && this.jumpAction.action.WasPressedThisFrame())
+        {
+            this._lastJumpPressedTime = Time.time;
+        }
+    }
+
+    private Vector3 GetCameraRelativeDirection()
+    {
+        var input = Vector2.ClampMagnitude(this._moveInput, 1f);
+        if (this.cameraTransform == null) return new Vector3(input.x, 0f, input.y);
+
+        var forward = Vector3.ProjectOnPlane(this.cameraTransform.forward, Vector3.up);
+        if (forward.sqrMagnitude < 0.0001f) forward = Vector3.ProjectOnPlane(this.cameraTransform.up, Vector3.up);
+        forward.Normalize();
+        var right = Vector3.Cross(Vector3.up, forward);
+
+        return forward * input.y + right * input.x;
     }
 
     #endregion

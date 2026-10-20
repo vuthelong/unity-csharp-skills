@@ -29,7 +29,7 @@ namespace Game.Data
 
         #endregion
 
-        #region Public Methods
+        #region Loading
 
         public async UniTask LoadAsync(CancellationToken cancellationToken, string label = DefaultLabel)
         {
@@ -74,6 +74,37 @@ namespace Game.Data
             this._handle = default;
         }
 
+        public void Dispose() => Unload();
+
+        private void Index(IList<GameDataTable> tables)
+        {
+            for (var i = 0; i < tables.Count; i++)
+            {
+                var table = tables[i];
+                if (table == null) continue;
+
+                if (table.DataSchemaVersion != table.CodeSchemaVersion)
+                {
+                    Debug.LogError($"{table.name}: data schema {table.DataSchemaVersion} does not match code schema {table.CodeSchemaVersion}. Table skipped.", table);
+                    continue;
+                }
+
+                this._tables[table.GetType()] = table;
+
+                if (!this._lookups.TryGetValue(table.RowType, out var lookup))
+                {
+                    lookup = table.CreateLookup();
+                    this._lookups.Add(table.RowType, lookup);
+                }
+
+                table.AppendTo(lookup);
+            }
+        }
+
+        #endregion
+
+        #region Queries
+
         public bool TryGet<TRow>(int id, out TRow row) where TRow : class, IGameDataRow
         {
             row = null;
@@ -99,37 +130,6 @@ namespace Game.Data
             if (this._tables.TryGetValue(typeof(TTable), out var table)) return (TTable)table;
 
             throw new KeyNotFoundException($"Table {typeof(TTable).Name} is not loaded.");
-        }
-
-        public void Dispose() => Unload();
-
-        #endregion
-
-        #region Private Methods
-
-        private void Index(IList<GameDataTable> tables)
-        {
-            for (var i = 0; i < tables.Count; i++)
-            {
-                var table = tables[i];
-                if (table == null) continue;
-
-                if (table.DataSchemaVersion != table.CodeSchemaVersion)
-                {
-                    Debug.LogError($"{table.name}: data schema {table.DataSchemaVersion} does not match code schema {table.CodeSchemaVersion}. Table skipped.", table);
-                    continue;
-                }
-
-                this._tables[table.GetType()] = table;
-
-                if (!this._lookups.TryGetValue(table.RowType, out var lookup))
-                {
-                    lookup = table.CreateLookup();
-                    this._lookups.Add(table.RowType, lookup);
-                }
-
-                table.AppendTo(lookup);
-            }
         }
 
         private bool TryGetLookup<TRow>(out GameDataLookup<TRow> lookup) where TRow : class, IGameDataRow

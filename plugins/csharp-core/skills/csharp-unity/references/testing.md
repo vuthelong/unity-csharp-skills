@@ -32,10 +32,13 @@ using NUnit.Framework;
 public sealed class HealthTests
 {
     #region Fields
+
     private Health _health;
+
     #endregion
 
-    #region Public Methods
+    #region Apply Tests
+
     [SetUp]
     public void SetUp() => this._health = new Health(100);
 
@@ -65,6 +68,7 @@ public sealed class HealthTests
 
         Assert.That(died, Is.True);
     }
+
     #endregion
 }
 ```
@@ -80,10 +84,13 @@ using UnityEngine.TestTools;
 public sealed class SpawnerTests
 {
     #region Fields
+
     private GameObject _root;
+
     #endregion
 
-    #region Public Methods
+    #region Spawn Tests
+
     [TearDown]
     public void TearDown() => Object.Destroy(this._root);
 
@@ -98,6 +105,7 @@ public sealed class SpawnerTests
 
         Assert.That(spawner.LastSpawned, Is.Not.Null);
     }
+
     #endregion
 }
 ```

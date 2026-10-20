@@ -93,14 +93,17 @@ using UnityEngine.Pool;
 public sealed class InventoryPanel : MonoBehaviour
 {
     #region Fields
+
     [SerializeField] private InventoryRow rowPrefab;
     [SerializeField] private Transform content;
     private ObservableList<ItemStack> _items;
     private ISynchronizedView<ItemStack, InventoryRow> _view;
     private ObjectPool<InventoryRow> _rowPool;
+
     #endregion
 
     #region Public API
+
     public void Bind(ObservableList<ItemStack> items)
     {
         this._rowPool ??= new ObjectPool<InventoryRow>(
@@ -112,9 +115,11 @@ public sealed class InventoryPanel : MonoBehaviour
         this._view = items.CreateView(this.CreateRow);
         this._view.ViewChanged += this.OnViewChanged;
     }
+
     #endregion
 
     #region Unity Lifecycle
+
     private void OnDestroy()
     {
         if (this._view != null)
@@ -125,9 +130,11 @@ public sealed class InventoryPanel : MonoBehaviour
 
         this._rowPool?.Dispose();
     }
+
     #endregion
 
     #region View Sync
+
     private InventoryRow CreateRow(ItemStack item)
     {
         var row = this._rowPool.Get();
@@ -168,6 +175,7 @@ public sealed class InventoryPanel : MonoBehaviour
             index++;
         }
     }
+
     #endregion
 }
 ```

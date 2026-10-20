@@ -48,13 +48,16 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 public sealed class MusicLoader
 {
     #region Fields
+
     private readonly MusicPlayer _music;
 
     private AsyncOperationHandle<AudioClip> _current;
     private AsyncOperationHandle<AudioClip> _previous;
+
     #endregion
 
-    #region Public Methods
+    #region Music Loading
+
     public MusicLoader(MusicPlayer music) => this._music = music;
 
     public async UniTask PlayAsync(AssetReferenceT<AudioClip> track, float fade, CancellationToken ct)
@@ -86,14 +89,13 @@ public sealed class MusicLoader
         if (this._current.IsValid()) Addressables.Release(this._current);
         this._current = default;
     }
-    #endregion
 
-    #region Private Methods
     private void ReleasePrevious()
     {
         if (this._previous.IsValid()) Addressables.Release(this._previous);
         this._previous = default;
     }
+
     #endregion
 }
 ```
@@ -110,10 +112,13 @@ Label every `AudioCue` used by a level (for example `audio-level-forest`) and lo
 public sealed class AudioBank
 {
     #region Fields
+
     private AsyncOperationHandle<IList<AudioCue>> _handle;
+
     #endregion
 
-    #region Public Methods
+    #region Bank Loading
+
     public async UniTask LoadAsync(string label, CancellationToken ct)
     {
         this._handle = Addressables.LoadAssetsAsync<AudioCue>(label, null);
@@ -133,6 +138,7 @@ public sealed class AudioBank
         Addressables.Release(this._handle);
         this._handle = default;
     }
+
     #endregion
 }
 ```

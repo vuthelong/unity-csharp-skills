@@ -69,6 +69,7 @@ using UnityEngine;
 public sealed class SpineCharacterAnimator : MonoBehaviour
 {
     #region Fields
+
     private const int LocomotionTrack = 0;
     private const int ActionTrack = 1;
     private const float ActionMixOut = 0.15f;
@@ -84,9 +85,11 @@ public sealed class SpineCharacterAnimator : MonoBehaviour
     private bool _isRunning;
 
     public event System.Action HitFrame;
+
     #endregion
 
     #region Unity Lifecycle
+
     private void Start()
     {
         this._state = this.skeletonAnimation.AnimationState;
@@ -99,9 +102,11 @@ public sealed class SpineCharacterAnimator : MonoBehaviour
     {
         if (this._state != null) this._state.Event -= HandleSpineEvent;
     }
+
     #endregion
 
-    #region Public Methods
+    #region Playback
+
     public void SetRunning(bool running)
     {
         if (this._isRunning == running) return;
@@ -118,15 +123,14 @@ public sealed class SpineCharacterAnimator : MonoBehaviour
     }
 
     public void Face(float direction) => this.skeletonAnimation.Skeleton.ScaleX = direction < 0f ? -1f : 1f;
-    #endregion
 
-    #region Private Methods
     private void HandleSpineEvent(TrackEntry entry, Spine.Event e)
     {
         if (e.Data != this._hitEvent) return;
 
         this.HitFrame?.Invoke();
     }
+
     #endregion
 }
 ```

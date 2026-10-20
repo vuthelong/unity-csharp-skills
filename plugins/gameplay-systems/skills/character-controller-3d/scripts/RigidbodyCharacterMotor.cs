@@ -128,7 +128,7 @@ public class RigidbodyCharacterMotor : MonoBehaviour
 
     #endregion
 
-    #region Public Methods
+    #region Movement
 
     public void Teleport(Vector3 position, Quaternion rotation)
     {
@@ -136,29 +136,6 @@ public class RigidbodyCharacterMotor : MonoBehaviour
         this._rigidbody.rotation = rotation;
         transform.SetPositionAndRotation(position, rotation);
         this._rigidbody.linearVelocity = Vector3.zero;
-    }
-
-    #endregion
-
-    #region Private Methods
-
-    private static void EnableAction(InputActionReference reference)
-    {
-        if (reference == null || reference.action == null) return;
-        reference.action.Enable();
-    }
-
-    private Vector3 GetCameraRelativeDirection()
-    {
-        var input = Vector2.ClampMagnitude(this._moveInput, 1f);
-        if (this.cameraTransform == null) return new Vector3(input.x, 0f, input.y);
-
-        var forward = Vector3.ProjectOnPlane(this.cameraTransform.forward, Vector3.up);
-        if (forward.sqrMagnitude < 0.0001f) forward = Vector3.ProjectOnPlane(this.cameraTransform.up, Vector3.up);
-        forward.Normalize();
-        var right = Vector3.Cross(Vector3.up, forward);
-
-        return forward * input.y + right * input.x;
     }
 
     private void ProbeGround()
@@ -233,16 +210,35 @@ public class RigidbodyCharacterMotor : MonoBehaviour
         this._rigidbody.MoveRotation(nextRotation);
     }
 
-    #endregion
-
-    #region Unity Callbacks
-
     private void OnValidate()
     {
         this.walkSpeed = Mathf.Max(0f, this.walkSpeed);
         this.sprintSpeed = Mathf.Max(this.walkSpeed, this.sprintSpeed);
         this.jumpHeight = Mathf.Max(0f, this.jumpHeight);
         this.maxSlopeAngle = Mathf.Clamp(this.maxSlopeAngle, 0f, 89f);
+    }
+
+    #endregion
+
+    #region Input
+
+    private static void EnableAction(InputActionReference reference)
+    {
+        if (reference == null || reference.action == null) return;
+        reference.action.Enable();
+    }
+
+    private Vector3 GetCameraRelativeDirection()
+    {
+        var input = Vector2.ClampMagnitude(this._moveInput, 1f);
+        if (this.cameraTransform == null) return new Vector3(input.x, 0f, input.y);
+
+        var forward = Vector3.ProjectOnPlane(this.cameraTransform.forward, Vector3.up);
+        if (forward.sqrMagnitude < 0.0001f) forward = Vector3.ProjectOnPlane(this.cameraTransform.up, Vector3.up);
+        forward.Normalize();
+        var right = Vector3.Cross(Vector3.up, forward);
+
+        return forward * input.y + right * input.x;
     }
 
     #endregion

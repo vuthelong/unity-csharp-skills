@@ -58,6 +58,7 @@ internal partial class MagicOnionGeneratedClientInitializer { }
 internal static class MagicOnionBootstrap
 {
     #region Initialization
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
     {
@@ -67,6 +68,7 @@ internal static class MagicOnionBootstrap
             DisposeHttpClient = true,
         }));
     }
+
     #endregion
 }
 ```

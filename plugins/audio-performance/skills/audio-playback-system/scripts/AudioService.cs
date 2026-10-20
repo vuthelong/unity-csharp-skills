@@ -8,16 +8,21 @@ using Object = UnityEngine.Object;
 public readonly struct AudioHandle : IEquatable<AudioHandle>
 {
     #region Fields
+
     public static readonly AudioHandle None = default;
 
     public readonly int Id;
+
     #endregion
 
     #region Properties
+
     public bool IsValid => this.Id != 0;
+
     #endregion
 
-    #region Public Methods
+    #region Equality
+
     public AudioHandle(int id) => this.Id = id;
 
     public bool Equals(AudioHandle other) => this.Id == other.Id;
@@ -25,12 +30,14 @@ public readonly struct AudioHandle : IEquatable<AudioHandle>
     public override bool Equals(object obj) => obj is AudioHandle other && this.Id == other.Id;
 
     public override int GetHashCode() => this.Id;
+
     #endregion
 }
 
 public sealed class AudioService : IDisposable
 {
     #region Fields
+
     private const float MinFade = 0.0001f;
 
     private readonly Transform _root;
@@ -46,16 +53,20 @@ public sealed class AudioService : IDisposable
     private int _nextId;
     private bool _paused;
     private bool _disposed;
+
     #endregion
 
     #region Properties
+
     public Transform Root => this._root;
     public MusicPlayer Music => this._music;
     public int ActiveVoiceCount => this._active.Count;
     public bool IsPaused => this._paused;
+
     #endregion
 
-    #region Public Methods
+    #region Service Control
+
     public AudioService(Transform root, AudioMixerGroup musicGroup, int maxVoices = 24, int prewarm = 8)
     {
         if (root == null)
@@ -81,56 +92,6 @@ public sealed class AudioService : IDisposable
         this._defaultOneShotSource = CreateOneShotSource("OneShot", null);
         this._music = new MusicPlayer(this._root, musicGroup);
         Prewarm(Mathf.Min(prewarm, this._maxVoices));
-    }
-
-    public AudioHandle Play(AudioCue cue, Vector3 position) => PlayInternal(cue, position, null);
-
-    public AudioHandle Play(AudioCue cue, Transform follow)
-    {
-        if (follow == null) return AudioHandle.None;
-
-        return PlayInternal(cue, follow.position, follow);
-    }
-
-    public AudioHandle Play2D(AudioCue cue) => PlayInternal(cue, this._root.position, null);
-
-    public void PlayOneShot(AudioCue cue)
-    {
-        if (cue == null || this._disposed) return;
-        if (!PassesCooldown(cue)) return;
-
-        var clip = cue.PickClip();
-        if (clip == null) return;
-
-        var source = GetOneShotSource(cue.MixerGroup);
-        source.PlayOneShot(clip, cue.PickVolume());
-        this._lastPlayTime[cue] = Time.unscaledTimeAsDouble;
-    }
-
-    public bool IsPlaying(AudioHandle handle) => IndexOf(handle) >= 0;
-
-    public void Stop(AudioHandle handle, float fadeOut = 0f)
-    {
-        var index = IndexOf(handle);
-        if (index < 0) return;
-
-        StopAt(index, fadeOut);
-    }
-
-    public void StopCue(AudioCue cue, float fadeOut = 0f)
-    {
-        for (var i = this._active.Count - 1; i >= 0; i--)
-        {
-            if (this._active[i].Cue == cue) StopAt(i, fadeOut);
-        }
-    }
-
-    public void StopAll(float fadeOut = 0f)
-    {
-        for (var i = this._active.Count - 1; i >= 0; i--)
-        {
-            StopAt(i, fadeOut);
-        }
     }
 
     public void SetPaused(bool paused)
@@ -197,9 +158,35 @@ public sealed class AudioService : IDisposable
 
         if (this._ownsRoot && this._root != null) Object.Destroy(this._root.gameObject);
     }
+
     #endregion
 
-    #region Private Methods
+    #region Playback
+
+    public AudioHandle Play(AudioCue cue, Vector3 position) => PlayInternal(cue, position, null);
+
+    public AudioHandle Play(AudioCue cue, Transform follow)
+    {
+        if (follow == null) return AudioHandle.None;
+
+        return PlayInternal(cue, follow.position, follow);
+    }
+
+    public AudioHandle Play2D(AudioCue cue) => PlayInternal(cue, this._root.position, null);
+
+    public void PlayOneShot(AudioCue cue)
+    {
+        if (cue == null || this._disposed) return;
+        if (!PassesCooldown(cue)) return;
+
+        var clip = cue.PickClip();
+        if (clip == null) return;
+
+        var source = GetOneShotSource(cue.MixerGroup);
+        source.PlayOneShot(clip, cue.PickVolume());
+        this._lastPlayTime[cue] = Time.unscaledTimeAsDouble;
+    }
+
     private AudioHandle PlayInternal(AudioCue cue, Vector3 position, Transform follow)
     {
         if (cue == null || this._disposed) return AudioHandle.None;
@@ -241,6 +228,91 @@ public sealed class AudioService : IDisposable
 
         return Time.unscaledTimeAsDouble - last >= cue.Cooldown;
     }
+
+    private AudioSource GetOneShotSource(AudioMixerGroup group)
+    {
+        if (group == null) return this._defaultOneShotSource;
+        if (this._oneShotSources.TryGetValue(group, out var source) && source != null) return source;
+
+        source = CreateOneShotSource(group.name, group);
+        this._oneShotSources[group] = source;
+        return source;
+    }
+
+    private AudioSource CreateOneShotSource(string label, AudioMixerGroup group)
+    {
+        var gameObject = new GameObject($"OneShot_{label}");
+        gameObject.transform.SetParent(this._root, false);
+        var source = gameObject.AddComponent<AudioSource>();
+        source.playOnAwake = false;
+        source.spatialBlend = 0f;
+        source.ignoreListenerPause = true;
+        source.outputAudioMixerGroup = group;
+        return source;
+    }
+
+    #endregion
+
+    #region Stopping
+
+    public bool IsPlaying(AudioHandle handle) => IndexOf(handle) >= 0;
+
+    public void Stop(AudioHandle handle, float fadeOut = 0f)
+    {
+        var index = IndexOf(handle);
+        if (index < 0) return;
+
+        StopAt(index, fadeOut);
+    }
+
+    public void StopCue(AudioCue cue, float fadeOut = 0f)
+    {
+        for (var i = this._active.Count - 1; i >= 0; i--)
+        {
+            if (this._active[i].Cue == cue) StopAt(i, fadeOut);
+        }
+    }
+
+    public void StopAll(float fadeOut = 0f)
+    {
+        for (var i = this._active.Count - 1; i >= 0; i--)
+        {
+            StopAt(i, fadeOut);
+        }
+    }
+
+    private void StopAt(int index, float fadeOut)
+    {
+        var voice = this._active[index];
+        if (fadeOut <= MinFade || voice.Source == null)
+        {
+            ReleaseAt(index);
+            return;
+        }
+
+        if (voice.Stopping) return;
+
+        voice.Stopping = true;
+        voice.FadeFrom = voice.Source.volume;
+        voice.FadeDuration = fadeOut;
+        voice.FadeElapsed = 0f;
+    }
+
+    private int IndexOf(AudioHandle handle)
+    {
+        if (!handle.IsValid) return -1;
+
+        for (var i = 0; i < this._active.Count; i++)
+        {
+            if (this._active[i].Id == handle.Id) return i;
+        }
+
+        return -1;
+    }
+
+    #endregion
+
+    #region Voice Stealing
 
     private bool TryMakeRoomForCue(AudioCue cue)
     {
@@ -307,34 +379,9 @@ public sealed class AudioService : IDisposable
         };
     }
 
-    private void StopAt(int index, float fadeOut)
-    {
-        var voice = this._active[index];
-        if (fadeOut <= MinFade || voice.Source == null)
-        {
-            ReleaseAt(index);
-            return;
-        }
+    #endregion
 
-        if (voice.Stopping) return;
-
-        voice.Stopping = true;
-        voice.FadeFrom = voice.Source.volume;
-        voice.FadeDuration = fadeOut;
-        voice.FadeElapsed = 0f;
-    }
-
-    private int IndexOf(AudioHandle handle)
-    {
-        if (!handle.IsValid) return -1;
-
-        for (var i = 0; i < this._active.Count; i++)
-        {
-            if (this._active[i].Id == handle.Id) return i;
-        }
-
-        return -1;
-    }
+    #region Voice Pool
 
     private void ReleaseAt(int index)
     {
@@ -377,28 +424,6 @@ public sealed class AudioService : IDisposable
         return new Voice(gameObject, source);
     }
 
-    private AudioSource GetOneShotSource(AudioMixerGroup group)
-    {
-        if (group == null) return this._defaultOneShotSource;
-        if (this._oneShotSources.TryGetValue(group, out var source) && source != null) return source;
-
-        source = CreateOneShotSource(group.name, group);
-        this._oneShotSources[group] = source;
-        return source;
-    }
-
-    private AudioSource CreateOneShotSource(string label, AudioMixerGroup group)
-    {
-        var gameObject = new GameObject($"OneShot_{label}");
-        gameObject.transform.SetParent(this._root, false);
-        var source = gameObject.AddComponent<AudioSource>();
-        source.playOnAwake = false;
-        source.spatialBlend = 0f;
-        source.ignoreListenerPause = true;
-        source.outputAudioMixerGroup = group;
-        return source;
-    }
-
     private static void OnGetVoice(Voice voice) => voice.GameObject.SetActive(true);
 
     private static void OnReleaseVoice(Voice voice)
@@ -417,11 +442,13 @@ public sealed class AudioService : IDisposable
     {
         if (voice.GameObject != null) Object.Destroy(voice.GameObject);
     }
+
     #endregion
 
     private sealed class Voice
     {
         #region Fields
+
         public readonly GameObject GameObject;
         public readonly Transform Transform;
         public readonly AudioSource Source;
@@ -435,15 +462,18 @@ public sealed class AudioService : IDisposable
         public float FadeFrom;
         public float FadeDuration;
         public float FadeElapsed;
+
         #endregion
 
-        #region Public Methods
+        #region Construction
+
         public Voice(GameObject gameObject, AudioSource source)
         {
             this.GameObject = gameObject;
             this.Transform = gameObject.transform;
             this.Source = source;
         }
+
         #endregion
     }
 }

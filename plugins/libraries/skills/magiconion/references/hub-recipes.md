@@ -148,28 +148,37 @@ using UnityEngine;
 public sealed class RoomConnection : MonoBehaviour, IRoomHubReceiver
 {
     #region Constants
+
     private static readonly TimeSpan InitialRetryDelay = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan MaxRetryDelay = TimeSpan.FromSeconds(30);
+
     #endregion
 
     #region Serialized Fields
+
     [SerializeField] private string serverUrl = "http://localhost:5000";
     [SerializeField] private string roomName = "lobby";
     [SerializeField] private string userName = "player";
+
     #endregion
 
     #region Private Fields
+
     private GrpcChannelx _channel;
     private IRoomHub _hub;
     private string _accessToken = "";
+
     #endregion
 
     #region Events
+
     public event Action<Guid, PlayerPose> PlayerMoved;
     public event Action<Guid> PlayerLeft;
+
     #endregion
 
     #region Unity Lifecycle
+
     private void Start()
     {
         this._channel = GrpcChannelx.ForAddress(this.serverUrl);
@@ -191,9 +200,11 @@ public sealed class RoomConnection : MonoBehaviour, IRoomHubReceiver
             this._channel = null;
         }
     }
+
     #endregion
 
     #region Public API
+
     public void SendPose(PlayerPose pose)
     {
         if (this._hub == null)
@@ -203,9 +214,11 @@ public sealed class RoomConnection : MonoBehaviour, IRoomHubReceiver
 
         this._hub.FireAndForget().MoveAsync(pose);
     }
+
     #endregion
 
     #region Connection
+
     private async UniTaskVoid RunAsync(CancellationToken cancellationToken)
     {
         var delay = InitialRetryDelay;
@@ -275,9 +288,11 @@ public sealed class RoomConnection : MonoBehaviour, IRoomHubReceiver
     private void ApplySnapshot(RoomSnapshot snapshot)
     {
     }
+
     #endregion
 
     #region IRoomHubReceiver
+
     public void OnJoin(Guid connectionId, string joinedUserName)
     {
     }
@@ -291,6 +306,7 @@ public sealed class RoomConnection : MonoBehaviour, IRoomHubReceiver
     {
         this.PlayerMoved?.Invoke(connectionId, pose);
     }
+
     #endregion
 }
 ```

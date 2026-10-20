@@ -46,6 +46,7 @@ using Cysharp.Collections;
 public static class NativeFileIO
 {
     #region Public API
+
     public static async Task<NativeMemoryArray<byte>> ReadAllAsync(string path, CancellationToken cancellationToken)
     {
         using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, useAsync: true);
@@ -75,6 +76,7 @@ public static class NativeFileIO
             await stream.WriteAsync(chunk, cancellationToken);
         }
     }
+
     #endregion
 }
 ```

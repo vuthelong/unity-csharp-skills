@@ -4,6 +4,7 @@ using UnityEngine;
 public sealed class AudioOcclusion : MonoBehaviour
 {
     #region Fields
+
     private const float OpenCutoff = 22000f;
     private const float FilterOffThreshold = 0.001f;
 
@@ -23,9 +24,11 @@ public sealed class AudioOcclusion : MonoBehaviour
     private float _target;
     private float _current;
     private float _nextCheck;
+
     #endregion
 
     #region Properties
+
     public float Occlusion => this._current;
 
     public float BaseVolume
@@ -33,9 +36,11 @@ public sealed class AudioOcclusion : MonoBehaviour
         get => this._baseVolume;
         set => this._baseVolume = Mathf.Clamp01(value);
     }
+
     #endregion
 
     #region Unity Lifecycle
+
     private void Awake()
     {
         this._source = GetComponent<AudioSource>();
@@ -81,13 +86,13 @@ public sealed class AudioOcclusion : MonoBehaviour
         this._source.volume = this._baseVolume;
         this._filter.enabled = false;
     }
+
     #endregion
 
-    #region Public Methods
+    #region Occlusion
+
     public void SetListener(Transform target) => this.listener = target;
-    #endregion
 
-    #region Private Methods
     private float MeasureOcclusion()
     {
         var from = this.listener.position;
@@ -106,5 +111,6 @@ public sealed class AudioOcclusion : MonoBehaviour
         this._filter.cutoffFrequency = OpenCutoff * Mathf.Pow(this.occludedCutoff / OpenCutoff, this._current);
         this._source.volume = this._baseVolume * Mathf.Lerp(1f, this.occludedVolume, this._current);
     }
+
     #endregion
 }

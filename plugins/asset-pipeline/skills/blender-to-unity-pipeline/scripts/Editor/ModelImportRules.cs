@@ -7,6 +7,7 @@ using Object = UnityEngine.Object;
 public sealed class ModelImportRules : AssetPostprocessor
 {
     #region Fields
+
     private const uint RulesVersion = 1;
     private const string PresetFileName = "ModelImport.preset";
     private const string ColliderSuffix = "_COL";
@@ -70,13 +71,13 @@ public sealed class ModelImportRules : AssetPostprocessor
             meshCompression: ModelImporterMeshCompression.Low,
             materialImportMode: ModelImporterMaterialImportMode.ImportViaMaterialDescription),
     };
+
     #endregion
 
-    #region Public Methods
+    #region Model Import
+
     public override uint GetVersion() => RulesVersion;
-    #endregion
 
-    #region Private Methods
     private static FolderRule FindRule(string path)
     {
         FolderRule best = null;
@@ -140,6 +141,27 @@ public sealed class ModelImportRules : AssetPostprocessor
         importer.optimizeGameObjects = rule.OptimizeGameObjects && importer.avatarSetup != ModelImporterAvatarSetup.NoAvatar;
     }
 
+    private void OnPreprocessModel()
+    {
+        if (assetImporter is not ModelImporter importer) return;
+
+        var rule = FindRule(assetPath);
+
+        if (importer.importSettingsMissing)
+        {
+            if (rule != null) ApplyFirstImportDefaults(importer);
+            ApplyNearestPreset(importer, assetPath);
+        }
+
+        if (rule == null) return;
+
+        ApplyRule(importer, rule);
+    }
+
+    #endregion
+
+    #region Animation Import
+
     private static bool IsLoopClip(string clipName)
     {
         if (clipName.EndsWith(LoopSuffix, StringComparison.OrdinalIgnoreCase)) return true;
@@ -156,85 +178,6 @@ public sealed class ModelImportRules : AssetPostprocessor
     {
         var separator = takeName.LastIndexOf(TakeSeparator);
         return separator < 0 ? takeName : takeName.Substring(separator + 1);
-    }
-
-    private static bool IsLodName(string objectName, out int level)
-    {
-        level = -1;
-        var index = objectName.LastIndexOf(LodToken, StringComparison.OrdinalIgnoreCase);
-        if (index < 0) return false;
-
-        var digits = objectName.Substring(index + LodToken.Length);
-        return int.TryParse(digits, out level);
-    }
-
-    private void ConvertCollider(Transform target, bool convex)
-    {
-        if (!target.TryGetComponent<MeshFilter>(out var filter) || filter.sharedMesh == null)
-        {
-            context.LogImportWarning($"Collider object '{target.name}' has no mesh.", target);
-            return;
-        }
-
-        var collider = target.gameObject.AddComponent<MeshCollider>();
-        collider.sharedMesh = filter.sharedMesh;
-        collider.convex = convex;
-
-        if (target.TryGetComponent<MeshRenderer>(out var meshRenderer)) Object.DestroyImmediate(meshRenderer);
-        Object.DestroyImmediate(filter);
-    }
-
-    [MenuItem("Assets/Model Import/Remap Materials By Name")]
-    private static void RemapSelectedMaterials()
-    {
-        var guids = Selection.assetGUIDs;
-        AssetDatabase.StartAssetEditing();
-        try
-        {
-            for (var i = 0; i < guids.Length; i++)
-            {
-                var path = AssetDatabase.GUIDToAssetPath(guids[i]);
-                if (AssetImporter.GetAtPath(path) is not ModelImporter importer) continue;
-
-                importer.SearchAndRemapMaterials(ModelImporterMaterialName.BasedOnMaterialName, ModelImporterMaterialSearch.Everywhere);
-                importer.SaveAndReimport();
-            }
-        }
-        finally
-        {
-            AssetDatabase.StopAssetEditing();
-        }
-    }
-
-    [MenuItem("Assets/Model Import/Remap Materials By Name", true)]
-    private static bool CanRemapSelectedMaterials()
-    {
-        var guids = Selection.assetGUIDs;
-        for (var i = 0; i < guids.Length; i++)
-        {
-            if (AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(guids[i])) is ModelImporter) return true;
-        }
-
-        return false;
-    }
-    #endregion
-
-    #region Unity Callbacks
-    private void OnPreprocessModel()
-    {
-        if (assetImporter is not ModelImporter importer) return;
-
-        var rule = FindRule(assetPath);
-
-        if (importer.importSettingsMissing)
-        {
-            if (rule != null) ApplyFirstImportDefaults(importer);
-            ApplyNearestPreset(importer, assetPath);
-        }
-
-        if (rule == null) return;
-
-        ApplyRule(importer, rule);
     }
 
     private void OnPreprocessAnimation()
@@ -255,6 +198,36 @@ public sealed class ModelImportRules : AssetPostprocessor
         }
 
         importer.clipAnimations = clips;
+    }
+
+    #endregion
+
+    #region Collider And LOD Setup
+
+    private void ConvertCollider(Transform target, bool convex)
+    {
+        if (!target.TryGetComponent<MeshFilter>(out var filter) || filter.sharedMesh == null)
+        {
+            context.LogImportWarning($"Collider object '{target.name}' has no mesh.", target);
+            return;
+        }
+
+        var collider = target.gameObject.AddComponent<MeshCollider>();
+        collider.sharedMesh = filter.sharedMesh;
+        collider.convex = convex;
+
+        if (target.TryGetComponent<MeshRenderer>(out var meshRenderer)) Object.DestroyImmediate(meshRenderer);
+        Object.DestroyImmediate(filter);
+    }
+
+    private static bool IsLodName(string objectName, out int level)
+    {
+        level = -1;
+        var index = objectName.LastIndexOf(LodToken, StringComparison.OrdinalIgnoreCase);
+        if (index < 0) return false;
+
+        var digits = objectName.Substring(index + LodToken.Length);
+        return int.TryParse(digits, out level);
     }
 
     private void OnPostprocessModel(GameObject root)
@@ -293,12 +266,52 @@ public sealed class ModelImportRules : AssetPostprocessor
             context.LogImportWarning($"'{assetPath}' has _LOD{highestLod} meshes but no _LOD0; Unity will not build a LODGroup.", root);
         }
     }
+
+    #endregion
+
+    #region Material Remapping
+
+    [MenuItem("Assets/Model Import/Remap Materials By Name")]
+    private static void RemapSelectedMaterials()
+    {
+        var guids = Selection.assetGUIDs;
+        AssetDatabase.StartAssetEditing();
+        try
+        {
+            for (var i = 0; i < guids.Length; i++)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guids[i]);
+                if (AssetImporter.GetAtPath(path) is not ModelImporter importer) continue;
+
+                importer.SearchAndRemapMaterials(ModelImporterMaterialName.BasedOnMaterialName, ModelImporterMaterialSearch.Everywhere);
+                importer.SaveAndReimport();
+            }
+        }
+        finally
+        {
+            AssetDatabase.StopAssetEditing();
+        }
+    }
+
+    [MenuItem("Assets/Model Import/Remap Materials By Name", true)]
+    private static bool CanRemapSelectedMaterials()
+    {
+        var guids = Selection.assetGUIDs;
+        for (var i = 0; i < guids.Length; i++)
+        {
+            if (AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(guids[i])) is ModelImporter) return true;
+        }
+
+        return false;
+    }
+
     #endregion
 }
 
 internal sealed class FolderRule
 {
     #region Fields
+
     public readonly string Folder;
     public readonly ModelImporterAnimationType AnimationType;
     public readonly ModelImporterAvatarSetup? AvatarSetup;
@@ -308,9 +321,11 @@ internal sealed class FolderRule
     public readonly bool ImportBlendShapes;
     public readonly ModelImporterMeshCompression MeshCompression;
     public readonly ModelImporterMaterialImportMode MaterialImportMode;
+
     #endregion
 
-    #region Public Methods
+    #region Construction
+
     public FolderRule(
         string folder,
         ModelImporterAnimationType animationType,
@@ -332,5 +347,6 @@ internal sealed class FolderRule
         this.MeshCompression = meshCompression;
         this.MaterialImportMode = materialImportMode;
     }
+
     #endregion
 }

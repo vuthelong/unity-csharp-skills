@@ -94,7 +94,7 @@ public class StripDebugKeywordVariants : IPreprocessShaders
 
     #endregion
 
-    #region Public Methods
+    #region Shader Stripping
 
     public void OnProcessShader(Shader shader, ShaderSnippetData snippet, IList<ShaderCompilerData> data)
     {

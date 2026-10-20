@@ -34,13 +34,16 @@ using FMOD.Studio;
 public readonly struct TimelineBeat
 {
     #region Fields
+
     public readonly int Bar;
     public readonly int Beat;
     public readonly int PositionMs;
     public readonly float Tempo;
+
     #endregion
 
-    #region Public Methods
+    #region Construction
+
     public TimelineBeat(int bar, int beat, int positionMs, float tempo)
     {
         this.Bar = bar;
@@ -48,12 +51,14 @@ public readonly struct TimelineBeat
         this.PositionMs = positionMs;
         this.Tempo = tempo;
     }
+
     #endregion
 }
 
 public sealed class FmodTimelineListener : IDisposable
 {
     #region Fields
+
     private const EVENT_CALLBACK_TYPE Mask =
         EVENT_CALLBACK_TYPE.TIMELINE_BEAT | EVENT_CALLBACK_TYPE.TIMELINE_MARKER | EVENT_CALLBACK_TYPE.DESTROYED;
 
@@ -66,13 +71,17 @@ public sealed class FmodTimelineListener : IDisposable
 
     public event Action<TimelineBeat> BeatReached;
     public event Action<string> MarkerReached;
+
     #endregion
 
     #region Properties
+
     public EventInstance Instance => this._instance;
+
     #endregion
 
-    #region Public Methods
+    #region Callback Dispatch
+
     public FmodTimelineListener(EventInstance instance)
     {
         this._instance = instance;
@@ -99,9 +108,7 @@ public sealed class FmodTimelineListener : IDisposable
         this._instance.stop(STOP_MODE.ALLOWFADEOUT);
         this._instance.release();
     }
-    #endregion
 
-    #region Private Methods
     [AOT.MonoPInvokeCallback(typeof(EVENT_CALLBACK))]
     private static FMOD.RESULT OnEventCallback(EVENT_CALLBACK_TYPE type, IntPtr instancePtr, IntPtr parameterPtr)
     {
@@ -130,6 +137,7 @@ public sealed class FmodTimelineListener : IDisposable
 
         return FMOD.RESULT.OK;
     }
+
     #endregion
 }
 ```

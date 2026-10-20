@@ -12,7 +12,8 @@ using UnityEngine.UIElements;
 [CustomEditor(typeof(EnemyController))]
 public sealed class EnemyControllerEditor : Editor
 {
-    #region Public Methods
+    #region Inspector
+
     public override VisualElement CreateInspectorGUI()
     {
         var root = new VisualElement();
@@ -20,15 +21,14 @@ public sealed class EnemyControllerEditor : Editor
         root.Add(new Button(SimulateHit) { text = "Simulate Hit" });
         return root;
     }
-    #endregion
 
-    #region Private Methods
     private void SimulateHit()
     {
         var enemy = (EnemyController)target;
         Undo.RecordObject(enemy, "Simulate Hit");
         enemy.TakeDamage(10);
     }
+
     #endregion
 }
 ```

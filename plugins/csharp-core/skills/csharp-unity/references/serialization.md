@@ -32,8 +32,10 @@ Serialize two parallel lists or a `List<Entry>` and build the dictionary in `Awa
 public struct ItemEntry
 {
     #region Fields
+
     public string id;
     public ItemData data;
+
     #endregion
 }
 
@@ -73,9 +75,11 @@ Public fields inside a `[Serializable]` data struct are acceptable; the `[Serial
 public sealed class ItemData : ScriptableObject
 {
     #region Properties
+
     [field: SerializeField] public string DisplayName { get; private set; }
     [field: SerializeField] public int BaseDamage { get; private set; }
     [field: SerializeField] public Sprite Icon { get; private set; }
+
     #endregion
 }
 ```

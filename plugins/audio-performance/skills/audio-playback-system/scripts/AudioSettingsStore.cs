@@ -11,6 +11,7 @@ public enum AudioChannel
 public sealed class AudioSettingsStore
 {
     #region Fields
+
     public const float MinDb = -80f;
 
     private const float MinLinear = 0.0001f;
@@ -24,13 +25,17 @@ public sealed class AudioSettingsStore
     private readonly float _defaultVolume;
 
     private bool _muted;
+
     #endregion
 
     #region Properties
+
     public bool IsMuted => this._muted;
+
     #endregion
 
-    #region Public Methods
+    #region Persistence
+
     public AudioSettingsStore(
         AudioMixer mixer,
         string masterParameter = "MasterVolume",
@@ -44,20 +49,6 @@ public sealed class AudioSettingsStore
         this._defaultVolume = Mathf.Clamp01(defaultVolume);
     }
 
-    public static float LinearToDb(float linear)
-    {
-        if (linear <= MinLinear) return MinDb;
-
-        return Mathf.Max(MinDb, 20f * Mathf.Log10(linear));
-    }
-
-    public static float DbToLinear(float db)
-    {
-        if (db <= MinDb) return 0f;
-
-        return Mathf.Pow(10f, db / 20f);
-    }
-
     public void Load()
     {
         for (var i = 0; i < this._volumes.Length; i++)
@@ -67,6 +58,12 @@ public sealed class AudioSettingsStore
 
         this._muted = PlayerPrefs.GetInt(MuteKey, 0) == 1;
     }
+
+    public void Save() => PlayerPrefs.Save();
+
+    #endregion
+
+    #region Volume
 
     public void ApplyAll()
     {
@@ -93,10 +90,6 @@ public sealed class AudioSettingsStore
         ApplyChannel(AudioChannel.Master);
     }
 
-    public void Save() => PlayerPrefs.Save();
-    #endregion
-
-    #region Private Methods
     private void ApplyChannel(AudioChannel channel)
     {
         var index = (int)channel;
@@ -105,5 +98,24 @@ public sealed class AudioSettingsStore
 
         Debug.LogError($"{nameof(AudioSettingsStore)}: exposed parameter '{this._parameters[index]}' not found on {this._mixer.name}", this._mixer);
     }
+
+    #endregion
+
+    #region Conversion
+
+    public static float LinearToDb(float linear)
+    {
+        if (linear <= MinLinear) return MinDb;
+
+        return Mathf.Max(MinDb, 20f * Mathf.Log10(linear));
+    }
+
+    public static float DbToLinear(float db)
+    {
+        if (db <= MinDb) return 0f;
+
+        return Mathf.Pow(10f, db / 20f);
+    }
+
     #endregion
 }

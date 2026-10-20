@@ -22,7 +22,7 @@ namespace Game.Data.Editor
 
         #endregion
 
-        #region Public Methods
+        #region Entry Sync
 
         [MenuItem("Tools/Game Data/Sync Addressables")]
         public static void SyncAll()
@@ -49,24 +49,6 @@ namespace Game.Data.Editor
 
             AssetDatabase.SaveAssets();
         }
-
-        public static bool IsGeneratedPath(string assetPath)
-        {
-            return assetPath.StartsWith(GeneratedFolder + "/", StringComparison.Ordinal)
-                   && assetPath.EndsWith(".asset", StringComparison.Ordinal);
-        }
-
-        public static string AddressFor(string assetPath)
-        {
-            var fileName = Path.GetFileNameWithoutExtension(assetPath);
-            var lastDot = fileName.LastIndexOf('.');
-            var shortName = lastDot >= 0 ? fileName.Substring(lastDot + 1) : fileName;
-            return AddressPrefix + shortName;
-        }
-
-        #endregion
-
-        #region Private Methods
 
         private static AddressableAssetEntry SyncEntry(AddressableAssetSettings settings, AddressableAssetGroup group, string guid)
         {
@@ -120,6 +102,10 @@ namespace Game.Data.Editor
 
             return stale.Count;
         }
+
+        #endregion
+
+        #region Group Schema
 
         private static AddressableAssetGroup GetOrCreateGroup(AddressableAssetSettings settings)
         {
@@ -177,6 +163,24 @@ namespace Game.Data.Editor
         }
 
         #endregion
+
+        #region Path Helpers
+
+        public static bool IsGeneratedPath(string assetPath)
+        {
+            return assetPath.StartsWith(GeneratedFolder + "/", StringComparison.Ordinal)
+                   && assetPath.EndsWith(".asset", StringComparison.Ordinal);
+        }
+
+        public static string AddressFor(string assetPath)
+        {
+            var fileName = Path.GetFileNameWithoutExtension(assetPath);
+            var lastDot = fileName.LastIndexOf('.');
+            var shortName = lastDot >= 0 ? fileName.Substring(lastDot + 1) : fileName;
+            return AddressPrefix + shortName;
+        }
+
+        #endregion
     }
 
     public sealed class GameDataAddressablesPostprocessor : AssetPostprocessor
@@ -187,16 +191,7 @@ namespace Game.Data.Editor
 
         #endregion
 
-        #region Private Methods
-
-        private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
-        {
-            if (_scheduled) return;
-            if (!AnyGenerated(importedAssets) && !AnyGenerated(deletedAssets) && !AnyGenerated(movedAssets) && !AnyGenerated(movedFromAssetPaths)) return;
-
-            _scheduled = true;
-            EditorApplication.delayCall += RunSync;
-        }
+        #region Auto Sync
 
         private static void RunSync()
         {
@@ -218,6 +213,15 @@ namespace Game.Data.Editor
             }
 
             return false;
+        }
+
+        private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
+        {
+            if (_scheduled) return;
+            if (!AnyGenerated(importedAssets) && !AnyGenerated(deletedAssets) && !AnyGenerated(movedAssets) && !AnyGenerated(movedFromAssetPaths)) return;
+
+            _scheduled = true;
+            EditorApplication.delayCall += RunSync;
         }
 
         #endregion

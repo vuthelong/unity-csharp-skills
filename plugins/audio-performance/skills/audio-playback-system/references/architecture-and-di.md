@@ -30,29 +30,36 @@ using VContainer.Unity;
 public sealed class AudioLifetimeScope : LifetimeScope
 {
     #region Fields
+
     [SerializeField] private AudioMixer mixer;
     [SerializeField] private AudioMixerGroup musicGroup;
     [SerializeField, Min(1)] private int maxVoices = 24;
+
     #endregion
 
-    #region Private Methods
+    #region Registration
+
     protected override void Configure(IContainerBuilder builder)
     {
         builder.Register(_ => new AudioService(null, this.musicGroup, this.maxVoices), Lifetime.Singleton);
         builder.Register(_ => new AudioSettingsStore(this.mixer), Lifetime.Singleton);
         builder.RegisterEntryPoint<AudioDriver>();
     }
+
     #endregion
 }
 
 public sealed class AudioDriver : IStartable, ILateTickable
 {
     #region Fields
+
     private readonly AudioService _service;
     private readonly AudioSettingsStore _settings;
+
     #endregion
 
-    #region Public Methods
+    #region Setup And Ticking
+
     public AudioDriver(AudioService service, AudioSettingsStore settings)
     {
         this._service = service;
@@ -66,6 +73,7 @@ public sealed class AudioDriver : IStartable, ILateTickable
     }
 
     public void LateTick() => this._service.Tick(Time.unscaledDeltaTime);
+
     #endregion
 }
 ```
@@ -87,18 +95,23 @@ using UnityEngine.Audio;
 public sealed class AudioServiceHost : MonoBehaviour
 {
     #region Fields
+
     [SerializeField] private AudioMixer mixer;
     [SerializeField] private AudioMixerGroup musicGroup;
     [SerializeField, Min(1)] private int maxVoices = 24;
     [SerializeField] private bool pauseOnFocusLoss = true;
+
     #endregion
 
     #region Properties
+
     public static AudioService Service { get; private set; }
     public static AudioSettingsStore Settings { get; private set; }
+
     #endregion
 
     #region Unity Lifecycle
+
     private void Awake()
     {
         if (Service != null)
@@ -131,18 +144,18 @@ public sealed class AudioServiceHost : MonoBehaviour
         Service = null;
         Settings = null;
     }
+
     #endregion
 
-    #region Private Methods
+    #region Pause And Reset
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetStatics()
     {
         Service = null;
         Settings = null;
     }
-    #endregion
 
-    #region Unity Callbacks
     private void OnApplicationFocus(bool hasFocus)
     {
         if (this.pauseOnFocusLoss && Service != null) Service.SetPaused(!hasFocus);
@@ -152,6 +165,7 @@ public sealed class AudioServiceHost : MonoBehaviour
     {
         if (Service != null) Service.SetPaused(paused);
     }
+
     #endregion
 }
 ```
@@ -172,18 +186,22 @@ public sealed class AudioServiceHost : MonoBehaviour
 public sealed class Weapon : MonoBehaviour
 {
     #region Fields
+
     [SerializeField] private AudioCue fireCue;
     [SerializeField] private AudioCue reloadLoopCue;
 
     private AudioHandle _reloadHandle;
+
     #endregion
 
-    #region Public Methods
+    #region Weapon Audio
+
     public void Fire() => AudioServiceHost.Service.Play(this.fireCue, transform.position);
 
     public void BeginReload() => this._reloadHandle = AudioServiceHost.Service.Play(this.reloadLoopCue, transform);
 
     public void EndReload() => AudioServiceHost.Service.Stop(this._reloadHandle, 0.1f);
+
     #endregion
 }
 ```

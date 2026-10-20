@@ -53,64 +53,26 @@ using UnityEngine;
 public sealed class FmodAudioService : IAudioService<EventReference>
 {
     #region Fields
+
     private readonly List<Voice> _active;
     private int _nextId;
     private bool _paused;
     private bool _disposed;
+
     #endregion
 
     #region Properties
+
     public int ActiveVoiceCount => this._active.Count;
     public bool IsPaused => this._paused;
+
     #endregion
 
-    #region Public Methods
+    #region Service Control
+
     public FmodAudioService(int capacity = 64)
     {
         this._active = new List<Voice>(capacity);
-    }
-
-    public AudioHandle Play(EventReference cue, Vector3 position) => StartInstance(cue, position, null);
-
-    public AudioHandle Play(EventReference cue, Transform follow)
-    {
-        if (follow == null) return AudioHandle.None;
-
-        return StartInstance(cue, follow.position, follow);
-    }
-
-    public void PlayOneShot(EventReference cue)
-    {
-        if (this._disposed || cue.Guid.IsNull) return;
-
-        RuntimeManager.PlayOneShot(cue);
-    }
-
-    public bool IsPlaying(AudioHandle handle)
-    {
-        var index = IndexOf(handle);
-        return index >= 0 && this._active[index].Instance.isValid();
-    }
-
-    public void Stop(AudioHandle handle, float fadeOut = 0f)
-    {
-        var index = IndexOf(handle);
-        if (index < 0) return;
-
-        StopAt(index, fadeOut);
-    }
-
-    public void StopCue(EventReference cue, float fadeOut = 0f)
-    {
-        for (var i = this._active.Count - 1; i >= 0; i--)
-        {
-            if (this._active[i].Event.Guid.Equals(cue.Guid)) StopAt(i, fadeOut);
-        }
-    }
-
-    public void StopAll(float fadeOut = 0f)
-    {
-        for (var i = this._active.Count - 1; i >= 0; i--) StopAt(i, fadeOut);
     }
 
     public void SetPaused(bool paused)
@@ -154,9 +116,27 @@ public sealed class FmodAudioService : IAudioService<EventReference>
         this._active.Clear();
         this._disposed = true;
     }
+
     #endregion
 
-    #region Private Methods
+    #region Playback
+
+    public AudioHandle Play(EventReference cue, Vector3 position) => StartInstance(cue, position, null);
+
+    public AudioHandle Play(EventReference cue, Transform follow)
+    {
+        if (follow == null) return AudioHandle.None;
+
+        return StartInstance(cue, follow.position, follow);
+    }
+
+    public void PlayOneShot(EventReference cue)
+    {
+        if (this._disposed || cue.Guid.IsNull) return;
+
+        RuntimeManager.PlayOneShot(cue);
+    }
+
     private AudioHandle StartInstance(EventReference cue, Vector3 position, Transform follow)
     {
         if (this._disposed || cue.Guid.IsNull) return AudioHandle.None;
@@ -181,6 +161,37 @@ public sealed class FmodAudioService : IAudioService<EventReference>
 
         this._active.Add(new Voice(this._nextId, cue, instance, follow));
         return new AudioHandle(this._nextId);
+    }
+
+    #endregion
+
+    #region Stopping And Tracking
+
+    public bool IsPlaying(AudioHandle handle)
+    {
+        var index = IndexOf(handle);
+        return index >= 0 && this._active[index].Instance.isValid();
+    }
+
+    public void Stop(AudioHandle handle, float fadeOut = 0f)
+    {
+        var index = IndexOf(handle);
+        if (index < 0) return;
+
+        StopAt(index, fadeOut);
+    }
+
+    public void StopCue(EventReference cue, float fadeOut = 0f)
+    {
+        for (var i = this._active.Count - 1; i >= 0; i--)
+        {
+            if (this._active[i].Event.Guid.Equals(cue.Guid)) StopAt(i, fadeOut);
+        }
+    }
+
+    public void StopAll(float fadeOut = 0f)
+    {
+        for (var i = this._active.Count - 1; i >= 0; i--) StopAt(i, fadeOut);
     }
 
     private void StopAt(int index, float fadeOut)
@@ -214,14 +225,17 @@ public sealed class FmodAudioService : IAudioService<EventReference>
     private struct Voice
     {
         #region Fields
+
         public readonly int Id;
         public readonly EventReference Event;
         public readonly EventInstance Instance;
         public Transform Follow;
         public bool Following;
+
         #endregion
 
-        #region Public Methods
+        #region Construction
+
         public Voice(int id, EventReference cue, EventInstance instance, Transform follow)
         {
             this.Id = id;
@@ -230,6 +244,7 @@ public sealed class FmodAudioService : IAudioService<EventReference>
             this.Follow = follow;
             this.Following = follow != null;
         }
+
         #endregion
     }
 }
@@ -258,10 +273,13 @@ using FMODUnity;
 public sealed class FmodBankLoader
 {
     #region Fields
+
     private readonly List<string> _loaded = new List<string>();
+
     #endregion
 
-    #region Public Methods
+    #region Bank Loading
+
     public async UniTask LoadAsync(IReadOnlyList<string> bankNames, bool loadSamples, CancellationToken cancellationToken)
     {
         for (var i = 0; i < bankNames.Count; i++)
@@ -279,6 +297,7 @@ public sealed class FmodBankLoader
         for (var i = this._loaded.Count - 1; i >= 0; i--) RuntimeManager.UnloadBank(this._loaded[i]);
         this._loaded.Clear();
     }
+
     #endregion
 }
 ```
@@ -299,29 +318,37 @@ using VContainer.Unity;
 public sealed class FmodAudioLifetimeScope : LifetimeScope
 {
     #region Fields
+
     [SerializeField, Min(1)] private int trackedVoices = 64;
+
     #endregion
 
-    #region Private Methods
+    #region Registration
+
     protected override void Configure(IContainerBuilder builder)
     {
         builder.Register<IAudioService<EventReference>>(_ => new FmodAudioService(this.trackedVoices), Lifetime.Singleton);
         builder.Register<FmodBankLoader>(Lifetime.Singleton);
         builder.RegisterEntryPoint<FmodAudioDriver>();
     }
+
     #endregion
 }
 
 public sealed class FmodAudioDriver : ILateTickable
 {
     #region Fields
+
     private readonly IAudioService<EventReference> _audio;
+
     #endregion
 
-    #region Public Methods
+    #region Setup And Ticking
+
     public FmodAudioDriver(IAudioService<EventReference> audio) => this._audio = audio;
 
     public void LateTick() => this._audio.Tick(Time.unscaledDeltaTime);
+
     #endregion
 }
 ```
@@ -340,14 +367,17 @@ using VContainer;
 public sealed class Weapon : MonoBehaviour
 {
     #region Fields
+
     [SerializeField] private EventReference fireCue;
     [SerializeField] private EventReference reloadLoopCue;
 
     private IAudioService<EventReference> _audio;
     private AudioHandle _reloadHandle;
+
     #endregion
 
-    #region Public Methods
+    #region Weapon Audio
+
     [Inject]
     public void Construct(IAudioService<EventReference> audio) => this._audio = audio;
 
@@ -356,6 +386,7 @@ public sealed class Weapon : MonoBehaviour
     public void BeginReload() => this._reloadHandle = this._audio.Play(this.reloadLoopCue, transform);
 
     public void EndReload() => this._audio.Stop(this._reloadHandle, 0.1f);
+
     #endregion
 }
 ```

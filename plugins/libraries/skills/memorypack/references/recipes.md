@@ -13,21 +13,25 @@ using UnityEngine;
 public partial class SaveData
 {
     #region Fields
+
     [MemoryPackOrder(0)] public int Version;
     [MemoryPackOrder(1)] public string PlayerName;
     [MemoryPackOrder(2)] public Vector3 Position;
     [MemoryPackOrder(3)] public Quaternion Rotation;
     [MemoryPackOrder(4)] public List<InventorySlot> Inventory = new();
     [MemoryPackOrder(6)] public Dictionary<string, bool> Flags = new();
+
     #endregion
 
     #region Callbacks
+
     [MemoryPackOnDeserialized]
     private void OnDeserialized()
     {
         if (this.Inventory == null) this.Inventory = new List<InventorySlot>();
         if (this.Flags == null) this.Flags = new Dictionary<string, bool>();
     }
+
     #endregion
 }
 
@@ -52,18 +56,23 @@ using UnityEngine;
 public sealed class SaveService
 {
     #region Fields
+
     private const int MaxSaveBytes = 16 * 1024 * 1024;
     private readonly string _path;
+
     #endregion
 
     #region Constructors
+
     public SaveService(string fileName)
     {
         this._path = Path.Combine(Application.persistentDataPath, fileName);
     }
+
     #endregion
 
     #region Public API
+
     public async UniTask SaveAsync(SaveData data, CancellationToken cancellationToken)
     {
         var bytes = MemoryPackSerializer.Serialize(data);
@@ -93,6 +102,7 @@ public sealed class SaveService
             return new SaveData();
         }
     }
+
     #endregion
 }
 ```
@@ -128,6 +138,7 @@ public partial class ChatMessage : INetMessage
 public static class NetCodec
 {
     #region Public API
+
     public static byte[] Encode(INetMessage message)
     {
         return MemoryPackSerializer.Serialize(message);
@@ -137,6 +148,7 @@ public static class NetCodec
     {
         return MemoryPackSerializer.Deserialize<INetMessage>(packet);
     }
+
     #endregion
 }
 ```
@@ -181,15 +193,19 @@ public partial struct EnemyRow
 public sealed class EnemyDatabase : MonoBehaviour
 {
     #region Fields
+
     [SerializeField] private TextAsset tableAsset;
     private EnemyTable _table;
+
     #endregion
 
     #region Unity Lifecycle
+
     private void Awake()
     {
         this._table = MemoryPackSerializer.Deserialize<EnemyTable>(this.tableAsset.bytes);
     }
+
     #endregion
 }
 ```
@@ -206,6 +222,7 @@ using UnityEngine;
 public sealed class RegexFormatter : MemoryPackFormatter<Regex>
 {
     #region Formatter
+
     public override void Serialize<TBufferWriter>(ref MemoryPackWriter<TBufferWriter> writer, ref Regex value)
     {
         if (value == null)
@@ -231,18 +248,21 @@ public sealed class RegexFormatter : MemoryPackFormatter<Regex>
         var options = reader.ReadValue<int>();
         value = new Regex(pattern, (RegexOptions)options);
     }
+
     #endregion
 }
 
 public static class MemoryPackSetup
 {
     #region Bootstrap
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
     private static void Register()
     {
         if (MemoryPackFormatterProvider.IsRegistered<Regex>()) return;
         MemoryPackFormatterProvider.Register(new RegexFormatter());
     }
+
     #endregion
 }
 ```
@@ -258,6 +278,7 @@ using MemoryPack.Compression;
 public static class CompressedCodec
 {
     #region Public API
+
     public static byte[] Pack<T>(T value)
     {
         using var compressor = new BrotliCompressor();
@@ -271,6 +292,7 @@ public static class CompressedCodec
         var buffer = decompressor.Decompress(bytes);
         return MemoryPackSerializer.Deserialize<T>(buffer);
     }
+
     #endregion
 }
 ```

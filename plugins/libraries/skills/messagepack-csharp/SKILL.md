@@ -136,15 +136,20 @@ using UnityEngine;
 public static class MessagePackBootstrap
 {
     #region Fields
+
     private static bool _registered;
+
     #endregion
 
     #region Properties
+
     public static MessagePackSerializerOptions Options { get; private set; } = MessagePackSerializerOptions.Standard;
     public static MessagePackSerializerOptions UntrustedOptions { get; private set; } = MessagePackSerializerOptions.Standard;
+
     #endregion
 
     #region Initialization
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
     {
@@ -163,6 +168,7 @@ public static class MessagePackBootstrap
         UntrustedOptions = Options.WithSecurity(MessagePackSecurity.UntrustedData);
         MessagePackSerializer.DefaultOptions = Options;
     }
+
     #endregion
 }
 ```

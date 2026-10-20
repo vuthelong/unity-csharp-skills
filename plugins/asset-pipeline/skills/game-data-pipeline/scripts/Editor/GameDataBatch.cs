@@ -22,7 +22,7 @@ namespace Game.Data.Editor
 
         #endregion
 
-        #region Public Methods
+        #region Batch Commands
 
         [MenuItem("Tools/Game Data/Reimport All CSV")]
         public static void ReimportAllFromMenu()
@@ -44,9 +44,52 @@ namespace Game.Data.Editor
         }
 #endif
 
+#if GOOGLE_SHEET_DOWNLOADER
+        private static async UniTaskVoid DownloadThenRunAsync()
+        {
+            var exitCode = 1;
+            _errorCount = 0;
+            Application.logMessageReceived += CountErrors;
+            try
+            {
+                var groups = CsvDataController.Instance.downloaderData;
+                for (var i = 0; i < groups.Length; i++)
+                {
+                    groups[i].isDownloading = false;
+                    await groups[i].LoadAll();
+                }
+
+                var downloadErrors = _errorCount;
+                Application.logMessageReceived -= CountErrors;
+                var importErrors = ImportValidateAndSync(HasArg(BuildContentArg));
+                exitCode = downloadErrors + importErrors == 0 ? 0 : 1;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+            }
+            finally
+            {
+                Application.logMessageReceived -= CountErrors;
+                EditorApplication.Exit(exitCode);
+            }
+        }
+#endif
+
+        private static bool HasArg(string name)
+        {
+            var args = Environment.GetCommandLineArgs();
+            for (var i = 0; i < args.Length; i++)
+            {
+                if (string.Equals(args[i], name, StringComparison.OrdinalIgnoreCase)) return true;
+            }
+
+            return false;
+        }
+
         #endregion
 
-        #region Private Methods
+        #region Import And Build
 
         private static int ImportValidateAndSync(bool buildContent)
         {
@@ -86,52 +129,9 @@ namespace Game.Data.Editor
             else Debug.Log($"Addressables content built for profile {settings.profileSettings.GetProfileName(settings.activeProfileId)}.");
         }
 
-#if GOOGLE_SHEET_DOWNLOADER
-        private static async UniTaskVoid DownloadThenRunAsync()
-        {
-            var exitCode = 1;
-            _errorCount = 0;
-            Application.logMessageReceived += CountErrors;
-            try
-            {
-                var groups = CsvDataController.Instance.downloaderData;
-                for (var i = 0; i < groups.Length; i++)
-                {
-                    groups[i].isDownloading = false;
-                    await groups[i].LoadAll();
-                }
-
-                var downloadErrors = _errorCount;
-                Application.logMessageReceived -= CountErrors;
-                var importErrors = ImportValidateAndSync(HasArg(BuildContentArg));
-                exitCode = downloadErrors + importErrors == 0 ? 0 : 1;
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception);
-            }
-            finally
-            {
-                Application.logMessageReceived -= CountErrors;
-                EditorApplication.Exit(exitCode);
-            }
-        }
-#endif
-
         private static void CountErrors(string condition, string stackTrace, LogType type)
         {
             if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert) _errorCount++;
-        }
-
-        private static bool HasArg(string name)
-        {
-            var args = Environment.GetCommandLineArgs();
-            for (var i = 0; i < args.Length; i++)
-            {
-                if (string.Equals(args[i], name, StringComparison.OrdinalIgnoreCase)) return true;
-            }
-
-            return false;
         }
 
         #endregion

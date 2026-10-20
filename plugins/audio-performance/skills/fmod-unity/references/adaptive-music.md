@@ -25,6 +25,7 @@ using UnityEngine;
 public sealed class MusicDirector : MonoBehaviour
 {
     #region Fields
+
     [SerializeField] private EventReference music;
     [SerializeField] private string intensityParameter = "Intensity";
     [SerializeField, Min(0f)] private float startIntensity;
@@ -37,23 +38,29 @@ public sealed class MusicDirector : MonoBehaviour
 
     public event Action<TimelineBeat> Beat;
     public event Action<string> Marker;
+
     #endregion
 
     #region Properties
+
     public bool IsPlaying => this._timeline != null;
     public float Intensity => this._intensity;
+
     #endregion
 
     #region Unity Lifecycle
+
     private void Update()
     {
         if (this._timeline != null) this._timeline.Pump();
     }
 
     private void OnDestroy() => Stop();
+
     #endregion
 
-    #region Public Methods
+    #region Playback
+
     public void Play()
     {
         if (this._timeline != null || this.music.Guid.IsNull) return;
@@ -90,9 +97,11 @@ public sealed class MusicDirector : MonoBehaviour
         this._timeline.Dispose();
         this._timeline = null;
     }
+
     #endregion
 
-    #region Private Methods
+    #region Helpers
+
     private static bool TryGetParameterId(EventInstance instance, string parameterName, out PARAMETER_ID id)
     {
         id = default;
@@ -106,6 +115,7 @@ public sealed class MusicDirector : MonoBehaviour
     private void HandleBeat(TimelineBeat beat) => this.Beat?.Invoke(beat);
 
     private void HandleMarker(string marker) => this.Marker?.Invoke(marker);
+
     #endregion
 }
 ```
@@ -120,25 +130,31 @@ Compute intensity from game state, smooth it, and add hysteresis so music does n
 public sealed class ThreatIntensity : MonoBehaviour
 {
     #region Fields
+
     [SerializeField] private MusicDirector director;
     [SerializeField, Min(0.01f)] private float riseRate = 2f;
     [SerializeField, Min(0.01f)] private float fallRate = 0.25f;
 
     private float _target;
     private float _current;
+
     #endregion
 
     #region Unity Lifecycle
+
     private void Update()
     {
         var rate = this._target > this._current ? this.riseRate : this.fallRate;
         this._current = Mathf.MoveTowards(this._current, this._target, rate * Time.unscaledDeltaTime);
         this.director.SetIntensity(this._current);
     }
+
     #endregion
 
-    #region Public Methods
+    #region Threat Reporting
+
     public void ReportThreat(float threatLevel) => this._target = Mathf.Clamp(threatLevel, 0f, 3f);
+
     #endregion
 }
 ```

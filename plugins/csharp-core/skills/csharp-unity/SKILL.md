@@ -80,18 +80,64 @@ Keep the explicit type when `var` hides meaning (`int result = Compute();` where
 
 ## `#region` layout
 
-Every class wraps members in top-level regions, in this order, with these exact names:
+Group members by feature or purpose, not by access modifier or member kind.
 
-| # | Region | Contents |
-|---|---|---|
-| 1 | `Fields` | Constants, statics, serialized fields, private fields, events |
-| 2 | `Properties` | All properties |
-| 3 | `Unity Lifecycle` | `Awake`, `OnEnable`, `Start`, `Update`, `FixedUpdate`, `LateUpdate`, `OnDisable`, `OnDestroy` |
-| 4 | `Public Methods` | Constructors and public non-Unity methods |
-| 5 | `Private Methods` | Private / protected helpers |
-| 6 | `Unity Callbacks` | Collision, trigger, animation events, UI callbacks, `OnValidate`, `OnDrawGizmos` |
+1. Data first: a `Fields` region (constants, statics, serialized fields, private fields, events), then a `Properties` region.
+2. Unity message methods (`Awake`, `OnEnable`, `Start`, `Update`, `FixedUpdate`, `LateUpdate`, `OnDisable`, `OnDestroy`) always go in their own `Unity Lifecycle` region, with exactly that name, even when there is only one of them.
+3. Every other method goes in a region named after the feature or purpose it serves: `Movement`, `Damage`, `Save Load`, `Input Handling`, … Public and private methods of the same feature share a region. Unity callbacks (collision, trigger, animation events, `OnValidate`, `OnDrawGizmos`) go in the region of the feature they serve.
+4. Implementation of an interface or base-class contract whose members serve one purpose goes in one region named after that contract or purpose (`IState`, `Drag`, `Renderer Feature`). Single-method infrastructure interfaces (`IDisposable`, `IStartable`, `ITickable`) and unrelated overrides (`ToString`, `Equals`) go in the region of the feature they serve. Unity message overrides stay in `Unity Lifecycle`.
+5. A feature region should hold more than 2 methods. When a feature has only 1-2 methods, merge it with other small groups into one region with a broader purpose name (`Damage And Healing`, `Helpers`). If there is no other small group left to merge with, it may stay in its own region. `Unity Lifecycle` is exempt from this rule.
+6. Region order: `Fields`, `Properties`, `Unity Lifecycle`, then feature regions in the order the class is usually read (main behaviour first, helpers last).
+7. Member order inside a feature region: public methods, then private and protected methods, then the Unity callbacks of that feature.
+8. Omit empty regions. Never nest regions.
 
-Omit a region with no members. Never nest regions. Every class and struct uses regions, however small.
+Spacing: exactly one blank line before and after every `#region` and `#endregion` line, never two. The only exception is a `#region` directly after the type's opening `{` or an `#endregion` directly before its closing `}`, which take no blank line on that side.
+
+```csharp
+public sealed class Health : MonoBehaviour
+{
+    #region Fields
+
+    [SerializeField] private int maxHealth = 100;
+
+    private int _current;
+
+    #endregion
+
+    #region Properties
+
+    public bool IsAlive => this._current > 0;
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    private void Awake() => this._current = this.maxHealth;
+
+    #endregion
+
+    #region Damage And Healing
+
+    public void TakeDamage(int amount)
+    {
+        if (!IsAlive || amount <= 0) return;
+
+        this._current = Mathf.Max(0, this._current - amount);
+        if (!IsAlive) Die();
+    }
+
+    public void Heal(int amount) => this._current = Mathf.Min(this.maxHealth, this._current + amount);
+
+    private void Die() => gameObject.SetActive(false);
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.TryGetComponent(out Hazard hazard)) TakeDamage(hazard.Damage);
+    }
+
+    #endregion
+}
+```
 
 ## Comments
 
@@ -260,13 +306,16 @@ using UnityEngine;
 public sealed class Mover : MonoBehaviour
 {
     #region Fields
+
     [SerializeField] private float speed = 5f;
 
     private Rigidbody _rb;
     private Vector3 _direction;
+
     #endregion
 
     #region Unity Lifecycle
+
     private void Awake() => this._rb = GetComponent<Rigidbody>();
 
     private void FixedUpdate()
@@ -275,10 +324,13 @@ public sealed class Mover : MonoBehaviour
 
         this._rb.MovePosition(this._rb.position + this._direction * (this.speed * Time.fixedDeltaTime));
     }
+
     #endregion
 
-    #region Public Methods
+    #region Movement
+
     public void SetDirection(Vector3 direction) => this._direction = direction.normalized;
+
     #endregion
 }
 ```

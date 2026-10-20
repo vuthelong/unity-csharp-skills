@@ -18,7 +18,7 @@ namespace Game.Data.Editor
 
         #endregion
 
-        #region Public Methods
+        #region Validation
 
         public static List<string> Validate()
         {
@@ -60,10 +60,6 @@ namespace Game.Data.Editor
             return tables;
         }
 
-        #endregion
-
-        #region Private Methods
-
         [MenuItem("Tools/Game Data/Validate")]
         private static void ValidateFromMenu()
         {
@@ -99,6 +95,10 @@ namespace Game.Data.Editor
                 if (!ids.Add(row.Id)) errors.Add($"{table.name}: duplicate {table.RowType.Name} id {row.Id}.");
             }
         }
+
+        #endregion
+
+        #region Reference Checks
 
         private static void CheckReferences(object target, string context, Dictionary<Type, HashSet<int>> idsByRowType, List<string> errors, int depth)
         {
@@ -189,7 +189,7 @@ namespace Game.Data.Editor
 
         #endregion
 
-        #region Public Methods
+        #region Build Validation
 
         public void OnPreprocessBuild(BuildReport report)
         {
