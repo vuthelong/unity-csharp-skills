@@ -1,8 +1,8 @@
 # Unity C# Skills
 
-Curated, categorized [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for **Unity 6 (6000.x)** and C# development, packaged as a Claude Code plugin marketplace. 87 skills in 11 plugins.
+Curated, categorized [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for **Unity 6 (6000.x)** and C# development, packaged as a Claude Code plugin marketplace. 88 skills in 11 plugins.
 
-Skills are merged, deduplicated and updated from Unity-Technologies/skills, Unity-Open-MCP, a5c-ai/babysitter, DietrichGebert/ponytail and original work. Third-party library skills are grounded in each library's source code; where an upstream README disagrees with its source, the skill follows the source.
+Skills are merged, deduplicated and updated from Unity-Technologies/skills, Unity-Open-MCP, a5c-ai/babysitter, DietrichGebert/ponytail, scenario-labs/skills and original work. Third-party library skills are grounded in each library's source code; where an upstream README disagrees with its source, the skill follows the source.
 
 ## Install
 
@@ -48,7 +48,7 @@ Unity CLI, packages, project bootstrap, search, auditing, builds.
 
 ### Rendering & VFX — `unity-rendering-vfx`
 
-URP, Render Graph, post-processing, Shader Graph, VFX Graph, lighting, day-night and weather.
+URP, Render Graph, post-processing, Shader Graph, HLSL shaders, VFX Graph, lighting, day-night and weather.
 
 | Skill | License | Summary |
 |---|---|---|
@@ -60,6 +60,7 @@ URP, Render Graph, post-processing, Shader Graph, VFX Graph, lighting, day-night
 | [`unity-particle-system`](plugins/rendering-vfx/skills/unity-particle-system/SKILL.md) | MIT | Creates, tunes, scripts, and optimizes the built-in CPU Particle System (Shuriken) on Unity 6 with URP particle shaders - the module struct API, bursts, Emit with EmitParams… |
 | [`unity-texture-import`](plugins/rendering-vfx/skills/unity-texture-import/SKILL.md) | MIT | Configures and audits Unity 6 texture import settings with TextureImporter, per-platform overrides, Presets, and AssetPostprocessor rules - texture type, sRGB vs linear data… |
 | [`unity-vfx-graph`](plugins/rendering-vfx/skills/unity-vfx-graph/SKILL.md) | MIT | Builds, drives, and debugs GPU particle effects with Visual Effect Graph on Unity 6 URP - contexts and blocks, exposed properties and the VisualEffect C# API, events… |
+| [`urp-hlsl-shaders`](plugins/rendering-vfx/skills/urp-hlsl-shaders/SKILL.md) | MIT | Writes, fixes and verifies hand-written HLSL/ShaderLab shaders for URP on Unity 6: UniversalForward, ShadowCaster, DepthOnly and DepthNormals passes that agree, SRP Batcher… |
 | [`urp-postprocessing`](plugins/rendering-vfx/skills/urp-postprocessing/SKILL.md) | Unity Companion | Sets up, scripts, and debugs URP post-processing with the Volume framework on Unity 6 - global and local Volumes, VolumeProfile overrides such as Bloom, Tonemapping, Color… |
 | [`validate-urp-render-graph-renderer-feature`](plugins/rendering-vfx/skills/validate-urp-render-graph-renderer-feature/SKILL.md) | Unity Companion | Writes, reviews, and fixes Unity 6 URP ScriptableRendererFeature and ScriptableRenderPass code built on the Render Graph API (RecordRenderGraph, AddRasterRenderPass… |
 
@@ -92,7 +93,7 @@ Pixel perfect, sprites, sprite atlases, tilemaps and rule tiles.
 
 ### Gameplay Systems — `unity-gameplay-systems`
 
-Physics, navigation, animation, cameras, input, terrain, splines, save system, boot flow, interaction, enemy AI, combat.
+Physics, navigation, animation, cameras, input, terrain and world building, splines, save system, boot flow, interaction, enemy AI, combat.
 
 | Skill | License | Summary |
 |---|---|---|

@@ -21,7 +21,7 @@
     {
       "name": "unity-rendering-vfx",
       "source": "./plugins/rendering-vfx",
-      "description": "URP, Render Graph, post-processing, Shader Graph, VFX Graph, lighting, day-night and weather."
+      "description": "URP, Render Graph, post-processing, Shader Graph, HLSL shaders, VFX Graph, lighting, day-night and weather."
     },
     {
       "name": "unity-ui",
@@ -36,7 +36,7 @@
     {
       "name": "unity-gameplay-systems",
       "source": "./plugins/gameplay-systems",
-      "description": "Physics, navigation, animation, cameras, input, terrain, splines, save system, boot flow, interaction, enemy AI, combat."
+      "description": "Physics, navigation, animation, cameras, input, terrain and world building, splines, save system, boot flow, interaction, enemy AI, combat."
     },
     {
       "name": "unity-audio-performance",

@@ -4,7 +4,7 @@ description: Triages CPU-bound frames and hitches in Unity 6 with the Unity Prof
 license: MIT
 metadata:
   category: audio-performance
-  sources: "https://github.com/vuthelong/unity-csharp-skills (original), https://docs.unity3d.com/6000.0/Documentation/Manual/profiling-target-device.html, https://docs.unity3d.com/6000.0/Documentation/Manual/profiler-build-settings-reference.html, https://docs.unity3d.com/6000.0/Documentation/Manual/profiler-deep-profiling.html, https://docs.unity3d.com/6000.0/Documentation/Manual/ProfilerCPU.html, https://docs.unity3d.com/6000.0/Documentation/Manual/profiler-markers.html, https://docs.unity3d.com/6000.0/Documentation/Manual/profiler-counters-reference.html, https://docs.unity3d.com/6000.0/Documentation/Manual/profiler-add-markers-code.html, https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Unity.Profiling.ProfilerMarker.html, https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Unity.Profiling.ProfilerRecorder.html, https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Unity.Profiling.ProfilerRecorderOptions.html, https://docs.unity3d.com/6000.0/Documentation/ScriptReference/FrameTimingManager.html, https://docs.unity3d.com/6000.0/Documentation/ScriptReference/FrameTiming.html, https://docs.unity3d.com/6000.0/Documentation/Manual/performance-incremental-garbage-collection.html, https://docs.unity3d.com/6000.0/Documentation/Manual/com.unity.performance.profile-analyzer.html, https://docs.unity3d.com/Packages/com.unity.performance.profile-analyzer@1.4/manual/profile-analyzer-window.html, https://docs.unity3d.com/Packages/com.unity.performance.profile-analyzer@1.4/manual/compare-view.html"
+  sources: "https://github.com/vuthelong/unity-csharp-skills (original), https://github.com/scenario-labs/skills/tree/main/skills/game-engines/unity/scenario-unity-performance, https://docs.unity3d.com/6000.0/Documentation/Manual/profiling-target-device.html, https://docs.unity3d.com/6000.0/Documentation/Manual/profiler-build-settings-reference.html, https://docs.unity3d.com/6000.0/Documentation/Manual/profiler-deep-profiling.html, https://docs.unity3d.com/6000.0/Documentation/Manual/ProfilerCPU.html, https://docs.unity3d.com/6000.0/Documentation/Manual/profiler-markers.html, https://docs.unity3d.com/6000.0/Documentation/Manual/profiler-counters-reference.html, https://docs.unity3d.com/6000.0/Documentation/Manual/profiler-add-markers-code.html, https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Unity.Profiling.ProfilerMarker.html, https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Unity.Profiling.ProfilerRecorder.html, https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Unity.Profiling.ProfilerRecorderOptions.html, https://docs.unity3d.com/6000.0/Documentation/ScriptReference/FrameTimingManager.html, https://docs.unity3d.com/6000.0/Documentation/ScriptReference/FrameTiming.html, https://docs.unity3d.com/6000.0/Documentation/Manual/performance-incremental-garbage-collection.html, https://docs.unity3d.com/6000.0/Documentation/Manual/com.unity.performance.profile-analyzer.html, https://docs.unity3d.com/Packages/com.unity.performance.profile-analyzer@1.4/manual/profile-analyzer-window.html, https://docs.unity3d.com/Packages/com.unity.performance.profile-analyzer@1.4/manual/compare-view.html"
   unity: "6000.0+"
 ---
 
@@ -95,11 +95,16 @@ Fixes with code: [references/hotspots.md](references/hotspots.md).
 
 ## Rules
 
+- Name the bound first (main thread, render thread, GPU) before touching anything: removing garbage does not speed up a frame bound by SetPass calls or GPU time.
 - Never optimize from Editor numbers alone. Confirm the problem and the fix in a development player on target hardware.
-- One change per capture. Record the median frame time before and after; a single frame proves nothing.
+- One change per capture. Record the median frame time before and after; a single frame proves nothing. Compare about 200 frames per side, interleave A/B runs, and count a change only when the sign is the same across runs; counts (allocations, draw calls) are exact, milliseconds drift with other processes.
+- Discard the first launch of a new build; it is several times slower than later launches.
+- For worlds, profile the worst viewpoint: teleport to anchor points, turn 360 degrees, keep the worst heading.
 - Read **Self ms** to find who does the work and **Total ms** to find which system owns it.
 - Close Profiler modules you do not need; collecting their stats costs time inside the player.
 - Do not leave Deep Profiling Support on in builds you measure; it changes timings for every script call.
+- `GC.Alloc` sample time is not the cost: the Profiler records only a timestamp and size, the bill comes later in `GC.Collect`. Count bytes and calls per frame and target 0 B in gameplay.
+- Spreading work over frames lowers the peak, not the total. Fix data layout first (one manager loop over arrays instead of thousands of `Update` calls), then amortize.
 - Reach for Burst and the Job System only after a capture shows one hot, data-parallel loop (hundreds of agents, per-vertex work). Then check the `JobHandle.Complete` sync points with Flow Events in the Timeline.
 
 ## Pitfalls
@@ -112,6 +117,10 @@ Fixes with code: [references/hotspots.md](references/hotspots.md).
 | Deep Profile capture freezes or runs out of memory | Profile a smaller repro, or add `ProfilerMarker`s instead |
 | Overlay shows `n/a` for a marker | Name or category not found; check the exact marker name in the Profiler Hierarchy |
 | `GC Alloc` differs between Editor and player | Editor-only checks allocate; trust the player |
+| `ProfilerRecorder` reads 0 forever | created without `ProfilerRecorderOptions.StartImmediately`; use `ProfilerRecorder.StartNew` |
+| Allocations appear with a feature off | a closure in a rarely taken branch captures locals for the whole method; move the captured locals into the branch |
+| Spawn spike in `Physics.BakePhysXCollisionMeshData` | MeshCollider added at runtime; enable Prebake Collision Meshes or `Physics.BakeMesh` in a job |
+| `InstantiateAsync` did not remove the hitch | the cost moved to a later frame; pool and prewarm behind a transition |
 
 ## References
 

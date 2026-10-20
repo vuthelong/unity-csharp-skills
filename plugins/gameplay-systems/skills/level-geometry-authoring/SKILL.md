@@ -1,10 +1,10 @@
 ---
 name: level-geometry-authoring
-description: Generates and edits level geometry by script in Unity 6 - Terrain heightmaps, splat painting, tree and detail placement, holes and multi-tile stitching, ProBuilder greybox meshes, and LODGroup setup. Use for procedural or scripted terrain, slope-based texturing, tree scattering, blockout platforms, ramps and stairs, or LOD levels, or when terrain tiles show seams, the TerrainCollider mismatches the visual, terrain renders pink in URP, ProBuilder edits do not show or LODs pop.
+description: Generates and edits level geometry by script in Unity 6 - Terrain heightmaps, splat painting, tree and detail placement, holes and multi-tile stitching, ProBuilder greybox meshes, and LODGroup setup. Use for procedural or scripted terrain, slope-based texturing, tree scattering, blockout platforms, ramps and stairs, or LOD levels, regenerating a whole procedural world (erosion, splat rules, foliage scatter, roads, additive scene streaming) and proving it with captures and a profiling tour, or when terrain tiles show seams, the TerrainCollider mismatches the visual, terrain renders pink in URP, ProBuilder edits do not show, LODs or foliage pop, or the world hitches or runs slow at its worst viewpoint.
 license: MIT
 metadata:
   category: gameplay-systems
-  sources: "https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/terrain, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/probuilder"
+  sources: "https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/terrain, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/probuilder, https://github.com/scenario-labs/skills/tree/main/skills/game-engines/unity/scenario-unity-world-building"
   unity: "6000.0+"
 ---
 
@@ -20,7 +20,7 @@ Three tools, one goal (playable space): **Terrain** for large organic ground, **
 4. **Save**: TerrainData and TerrainLayers are assets; create them with `AssetDatabase.CreateAsset` or they live only in the scene. ProBuilder data is serialized on the component in the scene/prefab.
 5. **Verify** in the Scene view and with gameplay queries (`terrain.SampleHeight`, raycasts against the collider).
 
-Code and coordinate details: [references/terrain-api.md](references/terrain-api.md) (read before any Terrain script), [references/probuilder-and-lod.md](references/probuilder-and-lod.md) (read before ProBuilder or LODGroup scripts).
+Code and coordinate details: [references/terrain-api.md](references/terrain-api.md) (read before any Terrain script), [references/probuilder-and-lod.md](references/probuilder-and-lod.md) (read before ProBuilder or LODGroup scripts), [references/world-building.md](references/world-building.md) (read before generating a whole world, scattering foliage, streaming scenes, or judging a world done).
 
 ## Terrain rules
 
@@ -34,6 +34,9 @@ Code and coordinate details: [references/terrain-api.md](references/terrain-api.
 - **URP / HDRP**: a pink terrain means the material is a Built-in shader. Assign a material using `Universal Render Pipeline/Terrain/Lit` (or the HDRP equivalent) to `terrain.materialTemplate`.
 - **Live editing** many small regions: `SetHeightsDelayLOD` then one `terrainData.SyncHeightmap()`.
 - For brush-based sculpting, erosion and noise in the Editor, use the Terrain Tools package (`com.unity.terrain-tools`).
+- **Create the TerrainData asset before writing splat or detail layers**; written first, they are lost in a fresh Editor.
+- **Trees with an LODGroup ignore `Terrain.treeDistance`**; tune the LOD Group. Instanced detail meshes ignore Healthy/Dry Color; vary color in the shader.
+- **Generate from a recipe** (seed, curves, rule tables in a ScriptableObject) in ordered re-runnable steps; never hand-edit generated data.
 
 ## ProBuilder rules
 
@@ -56,3 +59,5 @@ Code and coordinate details: [references/terrain-api.md](references/terrain-api.
 - `initialize-ai-navigation`: bake NavMesh on terrain and ProBuilder geometry; NavMeshModifier for areas.
 - `physics-3d-collision`: TerrainCollider, MeshCollider convexity and queries against level geometry.
 - `splines-paths`: roads and rivers along splines, flattening terrain under a spline.
+- `urp-hlsl-shaders`: terrain, grass and foliage shaders (wind, color variation, passes that agree).
+- `cpu-performance-profiling`, `optimize-3d-rendering`: the profiling tour and draw-call levers.

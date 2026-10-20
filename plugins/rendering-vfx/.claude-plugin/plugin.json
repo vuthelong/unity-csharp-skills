@@ -1,7 +1,7 @@
 {
   "name": "unity-rendering-vfx",
-  "description": "Unity 6 URP rendering and VFX skills: VFX Graph, Particle System, lighting and baking, URP post-processing Volumes, Render Graph renderer feature review, Built-in to URP migration, custom Shader Graph nodes, texture import settings, and day-night cycles with weather.",
-  "version": "0.1.0",
+  "description": "Unity 6 URP rendering and VFX skills: VFX Graph, Particle System, lighting and baking, URP post-processing Volumes, Render Graph renderer feature review, Built-in to URP migration, custom Shader Graph nodes, hand-written URP HLSL shaders, texture import settings, and day-night cycles with weather.",
+  "version": "0.1.1",
   "author": {
     "name": "vuthelong"
   },
