@@ -4,7 +4,7 @@ description: Creates, configures, and loads Sprite Atlas V2 assets from editor C
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: 2d
-  sources: "Unity-Technologies/skills/skills/manage-sprite-atlas, AlexeyPerov/Unity-Open-MCP/skills/extensions/spriteatlas"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/manage-sprite-atlas, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/spriteatlas"
   unity: "6000.0+"
 ---
 

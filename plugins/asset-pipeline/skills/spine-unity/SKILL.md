@@ -4,7 +4,7 @@ description: Integrates Spine 2D skeletal animation into Unity 6 with spine-unit
 license: MIT
 metadata:
   category: asset-pipeline
-  sources: "github.com/EsotericSoftware/spine-runtimes/spine-unity (branch 4.3), github.com/EsotericSoftware/spine-runtimes/spine-csharp/src (branch 4.3), esotericsoftware.com/spine-unity, esotericsoftware.com/spine-unity-download, esotericsoftware.com/spine-unity-assets, esotericsoftware.com/spine-unity-rendering"
+  sources: "https://github.com/EsotericSoftware/spine-runtimes/spine-unity (branch 4.3), https://github.com/EsotericSoftware/spine-runtimes/spine-csharp/src (branch 4.3), https://esotericsoftware.com/spine-unity, https://esotericsoftware.com/spine-unity-download, https://esotericsoftware.com/spine-unity-assets, https://esotericsoftware.com/spine-unity-rendering"
   unity: "6000.0+"
 ---
 

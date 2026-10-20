@@ -4,7 +4,7 @@ description: Writes, reviews, and fixes Unity 6 URP ScriptableRendererFeature an
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: rendering-vfx
-  sources: "Unity-Technologies/skills/skills/validate-urp-render-graph-renderer-feature"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/validate-urp-render-graph-renderer-feature"
   unity: "6000.0+"
 ---
 

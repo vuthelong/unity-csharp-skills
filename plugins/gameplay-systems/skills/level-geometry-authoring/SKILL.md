@@ -4,7 +4,7 @@ description: Generates and edits level geometry by script in Unity 6 - Terrain h
 license: MIT
 metadata:
   category: gameplay-systems
-  sources: "AlexeyPerov/Unity-Open-MCP/skills/extensions/terrain, AlexeyPerov/Unity-Open-MCP/skills/extensions/probuilder"
+  sources: "https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/terrain, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/probuilder"
   unity: "6000.0+"
 ---
 

@@ -4,7 +4,7 @@ description: Sets up and audits the Blender to Unity 6 URP model pipeline - FBX/
 license: MIT
 metadata:
   category: asset-pipeline
-  sources: "docs.unity3d.com/6000.0/Documentation/Manual/FBXImporter-Model.html, docs.unity3d.com/6000.0/Documentation/ScriptReference/ModelImporter.html, docs.unity3d.com/6000.0/Documentation/ScriptReference/AssetPostprocessor.html, docs.unity3d.com/6000.0/Documentation/Manual/Presets.html, github.com/Unity-Technologies/UnityCsReference/Modules/AssetPipelineEditor/Public/ModelImporting, docs.unity3d.com/Packages/com.unity.cloud.gltfast@6.20, docs.blender.org/manual/en/latest/addons/import_export/scene_fbx.html"
+  sources: "https://docs.unity3d.com/6000.0/Documentation/Manual/FBXImporter-Model.html, https://docs.unity3d.com/6000.0/Documentation/ScriptReference/ModelImporter.html, https://docs.unity3d.com/6000.0/Documentation/ScriptReference/AssetPostprocessor.html, https://docs.unity3d.com/6000.0/Documentation/Manual/Presets.html, https://github.com/Unity-Technologies/UnityCsReference/Modules/AssetPipelineEditor/Public/ModelImporting, https://docs.unity3d.com/Packages/com.unity.cloud.gltfast@6.20, https://docs.blender.org/manual/en/latest/addons/import_export/scene_fbx.html"
   unity: "6000.0+"
 ---
 

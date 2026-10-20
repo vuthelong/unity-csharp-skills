@@ -4,7 +4,7 @@ description: Creates, edits and samples Unity Splines 2.x in Unity 6 - SplineCon
 license: MIT
 metadata:
   category: gameplay-systems
-  sources: "AlexeyPerov/Unity-Open-MCP/skills/extensions/splines"
+  sources: "https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/splines"
   unity: "6000.0+"
 ---
 

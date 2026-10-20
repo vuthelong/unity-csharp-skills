@@ -4,7 +4,7 @@ description: "Safety rules and recovery steps for an agent changing a Unity 6 pr
 license: MIT
 metadata:
   category: csharp-core
-  sources: "AlexeyPerov/Unity-Open-MCP/skills/unity-open-mcp"
+  sources: "https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/unity-open-mcp"
   unity: "6000.0+"
 ---
 

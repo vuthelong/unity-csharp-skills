@@ -4,7 +4,7 @@ description: Builds an end-to-end game data pipeline in Unity 6 - CSV or Google 
 license: MIT
 metadata:
   category: asset-pipeline
-  sources: "github.com/Zitga-Tech/ZBase.Csv-Reader, docs.unity3d.com/Packages/com.unity.addressables@2.3/manual"
+  sources: "https://github.com/Zitga-Tech/ZBase.Csv-Reader, https://docs.unity3d.com/Packages/com.unity.addressables@2.3/manual"
   unity: "6000.0+"
 ---
 

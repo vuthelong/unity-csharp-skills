@@ -4,7 +4,7 @@ description: Diagnoses and fixes 3D PhysX collision, trigger and query problems 
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: gameplay-systems
-  sources: "Unity-Technologies/skills/skills/physics-3d-collision"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/physics-3d-collision"
   unity: "6000.0+"
 ---
 

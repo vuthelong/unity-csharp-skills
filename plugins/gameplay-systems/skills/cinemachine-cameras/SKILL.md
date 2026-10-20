@@ -4,7 +4,7 @@ description: Builds and scripts gameplay and cutscene cameras with Cinemachine 3
 license: MIT
 metadata:
   category: gameplay-systems
-  sources: "AlexeyPerov/Unity-Open-MCP/skills/extensions/cinemachine"
+  sources: "https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/cinemachine"
   unity: "6000.0+"
 ---
 

@@ -4,7 +4,7 @@ description: "Turns natural-language find/locate/list requests into Unity Search
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: editor-tooling
-  sources: "Unity-Technologies/skills/skills/generate-editor-search-query"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/generate-editor-search-query"
   unity: "6000.0+"
 ---
 

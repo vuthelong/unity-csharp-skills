@@ -4,7 +4,7 @@ description: Integrates LevelPlay ad mediation into Unity through the Ads Mediat
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: services-monetization
-  sources: "Unity-Technologies/skills/skills/levelplay-unity-integration"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/levelplay-unity-integration"
   unity: "6000.0+"
 ---
 

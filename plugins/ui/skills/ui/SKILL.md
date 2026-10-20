@@ -4,7 +4,7 @@ description: Routes ambiguous Unity UI requests to the right skill. Use when a U
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: ui
-  sources: "Unity-Technologies/skills/skills/ui"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/ui"
   unity: "6000.0+"
 ---
 

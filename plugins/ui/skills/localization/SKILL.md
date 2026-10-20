@@ -4,7 +4,7 @@ description: Sets up and drives Unity Localization (com.unity.localization) - Lo
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: ui
-  sources: "Unity-Technologies/skills/skills/localization"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/localization"
   unity: "6000.0+"
 ---
 

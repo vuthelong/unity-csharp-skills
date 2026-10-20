@@ -4,7 +4,7 @@ description: Plans and runs a phased, verified migration of a Unity 6 project fr
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: rendering-vfx
-  sources: "Unity-Technologies/skills/skills/migrate-birp-to-urp"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/migrate-birp-to-urp"
   unity: "6000.0+"
 ---
 

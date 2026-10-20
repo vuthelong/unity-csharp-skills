@@ -4,7 +4,7 @@ description: Sets up, scripts and troubleshoots Unity AI Navigation (com.unity.a
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: gameplay-systems
-  sources: "Unity-Technologies/skills/skills/initialize-ai-navigation, AlexeyPerov/Unity-Open-MCP/skills/extensions/navigation"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/initialize-ai-navigation, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/navigation"
   unity: "6000.0+"
 ---
 

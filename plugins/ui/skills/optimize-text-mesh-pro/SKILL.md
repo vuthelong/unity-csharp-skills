@@ -4,7 +4,7 @@ description: Optimizes TextMeshPro font assets in Unity 6 for memory, quality, C
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: ui
-  sources: "Unity-Technologies/skills/skills/optimize-text-mesh-pro"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/optimize-text-mesh-pro"
   unity: "6000.0+"
 ---
 

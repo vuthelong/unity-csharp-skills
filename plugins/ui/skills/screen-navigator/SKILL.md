@@ -4,7 +4,7 @@ description: Sets up and uses Haruma-K/UnityScreenNavigator (uGUI only) for scre
 license: MIT
 metadata:
   category: ui
-  sources: "github.com/vuthelong/unity-csharp-skills (original), github.com/Haruma-K/UnityScreenNavigator"
+  sources: "https://github.com/vuthelong/unity-csharp-skills (original), https://github.com/Haruma-K/UnityScreenNavigator"
   unity: "6000.0+"
 ---
 

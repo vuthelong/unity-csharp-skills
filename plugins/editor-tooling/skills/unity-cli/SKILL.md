@@ -4,7 +4,7 @@ description: "Drives the official `unity` command-line tool: controls an open Un
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: editor-tooling
-  sources: "Unity-Technologies/skills/skills/unity-cli"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/unity-cli"
   unity: "6000.0+"
 ---
 

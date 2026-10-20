@@ -4,7 +4,7 @@ description: Captures, compares and interprets Unity Memory Profiler snapshots (
 license: MIT
 metadata:
   category: performance
-  sources: "AlexeyPerov/Unity-Open-MCP/skills/extensions/memoryprofiler"
+  sources: "https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/memoryprofiler"
   unity: "6000.0+"
 ---
 

@@ -4,7 +4,7 @@ description: Audits and fixes the cost of audio assets in Unity 6 - AudioImporte
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: audio-performance
-  sources: "Unity-Technologies/skills/skills/optimize-audio, AlexeyPerov/Unity-Open-MCP/skills/extensions/audio"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/optimize-audio, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/audio"
   unity: "6000.0+ (live eval path needs com.unity.pipeline)"
 ---
 

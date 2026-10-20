@@ -4,7 +4,7 @@ description: Sets up, scripts, bakes, and debugs lighting in Unity 6 URP scenes 
 license: MIT
 metadata:
   category: rendering-vfx
-  sources: "AlexeyPerov/Unity-Open-MCP/skills/extensions/lighting"
+  sources: "https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/lighting"
   unity: "6000.0+"
 ---
 

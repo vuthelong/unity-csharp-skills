@@ -4,7 +4,7 @@ description: Routes scene AudioSources into the right AudioMixerGroup (Music, SF
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: audio-performance
-  sources: "Unity-Technologies/skills/skills/audio-setup-mixers, AlexeyPerov/Unity-Open-MCP/skills/extensions/audio"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/audio-setup-mixers, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/audio"
   unity: "6000.0+ (live eval path needs com.unity.pipeline)"
 ---
 

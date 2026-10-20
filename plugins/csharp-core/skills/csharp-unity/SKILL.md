@@ -4,7 +4,7 @@ description: "Writes and refactors Unity 6 C# (MonoBehaviours, ScriptableObjects
 license: MIT
 metadata:
   category: csharp-core
-  sources: "github.com/vuthelong/unity-csharp-skills (original)"
+  sources: "https://github.com/vuthelong/unity-csharp-skills (original)"
   unity: "6000.0+"
 ---
 

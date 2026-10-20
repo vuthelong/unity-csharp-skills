@@ -4,7 +4,7 @@ description: Adds in-game voice and text chat with Unity Vivox 16+ (VivoxService
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: services-monetization
-  sources: "Unity-Technologies/skills/skills/setup-vivox-voice-chat"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/setup-vivox-voice-chat"
   unity: "6000.0+"
 ---
 

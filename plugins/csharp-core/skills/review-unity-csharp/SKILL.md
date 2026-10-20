@@ -4,7 +4,7 @@ description: "Reviews existing Unity C# for correctness bugs, lifecycle mistakes
 license: MIT
 metadata:
   category: csharp-core
-  sources: "github.com/vuthelong/unity-csharp-skills (original), AlexeyPerov/Unity-Open-MCP/skills/extensions/memoryprofiler"
+  sources: "https://github.com/vuthelong/unity-csharp-skills (original), https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/memoryprofiler"
   unity: "6000.0+"
 ---
 

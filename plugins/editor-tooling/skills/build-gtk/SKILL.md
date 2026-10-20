@@ -4,7 +4,7 @@ description: "Builds node-based Editor tools with Unity Graph Toolkit (Unity.Gra
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: editor-tooling
-  sources: "Unity-Technologies/skills/skills/build-gtk"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/build-gtk"
   unity: "6000.6+"
 ---
 

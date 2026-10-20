@@ -4,7 +4,7 @@ description: Audits and optimizes Unity 6 WebGL and WebGPU builds for download s
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: web-performance
-  sources: "Unity-Technologies/skills/skills/optimize-web"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/optimize-web"
   unity: "6000.0+ (live writes need the com.unity.pipeline eval command)"
 ---
 

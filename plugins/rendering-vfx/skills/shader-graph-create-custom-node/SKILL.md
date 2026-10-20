@@ -4,7 +4,7 @@ description: Turns HLSL into reusable Shader Graph nodes for URP on Unity 6 - Cu
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: rendering-vfx
-  sources: "Unity-Technologies/skills/skills/shader-graph-create-custom-node, AlexeyPerov/Unity-Open-MCP/skills/extensions/shadergraph"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/shader-graph-create-custom-node, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/shadergraph"
   unity: "6000.0+"
 ---
 

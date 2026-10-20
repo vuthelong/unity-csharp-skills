@@ -162,11 +162,43 @@ Blender to Unity import, Spine runtime, Addressables, CSV to ScriptableObject ga
 | [`game-data-pipeline`](plugins/asset-pipeline/skills/game-data-pipeline/SKILL.md) | MIT | Builds an end-to-end game data pipeline in Unity 6 - CSV or Google Sheets baked into ScriptableObject tables, auto-registered as Addressables, loaded by label into id lookups… |
 | [`spine-unity`](plugins/asset-pipeline/skills/spine-unity/SKILL.md) | MIT | Integrates Spine 2D skeletal animation into Unity 6 with spine-unity 4.2 or 4.3 and the Spine URP Shaders - install, export settings, texture workflow, SkeletonAnimation /… |
 
+## Third-party SDKs and tools
+
+Skills that target software outside Unity's own packages. Each one is installed separately and carries its own license; these skills don't bundle it.
+
+| SDK / tool | Link | License | Skill |
+|---|---|---|---|
+| UniTask | [Cysharp/UniTask](https://github.com/Cysharp/UniTask) | MIT | `unitask` |
+| R3 | [Cysharp/R3](https://github.com/Cysharp/R3) | MIT | `r3` |
+| ObservableCollections | [Cysharp/ObservableCollections](https://github.com/Cysharp/ObservableCollections) | MIT | `observable-collections` |
+| MessagePipe | [Cysharp/MessagePipe](https://github.com/Cysharp/MessagePipe) | MIT | `messagepipe` |
+| ZString | [Cysharp/ZString](https://github.com/Cysharp/ZString) | MIT | `zstring` |
+| ZLogger | [Cysharp/ZLogger](https://github.com/Cysharp/ZLogger) | MIT | `zlogger` |
+| MemoryPack | [Cysharp/MemoryPack](https://github.com/Cysharp/MemoryPack) | MIT | `memorypack` |
+| MasterMemory | [Cysharp/MasterMemory](https://github.com/Cysharp/MasterMemory) | MIT | `mastermemory` |
+| NativeMemoryArray | [Cysharp/NativeMemoryArray](https://github.com/Cysharp/NativeMemoryArray) | MIT | `native-memory-array` |
+| MagicOnion | [Cysharp/MagicOnion](https://github.com/Cysharp/MagicOnion) | MIT | `magiconion` |
+| MessagePack for C# | [MessagePack-CSharp/MessagePack-CSharp](https://github.com/MessagePack-CSharp/MessagePack-CSharp) | MIT | `messagepack-csharp`, `mastermemory`, `magiconion` |
+| VContainer | [hadashiA/VContainer](https://github.com/hadashiA/VContainer) | MIT | `vcontainer` |
+| UIEffect | [mob-sakai/UIEffect](https://github.com/mob-sakai/UIEffect) | MIT | `ui-effect` |
+| Animation Sequencer | [brunomikoski/Animation-Sequencer](https://github.com/brunomikoski/Animation-Sequencer) | MIT | `animation-sequencer` |
+| DOTween | [dotween.demigiant.com](https://dotween.demigiant.com) | Free / DOTween Pro (commercial) | `animation-sequencer` (dependency) |
+| ZBase CSV Reader | [Zitga-Tech/ZBase.Csv-Reader](https://github.com/Zitga-Tech/ZBase.Csv-Reader) | MIT | `zbase-csv-reader`, `game-data-pipeline` |
+| ZBase PubSub | [Zitga-Tech/ZBase.Foundation.PubSub](https://github.com/Zitga-Tech/ZBase.Foundation.PubSub) | MIT | `zbase-pubsub` |
+| ZBase Pooling | [Zitga-Tech/ZBase.Foundation.Pooling](https://github.com/Zitga-Tech/ZBase.Foundation.Pooling) | MIT | `zbase-pooling` |
+| Odin Inspector | [odininspector.com](https://odininspector.com) | Commercial | `zbase-csv-reader`, `game-data-pipeline` (dependency) |
+| NuGetForUnity | [GlitchEnzo/NuGetForUnity](https://github.com/GlitchEnzo/NuGetForUnity) | MIT | NuGet-based installs in `r3` and other library skills |
+| UnityScreenNavigator | [Haruma-K/UnityScreenNavigator](https://github.com/Haruma-K/UnityScreenNavigator) | MIT | `screen-navigator` |
+| Spine Runtimes (spine-unity) | [EsotericSoftware/spine-runtimes](https://github.com/EsotericSoftware/spine-runtimes) | Spine Runtimes License (needs a Spine license) | `spine-unity` |
+| FMOD for Unity | [fmod.com/unity](https://www.fmod.com/unity), [download](https://www.fmod.com/download), [licensing](https://www.fmod.com/licensing) | FMOD EULA (per-title license) | `fmod-unity` |
+| LevelPlay (ironSource) | `com.unity.services.levelplay` (Unity Registry), [dashboard](https://platform.ironsrc.com/) | Unity / ironSource terms | `levelplay-unity-integration` |
+| Blender | [blender.org](https://www.blender.org) | GPL-3.0-or-later (exported files are yours) | `blender-to-unity-pipeline` |
+
 ## Accuracy notes
 
-- Targets Unity 6000.0 to 6000.6. APIs that changed across minors are flagged in the skills, e.g. `Object.GetInstanceID()` is a CS0619 error on 6000.5+.
+- Targets Unity 6000.0 to 6000.6. APIs that changed across minors are flagged in the skills, e.g. newer Unity 6 releases move to `EntityId` and deprecate `Object.GetInstanceID()`; check your version's docs.
 - Snippets have not all been compiled against every 6000.x minor. Where a skill could not verify an API it says so in place; check those against your installed package version.
-- `zbase-pubsub` and `zbase-pooling` upstream packages call `GetInstanceID()` and may not compile on 6000.5+ until patched.
+- `zbase-pubsub` and `zbase-pooling` upstream packages call `GetInstanceID()` and may break on newer Unity 6 releases that remove it, until patched.
 - `zlogger` v2 needs `-langVersion:10` via `csc.rsp` in every assembly that logs; Unity 6 compiles C# 9 by default.
 
 ## License

@@ -4,7 +4,7 @@ description: Builds 2D tile levels with Unity Tilemap and Rule Tiles from C# - G
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: 2d
-  sources: "Unity-Technologies/skills/skills/tilemap-palette-create, Unity-Technologies/skills/skills/tilemap-ruletile-createempty, Unity-Technologies/skills/skills/tilemap-ruletile-createfromsegment, Unity-Technologies/skills/skills/sprite-segment-3x3grid, AlexeyPerov/Unity-Open-MCP/skills/extensions/tilemap"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/tilemap-palette-create, https://github.com/Unity-Technologies/skills/tree/main/skills/tilemap-ruletile-createempty, https://github.com/Unity-Technologies/skills/tree/main/skills/tilemap-ruletile-createfromsegment, https://github.com/Unity-Technologies/skills/tree/main/skills/sprite-segment-3x3grid, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/tilemap"
   unity: "6000.0+"
 ---
 

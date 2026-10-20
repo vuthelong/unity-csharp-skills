@@ -4,7 +4,7 @@ description: Authors and drives Mecanim animation in Unity 6 - AnimationClip cur
 license: MIT
 metadata:
   category: gameplay-systems
-  sources: "AlexeyPerov/Unity-Open-MCP/skills/extensions/animation, AlexeyPerov/Unity-Open-MCP/skills/extensions/constraints"
+  sources: "https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/animation, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/constraints"
   unity: "6000.0+"
 ---
 

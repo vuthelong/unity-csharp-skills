@@ -4,7 +4,7 @@ description: Builds, drives, and debugs GPU particle effects with Visual Effect 
 license: MIT
 metadata:
   category: rendering-vfx
-  sources: "a5c-ai/babysitter/library/specializations/game-development/skills/unity-vfx-graph, AlexeyPerov/Unity-Open-MCP/skills/extensions/vfx"
+  sources: "https://github.com/a5c-ai/babysitter/tree/main/library/specializations/game-development/skills/unity-vfx-graph, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/vfx"
   unity: "6000.0+"
 ---
 

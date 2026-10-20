@@ -6,8 +6,8 @@ Checked against the FMOD for Unity 2.03 docs (integration 2.03.15) and the 2.04 
 
 1. Pick the FMOD Studio version first. The integration's major version (2.03, 2.04, ...) must match the Studio version that builds the banks, or banks fail to load. Patch numbers can differ.
 2. Install the integration:
-   - Asset Store: "FMOD for Unity", imported through Package Manager > My Assets. It is usually the latest major version.
-   - fmod.com/download (needs an account): a `.unitypackage` for any version. Import with Assets > Import Package > Custom Package. Use this to match an older Studio version.
+   - Asset Store: "FMOD for Unity" (search the [Unity Asset Store](https://assetstore.unity.com/)), imported through Package Manager > My Assets. It is usually the latest major version.
+   - [fmod.com/download](https://www.fmod.com/download) (needs an account): a `.unitypackage` for any version. Import with Assets > Import Package > Custom Package. Use this to match an older Studio version.
 3. Import all files. The default location is `Assets/Plugins/FMOD`.
 4. Optional UPM layout: move the `FMOD` folder **and** `FMOD.meta` into a `com.firelight.fmod-for-unity` folder under `Packages/`, and add a `package.json` with that name and the integration version. Moving keeps the GUID in `FMOD.meta`, which the integration uses to find itself. Never let Unity regenerate that meta.
 5. Version floors: 2.03 supports Unity 2021.3 and newer. 2.04 needs Unity 6.0 and adds support for 6.0 to 6.3. Use 2.04 or newer for new Unity 6 projects if your Studio team can move to it.

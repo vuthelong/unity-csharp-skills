@@ -4,7 +4,7 @@ description: Understands, edits and generates Unity 6 UI Toolkit UI - UXML layou
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: ui
-  sources: "Unity-Technologies/skills/skills/ui-uitk"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/ui-uitk"
   unity: "6000.0+"
 ---
 

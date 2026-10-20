@@ -4,7 +4,7 @@ description: Builds live-service backends on Unity Gaming Services - sign-in, Cl
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: services-monetization
-  sources: "Unity-Technologies/skills/skills/build-live-game"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/build-live-game"
   unity: "6000.0+"
 ---
 

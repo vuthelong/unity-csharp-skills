@@ -4,7 +4,7 @@ description: "Adds, removes, upgrades and discovers Unity Package Manager (UPM) 
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: editor-tooling
-  sources: "Unity-Technologies/skills/skills/unity-package-management"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/unity-package-management"
   unity: "6000.0+"
 ---
 

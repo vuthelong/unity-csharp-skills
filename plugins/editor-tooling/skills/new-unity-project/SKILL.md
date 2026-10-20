@@ -4,7 +4,7 @@ description: "Guides a brand-new Unity 6 game from idea to a running, version-co
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: editor-tooling
-  sources: "Unity-Technologies/skills/skills/new-unity-project"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/new-unity-project"
   unity: "6000.0+"
 ---
 

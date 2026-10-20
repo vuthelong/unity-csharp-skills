@@ -4,7 +4,7 @@ description: "Imports CAD, 3D model and point-cloud files with Unity Asset Trans
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: editor-tooling
-  sources: "Unity-Technologies/skills/skills/asset-transformer-toolkit"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/asset-transformer-toolkit"
   unity: "6000.0+"
 ---
 

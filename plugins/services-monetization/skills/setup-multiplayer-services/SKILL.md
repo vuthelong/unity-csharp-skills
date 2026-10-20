@@ -4,7 +4,7 @@ description: Designs and implements session-based online multiplayer with the Un
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: services-monetization
-  sources: "Unity-Technologies/skills/skills/setup-multiplayer-services"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/setup-multiplayer-services"
   unity: "6000.0+"
 ---
 

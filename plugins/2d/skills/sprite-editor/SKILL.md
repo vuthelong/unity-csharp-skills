@@ -4,7 +4,7 @@ description: Edits sprite metadata (rects, names, pivots, 9-slice borders, outli
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: 2d
-  sources: "Unity-Technologies/skills/skills/sprite-editor"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/sprite-editor"
   unity: "6000.0+"
 ---
 

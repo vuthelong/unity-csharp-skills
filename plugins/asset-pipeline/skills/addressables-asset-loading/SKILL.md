@@ -4,7 +4,7 @@ description: Loads, releases and ships content with Unity Addressables in Unity 
 license: MIT
 metadata:
   category: asset-pipeline
-  sources: "com.unity.addressables@2.11.2 and @4.1.1 package source and Documentation~ (packages.unity.com), github.com/Cysharp/UniTask/src/UniTask/Assets/Plugins/UniTask/Runtime/External/Addressables, docs.unity3d.com/Packages/com.unity.addressables@2.7/manual"
+  sources: "com.unity.addressables@2.11.2 and @4.1.1 package source and Documentation~ (packages.unity.com), https://github.com/Cysharp/UniTask/src/UniTask/Assets/Plugins/UniTask/Runtime/External/Addressables, https://docs.unity3d.com/Packages/com.unity.addressables@2.7/manual"
   unity: "6000.0+"
 ---
 

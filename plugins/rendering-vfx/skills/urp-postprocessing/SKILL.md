@@ -4,7 +4,7 @@ description: Sets up, scripts, and debugs URP post-processing with the Volume fr
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: rendering-vfx
-  sources: "Unity-Technologies/skills/skills/urp-postprocessing"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/urp-postprocessing"
   unity: "6000.0+"
 ---
 

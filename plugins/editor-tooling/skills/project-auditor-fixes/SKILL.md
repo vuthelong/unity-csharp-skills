@@ -4,7 +4,7 @@ description: "Runs Unity Project Auditor through the unity CLI (unity command au
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: editor-tooling
-  sources: "Unity-Technologies/skills/skills/project-auditor-fixes"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/project-auditor-fixes"
   unity: "6000.0+"
 ---
 

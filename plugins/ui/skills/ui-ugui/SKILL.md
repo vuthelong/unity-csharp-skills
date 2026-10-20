@@ -4,7 +4,7 @@ description: Understands, edits and generates Unity uGUI (Canvas-based) UI - Can
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: ui
-  sources: "Unity-Technologies/skills/skills/ui-ugui, AlexeyPerov/Unity-Open-MCP/skills/extensions/ui"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/ui-ugui, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/ui"
   unity: "6000.0+"
 ---
 

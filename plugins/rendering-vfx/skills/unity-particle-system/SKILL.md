@@ -4,7 +4,7 @@ description: Creates, tunes, scripts, and optimizes the built-in CPU Particle Sy
 license: MIT
 metadata:
   category: rendering-vfx
-  sources: "AlexeyPerov/Unity-Open-MCP/skills/extensions/particlesystem"
+  sources: "https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/particlesystem"
   unity: "6000.0+"
 ---
 

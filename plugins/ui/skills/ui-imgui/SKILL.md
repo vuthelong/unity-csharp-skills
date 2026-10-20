@@ -4,7 +4,7 @@ description: Maintains and writes Unity IMGUI code - EditorWindow OnGUI, OnInspe
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: ui
-  sources: "Unity-Technologies/skills/skills/ui-imgui"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/ui-imgui"
   unity: "6000.0+"
 ---
 

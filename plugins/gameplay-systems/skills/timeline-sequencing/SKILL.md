@@ -4,7 +4,7 @@ description: Builds, binds and controls Unity Timeline sequences in Unity 6 - Ti
 license: MIT
 metadata:
   category: gameplay-systems
-  sources: "AlexeyPerov/Unity-Open-MCP/skills/extensions/timeline"
+  sources: "https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/timeline"
   unity: "6000.0+"
 ---
 

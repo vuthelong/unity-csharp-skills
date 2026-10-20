@@ -4,7 +4,7 @@ description: Sets up, scripts and tests the Unity Input System 1.x in Unity 6 - 
 license: MIT
 metadata:
   category: gameplay-systems
-  sources: "AlexeyPerov/Unity-Open-MCP/skills/extensions/inputsystem, AlexeyPerov/Unity-Open-MCP/skills/extensions/input-simulation"
+  sources: "https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/inputsystem, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/input-simulation"
   unity: "6000.0+"
 ---
 

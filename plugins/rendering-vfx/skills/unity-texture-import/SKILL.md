@@ -4,7 +4,7 @@ description: Configures and audits Unity 6 texture import settings with TextureI
 license: MIT
 metadata:
   category: rendering-vfx
-  sources: "AlexeyPerov/Unity-Open-MCP/skills/extensions/texture"
+  sources: "https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/texture"
   unity: "6000.0+"
 ---
 

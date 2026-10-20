@@ -4,7 +4,7 @@ description: Sets up, diagnoses, and fixes pixel-perfect 2D rendering with the P
 license: Unity Companion License (see licenses/UNITY-COMPANION-LICENSE.md)
 metadata:
   category: 2d
-  sources: "Unity-Technologies/skills/skills/2d-pixel-perfect"
+  sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/2d-pixel-perfect"
   unity: "6000.0+"
 ---
 
