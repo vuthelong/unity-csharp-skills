@@ -1,6 +1,6 @@
 ---
 name: network-debugging
-description: Diagnoses and reproduces online co-op problems in Netcode for GameObjects 2.x on Unity 6 - Network Simulator presets, lag spikes and disconnects (com.unity.multiplayer.tools), Network Profiler modules and the Runtime Network Stats Monitor, bandwidth budgets for NetworkVariables, RPCs and NetworkTransform, desync and missing-object triage (authority mismatch, state lost for late joiners, in-scene object and NetworkPrefab hash errors, NetworkConfig mismatch), NetworkManager LogLevel, Multiplayer Play Mode repros under latency, and Steam P2P checks (SDR relay vs direct, connection end reasons, Steam fake lag, two-account tests). Use for "works on LAN but breaks online", rubber-banding, values that differ between players, objects missing on clients, clients dropping, bandwidth spikes, or adding a net stats HUD. Not for NGO API basics (netcode-for-gameobjects) or Steam lobby, invite and transport setup (steam-lobbies-p2p).
+description: "Diagnoses and reproduces online co-op problems in Netcode for GameObjects 2.x on Unity 6: Network Simulator presets and lag spikes, Network Profiler and stats monitor, bandwidth budgets, desync and missing-object triage, NetworkConfig mismatch, and Steam P2P checks. Use when co-op breaks online or between machines. Triggers: \"works on LAN but breaks online\", \"rubber-banding\", \"objects missing on clients\", \"clients keep dropping\", \"add a net stats HUD\". Not for NGO setup and API basics (netcode-for-gameobjects) or Steam lobby and transport setup (steam-lobbies-p2p)."
 license: MIT
 metadata:
   category: services-monetization
@@ -16,7 +16,7 @@ Package facts below are from NGO 2.13.3, Multiplayer Tools 2.2.12 and Unity Tran
 
 1. **Collect evidence from every peer.** Set `NetworkManager` **Log Level** to Developer (`networkManager.LogLevel = LogLevel.Developer` before `StartHost`/`StartClient`) on host and clients. Many NGO warnings, including `NetworkConfig` mismatch, only print at Normal or Developer. Collect the host's and each client's `Player.log`, not only the Editor Console.
 2. **Classify the symptom** with the triage table below: never connects, connects then drops, objects missing, values differ (desync), jitter or rubber-banding, bandwidth spikes.
-3. **Reproduce locally under bad conditions.** Multiplayer Play Mode (main Editor plus virtual players) on `UnityTransport` at 127.0.0.1, plus the Network Simulator. Start with **Home Broadband** (32 ms delay, 12 ms jitter, 2 % loss), then a custom 150 ms / 30 ms / 3 % preset. Details: [references/simulate-conditions.md](references/simulate-conditions.md).
+3. **Reproduce locally under bad conditions.** Multiplayer Play Mode (main Editor plus virtual players) on `UnityTransport` at 127.0.0.1, plus the Network Simulator. Start with **Home Broadband** (32 ms delay, 12 ms jitter, 2 % loss), then a custom preset that yields about 150 ms RTT (roughly 75 ms delay, 30 ms jitter, 3 % loss). Read the actual RTT from the HUD or Stats Monitor and adjust the delay until it matches. Details: [references/simulate-conditions.md](references/simulate-conditions.md).
 4. **Measure.** Network Profiler modules for bytes per message type and per `NetworkObject`; the Runtime Network Stats Monitor or [scripts/NetStatsHud.cs](scripts/NetStatsHud.cs) for RTT, ticks and connection events on screen.
 5. **Fix, then rerun the feature checklist** in `netcode-for-gameobjects` (`references/testing.md`) under the same simulated conditions.
 6. **Confirm on the real transport.** Two Steam accounts on two machines, same build. The Network Simulator does nothing on a Steam transport. Read [references/steam-p2p-checks.md](references/steam-p2p-checks.md).
@@ -64,7 +64,7 @@ public sealed class NetSimShortcuts : MonoBehaviour
 
     public void UseBadWifi()
     {
-        simulator.ChangeConnectionPreset(NetworkSimulatorPreset.Create("Bad Wi-Fi", packetDelayMs: 150, packetJitterMs: 30, packetLossPercent: 3));
+        simulator.ChangeConnectionPreset(NetworkSimulatorPreset.Create("Bad Wi-Fi", packetDelayMs: 75, packetJitterMs: 30, packetLossPercent: 3));
     }
 
     public void UseHomeBroadband() => simulator.ChangeConnectionPreset(NetworkSimulatorPresets.HomeBroadband);
@@ -82,7 +82,7 @@ Only works with `UnityTransport`, and only in the Editor and development builds 
 ## Rules
 
 - Debug with `UnityTransport` and the Network Simulator first; switch to the Steam transport only to test Steam-specific behaviour. Keep both transports selectable without editing the `NetworkManager` prefab.
-- Test every feature at least once at about 150 ms RTT with jitter and 2-5 % loss, and once with a 2-3 second lag spike.
+- Test every feature at least once at about 150 ms RTT (measured, not the preset delay) with jitter and 2-5 % loss, and once with a 2-3 second lag spike.
 - Give every replicated value exactly one writer. Server-authoritative state is written only on the server; owner-authoritative state only by the owner.
 - Anything a late joiner must see lives in `NetworkVariable`s, `NetworkList`s or spawned objects.
 - Use `NetworkManager.ServerTime` / `LocalTime` for networked timers, not `Time.time` on each peer.
@@ -97,7 +97,7 @@ Only works with `UnityTransport`, and only in the Editor and development builds 
 | `UnityTransport.SetDebugSimulatorParameters` / `DebugSimulator` has no effect | Both are obsolete in NGO 2.x and do nothing; use the Network Simulator |
 | RTT shows 0 | The Steam community transport's `GetCurrentRtt` always returns 0; read Steam's own connection status instead |
 | Host never rejects anyone but clients silently fail | Log Level Error or Nothing hides the `NetworkConfig` mismatch warning; raise it to Developer |
-| Works in MPPM, fails between two PCs | Firewall or bind address on `UnityTransport`, or the real transport behaves differently; see `netcode-for-gameobjects` testing and [steam-p2p-checks.md](references/steam-p2p-checks.md) |
+| Works in MPPM, fails between two PCs | Firewall, or the host's `UnityTransport` not listening on all interfaces (`SetConnectionData(address, port, "0.0.0.0")`), or the real transport behaves differently; see `netcode-for-gameobjects` testing and [steam-p2p-checks.md](references/steam-p2p-checks.md) |
 | All MPPM players show the same Steam identity | Expected; Steam binds to one account per machine. Test Steam with two machines |
 | Bandwidth spikes when a list changes | `NetworkList` or a managed `NetworkVariable` replaced wholesale; mutate elements, or split state |
 
@@ -111,8 +111,8 @@ Only works with `UnityTransport`, and only in the Editor and development builds 
 
 ## Related skills
 
-- `netcode-for-gameobjects`: NGO setup, authority, RPCs, NetworkVariables, spawning, Multiplayer Play Mode basics.
-- `steam-lobbies-p2p`: Steam lobbies, invites, the SteamNetworkingSockets transport.
-- `steamworks-integration`: SteamAPI init and callbacks.
-- `cpu-performance-profiling`: CPU cost of netcode on the host.
-- `setup-multiplayer-services`: Relay and sessions when not on Steam.
+- netcode-for-gameobjects: NGO setup, authority, RPCs, NetworkVariables, spawning, Multiplayer Play Mode basics and the per-feature test checklist.
+- steam-lobbies-p2p: Steam lobbies, invites, the SteamNetworkingSockets transport.
+- steamworks-integration: SteamAPI init and callbacks.
+- cpu-performance-profiling: CPU cost of netcode on the host.
+- setup-multiplayer-services: Relay and sessions when not on Steam.

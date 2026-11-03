@@ -1,6 +1,6 @@
 ---
 name: levelplay-unity-integration
-description: Integrates LevelPlay ad mediation into Unity through the Ads Mediation package (com.unity.services.levelplay, SDK 9.x) - install/upgrade, Android Gradle and iOS CocoaPods resolution, init, rewarded/interstitial/banner ad units, GDPR/CCPA/COPPA and ATT, impression-level revenue, Test Suite. Use when adding or debugging ads in a Unity game, fixing CS0246 on Unity.Services.LevelPlay, or migrating from IronSource.Agent or Unity Ads (Advertisement Legacy). Not for in-app purchases.
+description: "Integrates LevelPlay ad mediation through the Ads Mediation package (com.unity.services.levelplay, SDK 9.x): install, Gradle and CocoaPods resolution, init, rewarded/interstitial/banner ad units, GDPR/CCPA/COPPA and ATT, impression-level revenue, Test Suite. Use when adding or debugging ads or migrating from IronSource.Agent or Unity Ads (Advertisement Legacy). Triggers: \"add rewarded ads\", \"show an interstitial\", \"CS0246 on Unity.Services.LevelPlay\", \"ads not loading\". Not for in-app purchases (implement-in-app-purchases) or ad caps config and server-verified rewards (build-live-game)."
 license: Unity Companion License
 metadata:
   category: services-monetization
@@ -39,7 +39,7 @@ If an API doesn't compile, recommend upgrading via **Ads Mediation > Network Man
 
 - Package Manager → Unity Registry/Services → search **Ads Mediation** (id `com.unity.services.levelplay`). Not **Ads IAP Mediation Adaptor** (separate IAP package) and not **Advertisement Legacy** (deprecated, incompatible). Import **Mobile Dependency Resolver** if prompted. Headless: `unity-package-management` skill.
 - **Hard gate:** write no LevelPlay code until the id is in `packages-lock.json`. Missing from manifest = never installed; in manifest but not lock = Unity hasn't resolved yet (still importing or failed). Say which, and stop. Otherwise every symbol fails with `CS0246`.
-- If you added the id to `manifest.json` yourself, the lock file won't show it until the Editor runs. Never hand-edit `packages-lock.json`; ask the user to open the Editor and re-read. Report the resolved version, never "installed" from memory or the user's recollection.
+- Never hand-edit `manifest.json` or `packages-lock.json`; install through Package Manager or `unity-package-management`. If the id is in the manifest but not the lock file, ask the user to open the Editor (or wait for it to finish importing) and re-read. Report the resolved version, never "installed" from memory or the user's recollection.
 - Adapters and SDK updates: **Ads Mediation > Network Manager**.
 - Ask the optimization goal (revenue / UX / balanced) only if format choice depends on it; default to balanced.
 
@@ -116,24 +116,22 @@ Benchmarks, placement moments, anti-patterns: [best-practices.md](references/bes
 
 Details: [troubleshooting.md](references/troubleshooting.md).
 
-## Reference Map
+## References
 
-| Need | File |
-|---|---|
-| Dependency managers, Gradle/CocoaPods, AD_ID | [dependency-resolution.md](references/dependency-resolution.md) |
-| Init templates, ILRD init wiring, user ID, segments, error codes | [initialization-api.md](references/initialization-api.md) |
-| GDPR/CCPA/COPPA, network keys, legacy consent | [privacy-settings.md](references/privacy-settings.md) |
-| ATT, SKAdNetwork, privacy manifest, iOS initializer | [ios-setup.md](references/ios-setup.md) |
-| Shared ad unit API and lifecycle | [ad-format-common.md](references/ad-format-common.md) |
-| Rewarded / Interstitial / Banner specifics | [rewarded-api.md](references/rewarded-api.md), [interstitial-api.md](references/interstitial-api.md), [banner-api.md](references/banner-api.md) |
-| Strategy, placement, frequency, code-gen rules, bid floors | [best-practices.md](references/best-practices.md) |
-| ILRD to analytics platforms | [ilrd-api.md](references/ilrd-api.md) |
-| Mock ads, Test Suite, release checklist | [testing-and-validation.md](references/testing-and-validation.md) |
-| Errors and fixes | [troubleshooting.md](references/troubleshooting.md) |
-| SDK upgrade, IronSource.Agent / Unity Ads migration, Maven Central | [migration-sdk-9.md](references/migration-sdk-9.md) |
+- [references/dependency-resolution.md](references/dependency-resolution.md): read when setting up dependency managers, Gradle/CocoaPods resolution or AD_ID.
+- [references/initialization-api.md](references/initialization-api.md): read when writing init templates, ILRD init wiring, user ID, segments or handling init error codes.
+- [references/privacy-settings.md](references/privacy-settings.md): read when setting GDPR/CCPA/COPPA, network keys or legacy consent.
+- [references/ios-setup.md](references/ios-setup.md): read when handling ATT, SKAdNetwork, the privacy manifest or the iOS initializer.
+- [references/ad-format-common.md](references/ad-format-common.md): read when implementing any ad unit (shared API, lifecycle, retry, cleanup).
+- [references/rewarded-api.md](references/rewarded-api.md), [references/interstitial-api.md](references/interstitial-api.md), [references/banner-api.md](references/banner-api.md): read when implementing that format.
+- [references/best-practices.md](references/best-practices.md): read when choosing strategy, placement, frequency, code-generation layout or bid floors.
+- [references/ilrd-api.md](references/ilrd-api.md): read when forwarding impression-level revenue to analytics platforms.
+- [references/testing-and-validation.md](references/testing-and-validation.md): read when testing with mock ads or the Test Suite, or before release.
+- [references/troubleshooting.md](references/troubleshooting.md): read when diagnosing errors.
+- [references/migration-sdk-9.md](references/migration-sdk-9.md): read when upgrading the SDK or migrating from IronSource.Agent, Unity Ads, or the is.com Maven repo.
 
-## Related Skills
+## Related skills
 
-- `implement-in-app-purchases`: real-money purchases (the **Ads IAP Mediation Adaptor** package is not Unity IAP).
-- `build-live-game`: Remote Config for ad caps and A/B tests, Cloud Code for server-verified rewards.
-- `unity-package-management`: installing `com.unity.services.levelplay` headlessly.
+- implement-in-app-purchases: real-money purchases (the **Ads IAP Mediation Adaptor** package is not Unity IAP).
+- build-live-game: Remote Config for ad caps and A/B tests, Cloud Code for server-verified rewards.
+- unity-package-management: installing `com.unity.services.levelplay` headlessly.

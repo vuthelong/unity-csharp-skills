@@ -1,6 +1,6 @@
 ---
 name: netcode-for-gameobjects
-description: Builds host-client co-op multiplayer with Netcode for GameObjects 2.x (com.unity.netcode.gameobjects) in Unity 6 - NetworkManager and UnityTransport setup, NetworkObject spawning and ownership, owner vs server authority with NetworkTransform AuthorityMode, [Rpc(SendTo.Server)] RPCs and RpcInvokePermission, NetworkVariable and NetworkList state, NetworkSceneManager scene loads, connection approval, late join, disconnects and Multiplayer Play Mode testing. Use for "make this multiplayer", "sync this to clients", NetworkBehaviour or OnNetworkSpawn code, ServerRpc/ClientRpc migration, or host shutdown and returning clients to the menu when the host leaves. Not for Unity Gaming Services sessions, lobbies, Relay or matchmaking (setup-multiplayer-services), Steam lobbies and transport (steam-lobbies-p2p), save files (save-system), health and damage replication (combat-damage-system), diagnosing desync, missing objects or late-join bugs (network-debugging) or voice chat (setup-vivox-voice-chat).
+description: "Builds host-client co-op with Netcode for GameObjects 2.x on Unity 6: NetworkManager and transport setup, spawning and ownership, owner vs server authority, RPCs, NetworkVariable state, network scene loads, connection approval, late join and disconnects. Use when making a game multiplayer or writing NetworkBehaviour code. Triggers: \"make this multiplayer\", \"sync this to clients\", \"migrate ServerRpc/ClientRpc\", \"host left, return clients to menu\". Not for UGS sessions and Relay (setup-multiplayer-services), Steam lobbies (steam-lobbies-p2p) or diagnosing desync and drops (network-debugging)."
 license: MIT
 metadata:
   category: services-monetization
@@ -26,7 +26,7 @@ Check `Packages/manifest.json` first and match the installed line. Feature avail
 ## Workflow
 
 1. **Install** `com.unity.netcode.gameobjects` (2.x) and `com.unity.multiplayer.playmode` (see `unity-package-management`). Add `com.unity.multiplayer.tools` for the Network Simulator.
-2. **NetworkManager**: one GameObject in the boot scene with `NetworkManager`, a transport (`UnityTransport` while developing, the Steam transport when shipping on Steam - see `steam-lobbies-p2p`), the Player Prefab, and a Network Prefabs List containing every prefab you will spawn. Every prefab spawned at runtime needs a `NetworkObject` on its root.
+2. **NetworkManager**: one GameObject in the boot scene with `NetworkManager`, a transport (`UnityTransport` while developing and for direct IP; the Steam transport when shipping on Steam - see `steam-lobbies-p2p`; for non-Steam online play, Relay through `setup-multiplayer-services`, whose `With*Network` session options start NGO for you, so do not also call `StartHost` / `StartClient` on that path), the Player Prefab, and a Network Prefabs List containing every prefab you will spawn. Every prefab spawned at runtime needs a `NetworkObject` on its root.
 3. **Authority**: decide per object with the table below before writing sync code. Details: [references/authority-patterns.md](references/authority-patterns.md).
 4. **Sync**: `NetworkVariable<T>` for state that must survive late join, `[Rpc(SendTo.Server)]` for requests, `[Rpc(SendTo.ClientsAndHost)]` for one-off events (sound, VFX). Details: [references/rpc-and-variables.md](references/rpc-and-variables.md).
 5. **Spawn and scenes**: spawn and despawn only on the server; load gameplay scenes with `NetworkManager.SceneManager.LoadScene`. Details: [references/scenes-and-spawning.md](references/scenes-and-spawning.md).
@@ -114,13 +114,6 @@ The owner calls `UseHealthPotionRpc()`; the server validates and writes the `Net
 - No `async void` except UI button handlers wrapped in try/catch; pass `destroyCancellationToken` to awaited work inside a `NetworkBehaviour`.
 - Unity 6 API: `FindAnyObjectByType` / `FindFirstObjectByType`, not `FindObjectOfType`; `GetEntityId()` instead of `GetInstanceID()` on 6000.5+.
 
-## References
-
-- [references/authority-patterns.md](references/authority-patterns.md): read when choosing owner vs server authority, setting up NetworkTransform, NetworkAnimator or NetworkRigidbody, or handing ownership of an object (carrying, vehicles).
-- [references/rpc-and-variables.md](references/rpc-and-variables.md): read when writing RPCs, choosing SendTo targets, sending custom structs, or syncing state with NetworkVariable or NetworkList.
-- [references/scenes-and-spawning.md](references/scenes-and-spawning.md): read when spawning or despawning objects, loading scenes, handling in-scene placed objects, writing connection approval, or handling disconnects.
-- [references/testing.md](references/testing.md): read when testing with Multiplayer Play Mode, simulating latency, or debugging desync and missing objects.
-
 ## Pitfalls
 
 | Symptom | Cause / fix |
@@ -135,10 +128,21 @@ The owner calls `UseHealthPotionRpc()`; the server validates and writes the `Net
 | Bandwidth spikes, hitches on change | Large `NetworkVariable` payloads (big structs, strings, lists set wholesale); split state, use `NetworkList` deltas |
 | Client rejected on connect with no reason | Config hash mismatch (protocol version, tick rate, prefab list with `ForceSamePrefabs`, scene management flag) or approval callback missing while approval is on |
 
+## References
+
+- [references/authority-patterns.md](references/authority-patterns.md): read when choosing owner vs server authority, setting up NetworkTransform, NetworkAnimator or NetworkRigidbody, or handing ownership of an object (carrying, vehicles).
+- [references/rpc-and-variables.md](references/rpc-and-variables.md): read when writing RPCs, choosing SendTo targets, sending custom structs, or syncing state with NetworkVariable or NetworkList.
+- [references/scenes-and-spawning.md](references/scenes-and-spawning.md): read when spawning or despawning objects, loading scenes, handling in-scene placed objects, writing connection approval, or handling disconnects.
+- [references/testing.md](references/testing.md): read when testing with Multiplayer Play Mode, simulating latency, or running the per-feature test checklist. Diagnosing desync, missing objects or drops: `network-debugging`.
+
 ## Related skills
 
-- `steam-lobbies-p2p`: Steam lobbies, invites and the Steam transport for this NGO session.
-- `setup-multiplayer-services`: Unity Gaming Services sessions, Relay and join codes; its `With*Network` options start NGO for you.
-- `save-system`: host-owned world saves; clients save only their own data.
-- `csharp-unity`: house style for NetworkBehaviour code.
-- `unity-package-management`: installing the packages headlessly.
+- steam-lobbies-p2p: Steam lobbies, invites and the Steam transport for this NGO session.
+- setup-multiplayer-services: Unity Gaming Services sessions, Relay and join codes; its `With*Network` options start NGO for you.
+- network-debugging: diagnosing desync, missing objects, late-join bugs, drops and bandwidth.
+- combat-damage-system: health and damage replication.
+- save-system: host-owned world saves; clients save only their own data.
+- setup-vivox-voice-chat: voice chat.
+- csharp-unity: house style for NetworkBehaviour code.
+- unity-package-management: installing the packages headlessly.
+- magiconion: server-authoritative RPC and StreamingHub over gRPC instead of NGO.

@@ -1,6 +1,6 @@
 ---
 name: implement-in-app-purchases
-description: Implements, debugs and migrates real-money purchases with Unity IAP 5.x (StoreController) - store connection, product catalog, consumables, non-consumables, subscriptions, pending/confirm flow, receipt validation, restore, Apple and Google extensions, and D2C web payments (Stripe/Coda). Use for shops, microtransactions or "restore purchases", or when migrating from IAP v4, native BillingClient/StoreKit, RevenueCat, Adapty, Essential Kit or UniPay. Not for virtual currency or ads.
+description: "Implements, debugs and migrates real-money purchases with Unity IAP 5.x (StoreController): store connection, product catalog, consumables, non-consumables, subscriptions, pending/confirm flow, receipt validation, restore, Apple and Google extensions, and D2C web payments (Stripe/Coda). Use when building a shop or migrating from IAP v4, native BillingClient/StoreKit, RevenueCat, Adapty, Essential Kit or UniPay. Triggers: \"add a shop\", \"microtransactions\", \"restore purchases\", \"migrate IStoreListener\". Not for virtual currency (build-live-game) or ads (levelplay-unity-integration)."
 license: Unity Companion License
 metadata:
   category: services-monetization
@@ -24,23 +24,7 @@ Scale the check to the request:
 - **Quick path.** If `Packages/manifest.json` already lists `com.unity.purchasing` 5.x, the project already calls `UnityIAPServices.StoreController()`, and the request is incremental (add a consumable or shop item, a new product ID, a purchase button, fix a confirm/restore bug), skip the full scan: follow the existing store wiring, add the `ProductDefinition` (or `IAPProductCatalog.json` entry, see [references/codeless-catalog.md](references/codeless-catalog.md)), and handle it in the existing pending/confirm handler. Use [references/api-notes.md](references/api-notes.md) for signatures.
 - **Full pre-check.** For anything else (no IAP yet, IAP 4.x, native billing, a third-party IAP package such as RevenueCat/Adapty/Essential Kit/UniPay, D2C, or an unclear project state), read [references/pre-check.md](references/pre-check.md) first. It scans for those packages and existing Unity IAP versions and routes to the correct path; resolve routing before making changes.
 
-## Detailed References
-
-- **Project scan and path routing (read first unless on the quick path):** See [references/pre-check.md](references/pre-check.md)
-- **API signatures & code examples:** See [references/api-notes.md](references/api-notes.md)
-- **Platform extensions (Apple, Google):** See [references/platform-notes.md](references/platform-notes.md)
-- **Editing `IAPProductCatalog.json` (schema, decimal serialization, refresh):** See [references/codeless-catalog.md](references/codeless-catalog.md)
-- **v4 → v5 migration:** See [references/migration-v4-to-v5.md](references/migration-v4-to-v5.md)
-- **Convert native Google BillingClient to Unity IAP 5:** See [references/path-convert-native-google-billing.md](references/path-convert-native-google-billing.md)
-- **Convert native iOS StoreKit plugin to Unity IAP 5:** See [references/path-convert-native-storekit.md](references/path-convert-native-storekit.md)
-- **Convert Essential Kit billing to Unity IAP 5:** See [references/convert-essentialkit.md](references/convert-essentialkit.md)
-- **UniPay (FLOBUK) — assessment and guidance:** See [references/convert-unipay.md](references/convert-unipay.md)
-- **RevenueCat — conversion assessment and guidance:** See [references/convert-revenuecat.md](references/convert-revenuecat.md)
-- **Adapty — conversion assessment and guidance:** See [references/convert-adapty.md](references/convert-adapty.md)
-- **Add Unity IAP 5 to a project with no existing IAP:** See [references/path-add-iap-to-new-project.md](references/path-add-iap-to-new-project.md)
-- **Implement IAP D2C Capabilities (third-party payment provider — Stripe/Coda, requires v5.4+):** See [references/path-implement-iap-d2c.md](references/path-implement-iap-d2c.md)
-
-Read reference files on demand — only when you need specific API signatures, platform extension details, or migration mappings.
+Read reference files on demand (see [References](#references)), only when you need specific API signatures, platform extension details, or migration mappings.
 
 ## Initialization Flow
 
@@ -156,7 +140,7 @@ Where a type has both a field and a property, both compile; prefer the property.
 ## Validation
 
 After writing code that uses this package:
-1. Verify the project compiles without errors.
+1. Verify the project compiles without errors (connected Editor: `unity recompile --format json`, see `unity-cli`; otherwise `unity-editor-safety`).
 2. Confirm all API calls match the v5 signatures in [api-notes.md](references/api-notes.md) — do NOT use v4 legacy patterns (`IStoreListener`, `UnityPurchasing.Initialize`, `ConfigurationBuilder`).
 3. Check the "Anti-Hallucination: Common v5 Mistakes" table in api-notes.md — do NOT use `OnStoreConnectionFailed` (use `OnStoreDisconnected`), do NOT pass callbacks to `FetchProducts`/`FetchPurchases` (use events), do NOT use `product.receipt` (use `order.Info.Receipt`).
 4. Check that all required events are subscribed **before** calling `Connect()` (see Required Event Subscriptions table above).
@@ -166,8 +150,24 @@ After writing code that uses this package:
 8. If updated files coexist with legacy versions in the same project, use a unique namespace (e.g., add `.Updated` suffix) to avoid CS0101/CS0111 compilation errors.
 9. If the project subscribes to `OnAuthAccountChanged` (v5.4+): verify the handler re-fetches products and purchases from scratch — Unity IAP clears both caches before raising this event. Do not read `GetProducts()` or `GetPurchases()` inside the handler.
 
+## References
+
+- [references/pre-check.md](references/pre-check.md): read first unless on the quick path; scans the project and routes to the right path.
+- [references/api-notes.md](references/api-notes.md): read when you need v5 API signatures, code examples or the common-mistakes table.
+- [references/platform-notes.md](references/platform-notes.md): read when using Apple or Google platform extensions.
+- [references/codeless-catalog.md](references/codeless-catalog.md): read when editing `IAPProductCatalog.json` (schema, decimal serialization, refresh).
+- [references/migration-v4-to-v5.md](references/migration-v4-to-v5.md): read when migrating IAP 4.x code.
+- [references/path-convert-native-google-billing.md](references/path-convert-native-google-billing.md): read when converting native Google BillingClient code.
+- [references/path-convert-native-storekit.md](references/path-convert-native-storekit.md): read when converting a native iOS StoreKit plugin.
+- [references/convert-essentialkit.md](references/convert-essentialkit.md): read when converting Essential Kit billing.
+- [references/convert-unipay.md](references/convert-unipay.md): read when assessing a UniPay (FLOBUK) project.
+- [references/convert-revenuecat.md](references/convert-revenuecat.md): read when assessing a RevenueCat project.
+- [references/convert-adapty.md](references/convert-adapty.md): read when assessing an Adapty project.
+- [references/path-add-iap-to-new-project.md](references/path-add-iap-to-new-project.md): read when adding Unity IAP 5 to a project with no existing IAP.
+- [references/path-implement-iap-d2c.md](references/path-implement-iap-d2c.md): read when implementing D2C web payments (Stripe/Coda, v5.4+).
+
 ## Related skills
 
-- `build-live-game` - server-authoritative grants, Cloud Save for consumable ledgers, Economy virtual purchases.
-- `levelplay-unity-integration` - ad monetization alongside IAP (do not confuse the **Ads IAP Mediation Adaptor** package with Unity IAP).
-- `unity-package-management` - installing or upgrading `com.unity.purchasing` without the Editor UI.
+- build-live-game: server-authoritative grants, Cloud Save for consumable ledgers, Economy virtual currency and purchases.
+- levelplay-unity-integration: ad monetization alongside IAP (do not confuse the **Ads IAP Mediation Adaptor** package with Unity IAP).
+- unity-package-management: installing or upgrading `com.unity.purchasing` without the Editor UI.

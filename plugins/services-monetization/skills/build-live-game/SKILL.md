@@ -1,6 +1,6 @@
 ---
 name: build-live-game
-description: Builds live-service backends on Unity Gaming Services - sign-in, Cloud Save, Cloud Code C# modules for server-authoritative writes, Remote Config and Game Overrides, Economy, Leaderboards, Analytics, Access Control and deployment - with blueprints for achievements, battle passes and player accounts. Use for live-ops, player progression, season passes, rankings, feature flags or A/B tests, or when code touches .rc/.ac/.ccmr files. Not for sessions (setup-multiplayer-services), IAP (implement-in-app-purchases), voice/text chat (setup-vivox-voice-chat) or ads (levelplay-unity-integration).
+description: "Builds live-service backends on Unity Gaming Services: sign-in, Cloud Save, Cloud Code C# modules, Remote Config and Game Overrides, Economy, Leaderboards, Analytics, Access Control and deployment, with blueprints for achievements, battle passes and player accounts. Use when adding live-ops or player progression, or when code touches .rc/.ac/.ccmr files. Triggers: \"add a battle pass\", \"save progress to the cloud\", \"feature flag\", \"leaderboard\". Not for sessions (setup-multiplayer-services), IAP (implement-in-app-purchases), voice chat (setup-vivox-voice-chat) or ads (levelplay-unity-integration)."
 license: Unity Companion License
 metadata:
   category: services-monetization
@@ -37,7 +37,7 @@ Versions are the ones these references were written against, not hard minimums; 
 - [Common Architecture Patterns](#common-architecture-patterns)
 - [Validation](#validation)
 - [Deployment Checklist](#deployment-checklist)
-- [Detailed References](#detailed-references)
+- [References](#references)
 - [Related skills](#related-skills)
 
 ## Initialization Pattern
@@ -267,7 +267,7 @@ Used by **Leaderboards** and ranked systems:
 ## Validation
 
 After writing code for a live game feature:
-1. Verify the project compiles without errors.
+1. Verify the project compiles without errors (connected Editor: `unity recompile --format json`, see `unity-cli`; otherwise `unity-editor-safety`).
 2. Check that initialization order is correct: `UnityServices.InitializeAsync()` → Authentication sign-in → service calls.
 3. Confirm sensitive data writes (XP, rewards, currency) are routed through Cloud Code, not written directly from the client.
 4. Verify sensitive keys live in the Protected bucket, which only Cloud Code can write (no `.ac` needed); any `.ac` file only adds denials for Default/Public data.
@@ -284,17 +284,28 @@ For any live game feature, deploy these cloud resources via the Deployment Windo
 - [ ] `.ccmr` file — Cloud Code module reference (pointing to the module `.sln`)
 - [ ] `.lb` file — Leaderboard configuration (if using leaderboards)
 - [ ] `.ec` file — Economy definitions (if using virtual currencies/items)
-- [ ] `manifest.json` — Ensure all required packages are listed with correct versions
+- [ ] Required packages installed (see `unity-package-management`, never by hand-editing `manifest.json`) and their ids present in `Packages/packages-lock.json`
 - [ ] Environment configured in **Services > Deployment** settings
 
-## Detailed References
+## References
 
-Each Quick Reference entry above links its full reference; blueprints are in [Ready-Made Feature Blueprints](#ready-made-feature-blueprints); Building Blocks and sample projects: [references/building-blocks.md](references/building-blocks.md).
+- [references/authentication.md](references/authentication.md): read when choosing sign-in providers, using profiles, linking accounts, or handling token expiry and auth errors (including Steam session-ticket sign-in).
+- [references/cloud-code.md](references/cloud-code.md): read when writing or calling Cloud Code C# modules, triggers, schedules or push messages.
+- [references/cloud-save.md](references/cloud-save.md): read when storing player or Custom data, choosing access classes, write locks, queries or files.
+- [references/remote-config.md](references/remote-config.md): read when defining or fetching Remote Config entries.
+- [references/tooling.md](references/tooling.md): read when authoring Access Control (`.ac`) or Game Overrides (`.ugo`) files.
+- [references/deployment.md](references/deployment.md): read when deploying cloud resources from the Deployment Window or targeting environments.
+- [references/apis.md](references/apis.md): read when using the generated Services APIs clients (game, admin, server, trusted).
+- [references/building-blocks.md](references/building-blocks.md): read when recommending an Asset Store Building Block or sample project.
+- [references/battlepass.md](references/battlepass.md): read when implementing a battle pass.
+- [references/achievements.md](references/achievements.md): read when implementing achievements.
+- [references/player-account.md](references/player-account.md): read when implementing sign-in UI and player profile data.
 
 ## Related skills
 
-- `setup-multiplayer-services` - sessions, lobbies, matchmaking, Relay and dedicated-server sessions.
-- `setup-vivox-voice-chat` - voice and text chat on top of the same Authentication sign-in.
-- `implement-in-app-purchases` - real-money purchases; grant the purchased value through Cloud Code / Economy described here.
-- `levelplay-unity-integration` - ad monetization; use Remote Config for frequency caps and Cloud Code to verify rewarded grants.
-- `unity-package-management` - installing UGS packages headlessly.
+- setup-multiplayer-services: sessions, lobbies, matchmaking, Relay and dedicated-server sessions.
+- setup-vivox-voice-chat: voice and text chat on top of the same Authentication sign-in.
+- implement-in-app-purchases: real-money purchases; grant the purchased value through Cloud Code / Economy described here.
+- levelplay-unity-integration: ad monetization; use Remote Config for frequency caps and Cloud Code to verify rewarded grants.
+- steamworks-integration: obtaining the Steam session ticket that `SignInWithSteamAsync` needs.
+- unity-package-management: installing UGS packages headlessly.

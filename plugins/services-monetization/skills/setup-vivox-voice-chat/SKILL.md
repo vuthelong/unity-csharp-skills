@@ -1,6 +1,6 @@
 ---
 name: setup-vivox-voice-chat
-description: Adds in-game voice and text chat with Unity Vivox 16+ (VivoxService) - init and login with Unity Authentication, party, team or lobby channels, positional proximity voice, push-to-talk, mute and volume controls, VAD tuning, speaking indicators, direct messages, chat history, and mobile/WebGL mic permissions. Use when the user asks for voice chat, mic support, proximity or team voice, mute buttons or DMs, or is migrating from legacy Vivox v15 (Client.Instance, ILoginSession).
+description: "Adds in-game voice and text chat with Unity Vivox 16+ (VivoxService): init and login with Unity Authentication, party, team or lobby channels, positional proximity voice, push-to-talk, mute and volume controls, speaking indicators, direct messages, chat history, and mobile/WebGL mic permissions. Use when adding voice or text chat or migrating from Vivox v15 (Client.Instance, ILoginSession). Triggers: \"add voice chat\", \"proximity voice\", \"push-to-talk\", \"mute button\", \"send a DM\". Not for creating sessions or lobbies (setup-multiplayer-services) or sign-in setup (build-live-game)."
 license: Unity Companion License
 metadata:
   category: services-monetization
@@ -62,7 +62,7 @@ When in doubt about a signature, consult the Vivox documentation map at `https:/
 
 ## Validation
 
-1. `using Unity.Services.Vivox;` resolves and the project compiles.
+1. `using Unity.Services.Vivox;` resolves and the project compiles (connected Editor: `unity recompile --format json`, see `unity-cli`).
 2. Order is Core init → sign-in → Vivox init → event subscription → `LoginAsync`.
 3. No `Client.Instance`, `AccountId`, `ChannelId`, `ILoginSession`, `IChannelSession`.
 4. Every subscribed event has a matching unsubscribe in `OnDestroy` / `OnDisable`, null-guarding `VivoxService.Instance` during quit.
@@ -70,3 +70,17 @@ When in doubt about a signature, consult the Vivox documentation map at `https:/
 6. No Vivox secret or signing key in client code.
 
 Error codes, platform notes and the v15 → v16 migration table: [references/troubleshooting.md](references/troubleshooting.md).
+
+## References
+
+- [references/init-and-login.md](references/init-and-login.md): read when writing the bootstrap (init order, re-init guard, login, teardown).
+- [references/voice-channels.md](references/voice-channels.md): read when joining channels, setting 3D properties, transmission mode, push-to-talk or requesting mic permission.
+- [references/events-and-participants.md](references/events-and-participants.md): read when wiring the roster, speaking indicators, local mute or volume.
+- [references/text-chat.md](references/text-chat.md): read when adding channel messages, DMs, history or edit/delete.
+- [references/troubleshooting.md](references/troubleshooting.md): read when handling error codes, platform issues or migrating from v15.
+
+## Related skills
+
+- build-live-game: Unity Authentication sign-in providers and profiles.
+- setup-multiplayer-services: sessions whose id becomes the Vivox channel name.
+- unity-package-management: installing `com.unity.services.vivox` headlessly.

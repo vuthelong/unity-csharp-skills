@@ -20,6 +20,7 @@ Read when state differs between peers, objects are missing or duplicated, a late
 | Collection edited in place | Peers never see the change | Call `CheckDirtyState()` after editing a managed collection inside a `NetworkVariable`, or use `NetworkList<T>` |
 | Local simulation on non-authority | Physics props drift apart | `NetworkRigidbody` makes non-authority bodies kinematic; do not add forces on non-authority peers |
 | Local clocks | Timers end at different moments | Use `NetworkManager.ServerTime` for durations and start times shared between peers |
+| RPC never arrives | The event or request silently does nothing | Method name ends in `Rpc`; object spawned on both sides; `InvokePermission` not blocking the caller; the `SendTo` target does not exclude the host (`NotServer`) |
 | Random without shared seed | Loot or AI differ per peer | Roll on the server and replicate results, or replicate the seed |
 | Scene loaded with `SceneManager` | Clients in another scene, duplicated in-scene objects | Load with `NetworkManager.SceneManager.LoadScene` on the server only |
 | Logic in `Start` / `Awake` reading `IsOwner`, `IsServer` | Wrong branch on some peers | Move networked setup to `OnNetworkSpawn` |

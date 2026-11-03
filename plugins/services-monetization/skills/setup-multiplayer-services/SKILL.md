@@ -1,6 +1,6 @@
 ---
 name: setup-multiplayer-services
-description: Designs and implements session-based online multiplayer with the Unity Multiplayer Services SDK - topology choice, lobbies, parties and rooms, join codes, session browsing, quick join, matchmaking, Relay or direct connectivity, UGS session host migration, reconnect, and dedicated-server sessions. Use when players need to find, group, join or host matches, or code uses MultiplayerService, ISession or CreateSessionAsync. Not for live-ops data (build-live-game) or voice chat (setup-vivox-voice-chat).
+description: "Implements session-based online multiplayer with the Unity Multiplayer Services SDK: topology choice, lobbies, join codes, session browsing, quick join, matchmaking, Relay or direct connectivity, host migration, reconnect and dedicated-server sessions. Use when players need to find, join or host matches, or code uses MultiplayerService or ISession. Triggers: \"join with a code\", \"add matchmaking\", \"list open games\", \"use Relay\". Not for Steam lobbies and invites (steam-lobbies-p2p), NGO RPC and NetworkVariable code (netcode-for-gameobjects) or voice chat (setup-vivox-voice-chat)."
 license: Unity Companion License
 metadata:
   category: services-monetization
@@ -65,14 +65,27 @@ In questions, plans and summaries, describe concepts in game terms ("list of ope
 
 ## Validation
 
-1. Project compiles; `using Unity.Services.Multiplayer;` resolves.
+1. Project compiles (connected Editor: `unity recompile --format json`, see `unity-cli`); `using Unity.Services.Multiplayer;` resolves.
 2. Init order: `UnityServices.InitializeAsync` → sign-in → session calls.
 3. No parallel room system (raw Lobby + Relay) next to Sessions unless requested.
 4. Networking is started either by `With*Network` options or by explicit `IHostSession.Network.Start*NetworkAsync`, never both.
 5. Server-only code is guarded by `UNITY_SERVER`.
 
+## References
+
+- [references/implementation-fit.md](references/implementation-fit.md): read when gathering requirements and phrasing questions to the user.
+- [references/examples.md](references/examples.md): read for sample phrasings of requirement questions.
+- [references/workflows-prerequisites.md](references/workflows-prerequisites.md): read when checking packages, Matchmaker queues or server builds for the chosen workflow.
+- [references/entrypoints.md](references/entrypoints.md): read when implementing against the Sessions API (signatures, options, filters, networking, host migration).
+- [references/dgs-entrypoint.md](references/dgs-entrypoint.md): read when writing dedicated-server session code.
+- [references/underlying-services.md](references/underlying-services.md): read only when the Sessions API cannot meet the goal and the lower-level Lobby, Matchmaker or Relay clients are needed.
+
 ## Related skills
 
-- `build-live-game` - authentication depth, Cloud Code, Cloud Save, leaderboards, deployment.
-- `setup-vivox-voice-chat` - voice and text chat in a session (use the session id as the Vivox channel name).
-- `unity-package-management` - installing `com.unity.services.multiplayer` and Netcode packages headlessly.
+- build-live-game: authentication depth (including profiles for Multiplayer Play Mode), Cloud Code, Cloud Save, leaderboards, deployment.
+- netcode-for-gameobjects: the NGO gameplay layer that `With*Network` options start for you.
+- steam-lobbies-p2p: Steam-only co-op with Steam lobbies, invites and the Steam transport instead of Sessions.
+- network-debugging: desync, dropped clients and bandwidth once the session is connected.
+- setup-vivox-voice-chat: voice and text chat in a session (use the session id as the Vivox channel name).
+- unity-package-management: installing `com.unity.services.multiplayer` and Netcode packages headlessly.
+- magiconion: dedicated gRPC server with RPC and StreamingHub instead of UGS sessions.

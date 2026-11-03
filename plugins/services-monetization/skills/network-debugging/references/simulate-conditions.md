@@ -31,7 +31,7 @@ Built-in presets (`NetworkSimulatorPresets`):
 | `Mobile4G` | 100 | 20 | 4 |
 | `Mobile3G` | 360 | 30 | 7 |
 
-The Mobile 2G to 5G presets also exist; they matter little for a PC co-op game. For co-op on Steam add a custom "bad Wi-Fi across a continent" preset around 150 ms delay, 30 ms jitter, 3 % loss.
+The Mobile 2G to 5G presets also exist; they matter little for a PC co-op game. For co-op on Steam add a custom "bad Wi-Fi across a continent" preset that measures about 150 ms RTT (start near 75 ms delay, 30 ms jitter, 3 % loss).
 
 The delay is applied by the simulator stage on each peer that has the component active. Read the resulting RTT from the HUD or Stats Monitor instead of assuming it equals the preset delay.
 
