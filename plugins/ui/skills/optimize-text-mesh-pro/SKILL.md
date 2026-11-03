@@ -1,6 +1,6 @@
 ---
 name: optimize-text-mesh-pro
-description: Optimizes TextMeshPro font assets in Unity 6 for memory, quality, CPU and build size - static main font plus dynamic fallback chains, atlas sizing, padding and sampling ratios, SDF16, Dynamic OS fonts, AutoSize cost and Canvas rebuilds - and imports TMP Essential Resources headlessly. Use for atlas memory bloat, fuzzy or misaligned glyphs, fallback-chain design for mixed scripts, or text-driven CPU spikes. Per-locale font swapping and translation belong to localization.
+description: "Optimizes TextMeshPro font assets in Unity 6 for memory, quality, CPU and build size - static main font plus dynamic fallback chains, atlas sizing, padding and sampling ratios, SDF16, Dynamic OS fonts, AutoSize cost and Canvas rebuilds - and imports TMP Essential Resources headlessly. Use for TMP atlas or glyph problems and text-driven CPU spikes. Triggers: \"font atlas uses too much memory\", \"glyphs look fuzzy\", \"mixed Latin and CJK misaligned\", \"TMP_Settings is null\". Not for per-locale font swapping and translation (localization) or UI Toolkit text (ui-uitk)."
 license: Unity Companion License
 metadata:
   category: ui
@@ -144,3 +144,12 @@ Then poll `TMP_Settings.instance != null` in a **later** call. Never use `Editor
 - Comparing an Editor capture with Include Font Data on against a device build.
 - Sprite asset textures imported as Sprite.
 - Leftover `com.unity.textmeshpro` entry in `Packages/manifest.json` after upgrading to Unity 6.
+
+## Related skills
+
+- localization: per-locale font swapping through Asset Tables, CJK font creation.
+- ui-ugui: Canvas splitting and text components in uGUI.
+- ui-uitk: TextCore `FontAsset` for UI Toolkit text.
+- accessibility: text scaling that relies on sharp atlases at large sizes.
+- memory-snapshot-profiling: measuring atlas memory on device.
+- zstring: allocation-free string formatting before `SetText` when the built-in numeric overloads are not enough.

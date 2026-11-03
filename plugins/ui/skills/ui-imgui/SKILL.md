@@ -1,6 +1,6 @@
 ---
 name: ui-imgui
-description: Maintains and writes Unity IMGUI code - EditorWindow OnGUI, OnInspectorGUI custom editors, IMGUI PropertyDrawers, ScriptableWizards, Handles scene GUI and runtime OnGUI debug overlays. Use when editing an existing OnGUI or OnInspectorGUI script, when the user explicitly asks for IMGUI, for a quick debug overlay, or for errors like "Invalid GUILayout state". New editor tools default to UI Toolkit (ui-uitk).
+description: "Maintains and writes Unity IMGUI code - EditorWindow OnGUI, OnInspectorGUI custom editors, IMGUI PropertyDrawers, ScriptableWizards, Handles scene GUI and runtime OnGUI debug overlays. Use when editing an existing OnGUI or OnInspectorGUI script, when the user explicitly asks for IMGUI, or for a quick debug overlay. Triggers: \"Invalid GUILayout state\", \"fix this OnInspectorGUI\", \"add an FPS overlay\". Not for new editor tools (ui-uitk) or shipped game UI (ui-ugui, ui-uitk)."
 license: Unity Companion License
 metadata:
   category: ui
@@ -11,10 +11,6 @@ metadata:
 # IMGUI
 
 Immediate mode GUI redraws from code every event. It remains supported for editor tools and debug overlays, but Unity 6 inspectors render with UI Toolkit. Never use IMGUI for shipped game UI (use `ui-ugui` or `ui-uitk`).
-
-References (read when the trigger applies):
-- [references/templates.md](references/templates.md) — creating a new EditorWindow, Editor, PropertyDrawer, ScriptableWizard, or debug overlay.
-- [references/gui-elements.md](references/gui-elements.md) — looking up controls, layout options, scopes, and styles.
 
 ## When to use
 
@@ -70,3 +66,14 @@ If "inspector" is ambiguous, ask whether it is a custom `Editor` for one compone
 - `FindObjectOfType`/`FindObjectsOfType` are obsolete: use `FindFirstObjectByType`, `FindAnyObjectByType`, `FindObjectsByType`.
 - `Object.GetInstanceID()` is CS0619 on 6000.5+: use `GetEntityId()` and guard with `UNITY_6000_5_OR_NEWER`. Key persistent editor caches and `EditorPrefs` entries by asset GUID (`AssetDatabase.AssetPathToGUID`); instance IDs were never stable across sessions anyway.
 - An IMGUI-only `PropertyDrawer` still works inside Unity 6 UI Toolkit inspectors (hosted in an `IMGUIContainer`), at some performance cost; drawers used in many lists or UI Toolkit inspectors benefit from also implementing `CreatePropertyGUI` (see `ui-uitk`).
+
+## References
+
+- [references/templates.md](references/templates.md): read when creating a new EditorWindow, Editor, PropertyDrawer, ScriptableWizard, or debug overlay.
+- [references/gui-elements.md](references/gui-elements.md): read when looking up controls, layout options, scopes, and styles.
+
+## Related skills
+
+- ui-uitk: default for new editor windows, inspectors and drawers; `CreatePropertyGUI`.
+- ui: choosing a UI framework when the request names none.
+- unity-editor-safety: confirming editor scripts compiled.

@@ -1,6 +1,6 @@
 ---
 name: ui
-description: Routes ambiguous Unity UI requests to the right skill. Use when a UI request names no framework (a menu, HUD, popup or editor window with no UI Toolkit, uGUI or IMGUI signal), when choosing between UI Toolkit and uGUI, or for framework comparison questions. Picks ui-uitk, ui-ugui or ui-imgui from project context and layers screen-navigator, pc-settings-menu, accessibility, optimize-text-mesh-pro or localization on top. Skip it when the request already names a framework.
+description: "Routes ambiguous Unity UI requests to the right skill: picks ui-uitk, ui-ugui or ui-imgui from project context and layers screen-navigator, pc-settings-menu, accessibility, optimize-text-mesh-pro or localization on top. Use when a UI request names no framework (a menu, HUD, popup or editor window), when choosing between UI Toolkit and uGUI, or for framework comparison questions. Triggers: \"make a main menu\", \"UI Toolkit or uGUI?\", \"add a HUD\". Not for requests that already name a framework (ui-uitk, ui-ugui, ui-imgui)."
 license: Unity Companion License
 metadata:
   category: ui
@@ -26,7 +26,9 @@ Pick the UI system, then hand the request to the matching skill. Answer directly
 | `.uxml`, `.uss`, `.tss`, UI Toolkit, UITK, UIElements, `UIDocument`, `PanelSettings`, `CreateGUI`, `[UxmlElement]`, data binding, Manipulator | `ui-uitk` |
 | Canvas, uGUI, `RectTransform`, Layout Group, `ScrollRect`, `EventSystem`, `.prefab` UI | `ui-ugui` |
 | IMGUI, `OnGUI`, `OnInspectorGUI`, `EditorGUILayout`, immediate mode | `ui-imgui` |
-| Page/modal/sheet transitions, popup stack, back history, UnityScreenNavigator | `screen-navigator` (uGUI only) |
+| Page/modal/sheet transitions, popup stack, back history, UnityScreenNavigator | `screen-navigator` in uGUI projects; in UI Toolkit projects `ui-uitk` (screen-navigator does not support UI Toolkit) |
+| Options/settings menu, resolution, fullscreen, VSync, frame cap, key rebinding, volume or language settings | `pc-settings-menu` (+ the framework skill for the screens) |
+| Subtitles, captions, text or UI scaling, colorblind mode, camera shake toggle, hold vs toggle, screen reader | `accessibility` (+ `pc-settings-menu` for storage) |
 | TextMeshPro font assets, atlases, SDF, fallback fonts, text performance | `optimize-text-mesh-pro` |
 | Languages, translation, i18n/l10n, String/Asset Tables, `com.unity.localization` | `localization` |
 | Figma URL or "import from Figma" | Not available — see below |
@@ -66,3 +68,12 @@ Automated Figma import requires Unity's Figma integration inside Unity AI Assist
 - **Honor exact values.** Use given hex colors, pixel sizes, and spacing verbatim.
 - **Readable by default.** Ensure text contrasts with its background, except intentional low contrast (disabled, placeholder, decorative).
 - **Follow project naming first**; fall back to the conventions in the framework skill.
+
+## Related skills
+
+- ui-uitk, ui-ugui, ui-imgui: the framework skills this router hands off to.
+- screen-navigator: uGUI page, modal and tab stacks.
+- pc-settings-menu: options menu logic and the single settings file.
+- accessibility: subtitles, scaling, colorblind and comfort options.
+- optimize-text-mesh-pro: TMP font assets and text performance.
+- localization: languages and String/Asset Tables.

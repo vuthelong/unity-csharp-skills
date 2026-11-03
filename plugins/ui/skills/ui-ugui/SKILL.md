@@ -1,6 +1,6 @@
 ---
 name: ui-ugui
-description: Understands, edits and generates Unity uGUI (Canvas-based) UI - Canvas and CanvasScaler setup, RectTransform anchors, Layout Groups, ScrollRect, buttons and input fields, EventSystem and world-space canvases in scenes or UI prefabs. Use when the request mentions Canvas, uGUI, RectTransform or a .prefab UI hierarchy, or reports UI that is invisible, mis-sized, mis-anchored or not receiving clicks.
+description: "Understands, edits and generates Unity uGUI (Canvas-based) UI - Canvas and CanvasScaler setup, RectTransform anchors, Layout Groups, ScrollRect, buttons and input fields, EventSystem and world-space canvases in scenes or UI prefabs. Use when the request mentions Canvas, uGUI, RectTransform or a UI prefab hierarchy. Triggers: \"button doesn't receive clicks\", \"UI is invisible\", \"anchors are wrong on other resolutions\", \"build a menu prefab\". Not for page/modal stacks (screen-navigator), font atlases and text performance (optimize-text-mesh-pro) or UI Toolkit (ui-uitk)."
 license: Unity Companion License
 metadata:
   category: ui
@@ -11,10 +11,6 @@ metadata:
 # uGUI (Canvas UI)
 
 Understand existing Canvas UI, make targeted edits, and generate new hierarchies. For framework choice see `ui`; for screen/modal stacks see `screen-navigator`; for font assets and text performance see `optimize-text-mesh-pro`.
-
-References (read when the trigger applies):
-- [references/scrollview-setup.md](references/scrollview-setup.md) — any ScrollRect/ScrollView, list, or runtime-populated content.
-- [references/element-recipes.md](references/element-recipes.md) — building a Button, Toggle, Slider, InputField, or Dropdown from scratch, a world-space canvas, or creating UI from C#.
 
 ## Workflow
 
@@ -143,3 +139,16 @@ Organize hierarchies as Header / Content / Footer; pack UI sprites into a Sprite
 ## Error recovery
 
 Stop and identify the exact symptom and root cause before changing anything. Fix one issue at a time, verify, and track what changed. If stuck, re-read the hierarchy to confirm earlier changes actually applied and question the approach rather than layering fixes. Never "start fresh" on a working hierarchy.
+
+## References
+
+- [references/scrollview-setup.md](references/scrollview-setup.md): read when working on any ScrollRect/ScrollView, list, or runtime-populated content.
+- [references/element-recipes.md](references/element-recipes.md): read when building a Button, Toggle, Slider, InputField, or Dropdown from scratch, a world-space canvas, or creating UI from C#.
+
+## Related skills
+
+- ui: choosing between uGUI and UI Toolkit.
+- screen-navigator: page, modal and tab stacks on top of uGUI.
+- optimize-text-mesh-pro: font assets, fallbacks and text performance.
+- localization: binding text to String Tables.
+- pc-settings-menu, accessibility: settings and accessibility logic behind menu screens.

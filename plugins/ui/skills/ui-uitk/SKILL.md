@@ -1,6 +1,6 @@
 ---
 name: ui-uitk
-description: Understands, edits and generates Unity 6 UI Toolkit UI - UXML layouts, USS styling, UIDocument and PanelSettings, runtime data binding, custom controls, manipulators, Painter2D and SVG icons, plus editor UI via CreateGUI and CreateInspectorGUI. Use for .uxml, .uss or .tss files, UI Builder, UIElements, binding questions, or any new EditorWindow, custom inspector or PropertyDrawer (the default for new editor tools).
+description: "Understands, edits and generates Unity 6 UI Toolkit UI - UXML layouts, USS styling, UIDocument and PanelSettings, runtime data binding, custom controls, manipulators, Painter2D and SVG icons, plus editor UI via CreateGUI and CreateInspectorGUI. Use for .uxml, .uss or .tss files, UI Builder, binding questions, or any new EditorWindow, custom inspector or PropertyDrawer. Triggers: \"write the USS for this panel\", \"bind this data to UI Toolkit\", \"make a custom inspector\". Not for Canvas UI (ui-ugui), existing OnGUI code (ui-imgui) or TextMeshPro font assets (optimize-text-mesh-pro)."
 license: Unity Companion License
 metadata:
   category: ui
@@ -11,20 +11,6 @@ metadata:
 # UI Toolkit
 
 Understand existing UXML/USS, make targeted edits, generate new screens and controls, and wire binding or interaction when asked. For framework choice see `ui`; for legacy OnGUI code see `ui-imgui`.
-
-## References
-
-Paths are relative to this skill folder. Read when the trigger applies:
-
-| File | Read when |
-|---|---|
-| [references/uss-guide.md](references/uss-guide.md) | Before writing or editing any USS — patterns, specificity, and mistakes that parse but render wrong |
-| [references/editor-ui.md](references/editor-ui.md) | Building an EditorWindow, custom inspector, or PropertyDrawer with UI Toolkit |
-| [references/runtime-binding.md](references/runtime-binding.md) | Binding game data to UI (`dataSource`, `SetBinding`, UXML `<Bindings>`) |
-| [references/custom-elements.md](references/custom-elements.md) | Creating reusable controls with `[UxmlElement]` |
-| [references/manipulators.md](references/manipulators.md) | Drag and drop, custom pointer interaction, inventory or crafting slots |
-| [references/painter2d.md](references/painter2d.md) | Gradients, progress rings, charts, custom shapes — anything USS cannot draw |
-| [references/svg-icons.md](references/svg-icons.md) | Generating simple icons |
 
 ## Workflow
 
@@ -169,3 +155,21 @@ Icon priority: reuse project icons → generate SVG (`references/svg-icons.md`) 
 ```uss
 .icon { background-image: url("project://database/Assets/UI/Icons/close.svg"); }
 ```
+
+## References
+
+- [references/uss-guide.md](references/uss-guide.md): read before writing or editing any USS (patterns, specificity, mistakes that parse but render wrong).
+- [references/editor-ui.md](references/editor-ui.md): read when building an EditorWindow, custom inspector, or PropertyDrawer with UI Toolkit.
+- [references/runtime-binding.md](references/runtime-binding.md): read when binding game data to UI (`dataSource`, `SetBinding`, UXML `<Bindings>`).
+- [references/custom-elements.md](references/custom-elements.md): read when creating reusable controls with `[UxmlElement]`.
+- [references/manipulators.md](references/manipulators.md): read when adding drag and drop, custom pointer interaction, or inventory and crafting slots.
+- [references/painter2d.md](references/painter2d.md): read when drawing gradients, progress rings, charts or custom shapes USS cannot draw.
+- [references/svg-icons.md](references/svg-icons.md): read when generating simple icons.
+
+## Related skills
+
+- ui: choosing between UI Toolkit and uGUI.
+- ui-imgui: maintaining existing OnGUI code.
+- ui-ugui: Canvas UI; screen-navigator is uGUI only, so UI Toolkit page/modal stacks are built here (swap or stack root `VisualElement`s from one controller).
+- localization: binding text to String Tables.
+- pc-settings-menu, accessibility: settings and accessibility logic behind option screens; `PanelSettings.scale` for UI scaling.

@@ -1,6 +1,6 @@
 ---
 name: screen-navigator
-description: Sets up and uses Haruma-K/UnityScreenNavigator (uGUI only) for screen routing - PageContainer push/pop history, ModalContainer popups with backdrops, SheetContainer tabs, lifecycle overrides, transition animations, asset loaders, preloading and a hardware back-button handler. Use when adding page navigation, a modal or dialog stack, tab sheets or Android back/Escape handling to a uGUI project, or when editing code that uses PageContainer, ModalContainer, SheetContainer, Page, Modal or Sheet.
+description: "Sets up and uses Haruma-K/UnityScreenNavigator (uGUI only) for screen routing - PageContainer push/pop history, ModalContainer popups with backdrops, SheetContainer tabs, lifecycle overrides, transition animations, asset loaders, preloading and a back-button handler. Use when adding page navigation, a dialog stack or tabs to a uGUI project, or when editing code that uses PageContainer, ModalContainer or SheetContainer. Triggers: \"push a page\", \"modal popup stack\", \"Android back button closes the dialog\". Not for UI Toolkit navigation (ui-uitk) or Canvas layout inside screens (ui-ugui)."
 license: MIT
 metadata:
   category: ui
@@ -11,10 +11,6 @@ metadata:
 # UnityScreenNavigator
 
 uGUI library for screen transitions, transition animations, history stacking, and screen lifecycle (load → initialize → enter/exit → cleanup → release). Package 1.8.x requires **Unity 6000.0+** and **uGUI**; UI Toolkit is not supported. For Canvas/RectTransform work inside screens see `ui-ugui`.
-
-References:
-- [references/api.md](references/api.md) — read when writing container calls, lifecycle overrides, callback receivers, or loaders; full signatures verified against 1.8.0 source.
-- [references/transitions.md](references/transitions.md) — read when customizing transition animations, draw order, modal backdrops, interaction blocking, or hardware back-button handling.
 
 ## Before writing code
 
@@ -118,3 +114,15 @@ Project settings live in a `UnityScreenNavigatorSettings` asset created via `Ass
 2. Create the prefab under the loader's root with the subclass on the root GameObject.
 3. Override only needed lifecycle methods with the signature style the project uses (coroutine vs `Task`).
 4. Add the `Push`/`Register`+`Show` call at the real call site, with an `IsInTransition` guard for user-triggered navigation.
+
+## References
+
+- [references/api.md](references/api.md): read when writing container calls, lifecycle overrides, callback receivers, or loaders; full signatures verified against 1.8.0 source.
+- [references/transitions.md](references/transitions.md): read when customizing transition animations, draw order, modal backdrops, interaction blocking, or hardware back-button handling.
+
+## Related skills
+
+- ui-ugui: Canvas, RectTransform and layout inside each screen.
+- ui: framework choice; UI Toolkit projects build navigation in ui-uitk instead.
+- addressables-asset-loading: the Addressables asset loader and key rules.
+- input-system-actions: Escape/back and gamepad cancel actions.
