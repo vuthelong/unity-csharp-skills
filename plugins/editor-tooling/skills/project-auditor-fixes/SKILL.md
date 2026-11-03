@@ -1,6 +1,6 @@
 ---
 name: project-auditor-fixes
-description: "Runs Unity Project Auditor through the unity CLI (unity command audit / audit_status), reads its issue CSV and fixes the flagged code, asset-import and project-setting issues in small, compiling, reviewable batches with a before/after test case. Use for \"run Project Auditor\", \"fix the auditor issues\", working through an audit CSV, or cleaning up import and player settings flagged by analysis. Needs a connected Editor with com.unity.pipeline and Project Auditor rules."
+description: "Runs Unity Project Auditor through the unity CLI (unity command audit / audit_status), reads its issue CSV and fixes the flagged code, asset-import and project-setting issues in small, compiling, reviewable batches with a before/after test case. Use when a connected Editor with com.unity.pipeline should be audited and cleaned up. Triggers: \"run Project Auditor\", \"fix the auditor issues\", \"work through this audit CSV\", \"clean up flagged import settings\". Not for finding assets interactively (generate-editor-search-query) or deep rendering/audio optimization (optimize-3d-rendering, optimize-audio)."
 license: Unity Companion License
 metadata:
   category: editor-tooling
@@ -47,7 +47,8 @@ unity command audit_status                       # repeat until a terminal statu
 1. **Clean baseline.** The project opens with no compile errors. If errors exist, ask the user —
    they may know and want them ignored.
 2. **Test case.** Agree on a check to run before and after changes: a scene to open and play, a
-   platform build, or `unity test` (see `unity-cli`). If none exists, propose one and ask for
+   platform build, or tests run in the connected Editor with `unity command run_tests` (see
+   `unity-cli` → Run tests headless; never `unity test` while this Editor has the project open). If none exists, propose one and ask for
    confirmation. Run it now and record the result.
 3. **Clean version control.** Commit or stash pending work so every fix is its own reviewable change.
 4. **Audit and group.** Run the audit, then group rows by `DescriptorId` (issue type) and by
@@ -58,7 +59,7 @@ unity command audit_status                       # repeat until a terminal statu
    - Code issues: fix **by file and subfolder**. The project must compile between commits.
    - Follow the `Recommendation` text; do not invent broader refactors.
    - Keep batches small enough for a human to review.
-6. **Verify each batch.** No Console errors after the reimport/recompile, then commit with a
+6. **Verify each batch.** `unity recompile --format json` exits `0` and the Console shows no errors after the reimport, then commit with a
    message naming the issue type and scope.
 7. **Re-audit and re-test.** Re-run the audit to confirm the rows are gone and the test case from
    step 2 still passes. Report fixed, remaining and deliberately skipped issues.
@@ -83,3 +84,11 @@ rather than guessing past the `Recommendation`.
   reloaded the domain. Re-run `audit`.
 - Do not fix and refactor in the same commit; reviewers cannot tell the audit fix apart.
 - Target a specific Editor with `--project-path <path>` when more than one is open.
+
+## Related skills
+
+- unity-cli: connecting to the Editor, `unity recompile`, `run_tests` and the eval syntax used by fix scripts.
+- unity-package-management: installing `com.unity.project-auditor` or its rules package.
+- generate-editor-search-query: locating flagged assets interactively.
+- optimize-3d-rendering, optimize-audio, optimize-web, optimize-text-mesh-pro, unity-texture-import: domain fixes beyond the `Recommendation` text.
+- unity-editor-safety: compile verification and safe batch asset edits.

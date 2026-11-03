@@ -1,6 +1,6 @@
 ---
 name: unity-package-management
-description: "Adds, removes, upgrades and discovers Unity Package Manager (UPM) packages: through an open Editor's package_add command or the UnityEditor.PackageManager.Client API, or headless in CI by launching the Editor in -batchmode without -quit. Use for \"install a Unity package\", \"add com.unity.*\", \"pin a package version\", headless or CI package setup, verifying package ids, or \"which packages for a <genre> game\". The unity CLI has no top-level package command."
+description: "Adds, removes, upgrades and discovers Unity Package Manager (UPM) packages through an open Editor's package_add command or the UnityEditor.PackageManager.Client API, or headless in CI by launching the Editor in -batchmode without -quit. Use when a project needs packages installed, pinned or verified. Triggers: \"install a Unity package\", \"add com.unity.*\", \"pin a package version\", \"which packages for a <genre> game\", \"set up packages in CI\". Not for Editor installs and project creation (unity-cli) or integrating IAP, ads or UGS (implement-in-app-purchases, levelplay-unity-integration, build-live-game)."
 license: Unity Companion License
 metadata:
   category: editor-tooling
@@ -330,5 +330,15 @@ unity run "<project-path>" --editor-version <version> \
 - All scripts live under `Editor/` because they use `UnityEditor`; they never ship in a build.
 - Monetization / backend packages (`com.unity.purchasing`, `com.unity.services.levelplay`, the
   UGS packages) install through this same mechanism, but do the actual **integration** via the
-  dedicated skills: **implement-in-app-purchases**, **levelplay-unity-integration**,
-  **build-live-game**.
+  dedicated skills listed below.
+
+## References
+
+- [references/select-packages.md](references/select-packages.md): read when deciding which packages a game needs (genre, look, platform, monetization), searching the registry, or verifying a known id without the Editor.
+
+## Related skills
+
+- unity-cli: `unity status`, `unity command package_add`, Editor install and project creation.
+- new-unity-project: the guided bootstrap that installs packages through this skill.
+- implement-in-app-purchases, levelplay-unity-integration, build-live-game: integrating monetization and UGS packages after install.
+- unity-editor-safety: domain reloads and compile verification after a package change.

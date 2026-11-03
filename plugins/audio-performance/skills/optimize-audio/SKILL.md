@@ -1,11 +1,11 @@
 ---
 name: optimize-audio
-description: Audits and fixes the cost of audio assets in Unity 6 - AudioImporter Load Type, compression format, sample rate, Force To Mono and per-platform overrides, plus DSP cost from deep AudioMixer trees or effects on silent groups. Use when audio memory is high in the Memory Profiler, clips load or stream badly, a stereo clip on a 3D source sounds wrong, or the Profiler Audio module shows DSP spikes. Not for playback code (audio-playback-system) or routing (audio-setup-mixers).
+description: "Audits and fixes the cost of audio assets in Unity 6 - AudioImporter Load Type, compression format, sample rate, Force To Mono and per-platform overrides, plus DSP cost from deep AudioMixer trees or effects on silent groups. Use when audio memory is high, clips load or stream badly, or the Profiler Audio module shows DSP spikes. Triggers: \"audio memory too high\", \"stereo sound wrong in 3D\", \"load hitch when a sound plays\", \"audio CPU spikes\". Not for playback code (audio-playback-system), routing (audio-setup-mixers) or web build size (optimize-web)."
 license: Unity Companion License
 metadata:
   category: audio-performance
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/optimize-audio, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/audio"
-  unity: "6000.0+ (live eval path needs com.unity.pipeline)"
+  unity: "6000.0+"
 ---
 
 # Optimize Audio
@@ -20,7 +20,7 @@ metadata:
 
 ## 0. Execution path
 
-Preferred: run snippets in a live Editor with `unity command eval`. Eval syntax and prerequisites: see the `unity-cli` skill (unity-editor-tooling plugin) → Eval syntax. Each call is a fresh scope; resolve the `AudioSource` or `AudioClip` at the top of every snippet. All recipes in [references/audio-import-api.md](references/audio-import-api.md) are `eval`-ready.
+Preferred: run snippets in a live Editor with `unity command eval` (needs `com.unity.pipeline`). Eval syntax and prerequisites: see the `unity-cli` skill (unity-editor-tooling plugin) → Eval syntax. Each call is a fresh scope; resolve the `AudioSource` or `AudioClip` at the top of every snippet. All recipes in [references/audio-import-api.md](references/audio-import-api.md) are `eval`-ready.
 
 When `eval` is unavailable, continue read-only instead of stopping:
 
@@ -36,7 +36,7 @@ When `eval` is unavailable, continue read-only instead of stopping:
 ## 2. Assess
 
 1. Enumerate `AudioSource` components and batch-read each one in a single `eval` (clip, load type, channels, frequency, spatial blend, rolloff, mixer group).
-2. If a mixer exists, read group names (public API) and effects (read-only from YAML or the Audio Mixer window). More than ~8 groups, more than 3 levels, or any effect on Master is a flag.
+2. If a mixer exists, read group names (public API) and effects (read-only from YAML or the Audio Mixer window). More than 3 levels, groups that exist only for naming, or any effect on Master is a flag. A flat category layout (Master plus Music, SFX, Foley, Voice, UI, Ambience as in `audio-setup-mixers`) is normal.
 3. Read the DSP buffer size (`AudioSettings.GetDSPBufferSize`).
 4. Report sources, listener count, mixer depth, and immediate risks: stereo clip with `spatialBlend == 1`, Decompress On Load on a clip over ~1 MB or longer than ~5 s, Vorbis quality ≤ 0.5 on dialogue, reverb on Master.
 
@@ -131,11 +131,13 @@ For every source with `spatialBlend > 0`:
 
 ## References
 
-- [references/platform-settings.md](references/platform-settings.md) — read when choosing format, Load Type, sample rate, or DSP buffer per platform.
-- [references/audio-import-api.md](references/audio-import-api.md) — read before writing any `eval` snippet that reads or writes import settings, sources, listeners, or mixers.
+- [references/platform-settings.md](references/platform-settings.md): read when choosing format, Load Type, sample rate, or DSP buffer per platform.
+- [references/audio-import-api.md](references/audio-import-api.md): read before writing any `eval` snippet that reads or writes import settings, sources, listeners, or mixers.
 
-## See also
+## Related skills
 
-- `audio-setup-mixers` — routing sources into groups, exposed parameters, snapshots, volume sliders.
-- `memory-snapshot-profiling` — capturing and comparing Memory Profiler snapshots.
-- `optimize-web` — Web-specific audio limits and compression.
+- audio-setup-mixers: routing sources into groups, exposed parameters, snapshots, volume sliders.
+- audio-playback-system: runtime playback, preloading and voice limits.
+- memory-snapshot-profiling: capturing and comparing Memory Profiler snapshots.
+- optimize-web: Web-specific audio limits and compression.
+- unity-cli: Editor connection and `eval` syntax.

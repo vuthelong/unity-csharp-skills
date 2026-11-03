@@ -17,7 +17,7 @@ Never conclude "Unity is not running" while a Unity process for the project is a
 
 ## Reading compile errors
 
-- `Editor.log` locations: Windows `%LOCALAPPDATA%\Unity\Editor\Editor.log`, macOS `~/Library/Logs/Unity/Editor.log`, Linux `~/.config/unity3d/Editor.log`. The previous session is in `Editor-prev.log`.
+- `Editor.log` locations, in this order: the `-logFile` path if the Editor or batch run was started with one; otherwise the global log at Windows `%LOCALAPPDATA%\Unity\Editor\Editor.log`, macOS `~/Library/Logs/Unity/Editor.log`, Linux `~/.config/unity3d/Editor.log`. Check `<project>/Logs/` only if it exists and holds a newer log. The previous session is in `Editor-prev.log`.
 - Grep for `error CS` and `warning CS0618` / `CS0619` (obsolete API). Each line carries `path(line,col)`.
 - The log accumulates every compile of the session. Only the newest compile block matters.
 

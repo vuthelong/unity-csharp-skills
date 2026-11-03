@@ -1,6 +1,6 @@
 # Audio import API recipes
 
-Statement blocks for `unity command eval --code '<snippet>'`. No `using` directives, fully qualified types, results returned as strings so they reach CLI stdout. Unity 6000.x API.
+Statement blocks for `unity command eval "<snippet>"` (eval syntax: see `unity-cli` -> Eval syntax). No `using` directives, fully qualified types, results returned as strings so they reach CLI stdout. Unity 6000.x API.
 
 Do not use `?.` or `??` on `UnityEngine.Object` references (clips, sources, groups). They bypass Unity's null check and report destroyed objects as live; compare with `!= null`.
 

@@ -1,6 +1,6 @@
 ---
 name: unity-cli
-description: "Drives the official `unity` command-line tool: controls an open Unity Editor live (GameObjects, scenes, assets, C# through `unity command eval` with com.unity.pipeline), installs Editors and modules, manages auth and licenses, creates and opens projects, sets up source control, and runs headless builds and tests. Use for any `unity …` command, \"install Unity 6000.x\", \"build/test from the terminal\", \"edit the scene in the open Editor\", or CLI connection failures (including Safe Mode blocking the connection). Owns the canonical eval syntax and test-runner rule. Compile-error diagnosis via Editor.log, domain reload and asset/YAML safety belong to unity-editor-safety."
+description: "Drives the official `unity` CLI: controls an open Editor live through `unity command eval` and com.unity.pipeline, installs Editors and modules, manages auth and licenses, creates projects, sets up source control, and runs headless builds and tests. Use when running any `unity …` command or when the CLI cannot connect. Triggers: \"install Unity 6000.x\", \"build/test from the terminal\", \"edit the scene in the open Editor\", \"unity status shows nothing\". Not for compile-error diagnosis and asset/YAML safety (unity-editor-safety) or UPM package installs (unity-package-management)."
 license: Unity Companion License
 metadata:
   category: editor-tooling
@@ -110,26 +110,9 @@ unity commands --grep 'build|test' --format json
 
 ## Commands
 
-The full per-command reference — syntax, flags, and examples — lives in grouped files under
-[`references/`](references/). **Read the file for the command group you need**; all the global
-flags, environment variables, and exit codes in [cli-conventions.md](references/cli-conventions.md) apply throughout.
-
-| Commands | Reference file |
-|---|---|
-| `auth` (login / logout / status / list / switch / default / consumers / revoke), `license` (activate / return / server), `cloud` (org / project) | [auth-license-cloud.md](references/auth-license-cloud.md) |
-| `pipeline cloud-build` (targets incl. groups / builds / project / tooling), `pipeline automation` (apps / pipelines / jobs / automations / bots / profiles / templates, plus `apps versions`, `pipelines versions`, `jobs stats`) | [cloud-automation.md](references/cloud-automation.md) |
-| `editors` (list / running / add / default / path / install-path / info / upgrade / prune / verify / module), `install`, `uninstall`, `modules`, `install-modules` | [editors-install.md](references/editors-install.md) |
-| `projects` (list / create / new / clone / open / link / require / upgrade / export / import / pin / size / clean / exec), `open`, `close`, `releases`, `templates` (list / info / create / pack / delete), `assets` (`inspect` / `export`) | [projects-templates.md](references/projects-templates.md) |
-| Idea → created, version-controlled, Pipeline-ready project (raw CLI recipe) | [new-project-bootstrap.md](references/new-project-bootstrap.md) |
-| `config` (proxy / update-check / accelerator / get / set / list / unset / resolve), `context` (save / use / list / current / delete), `hub install` | [config-hub.md](references/config-hub.md) |
-| `run`, `test`, `build` (+ `build run`), `recompile`, `watch` (`test`) | [build-run-test.md](references/build-run-test.md) |
-| `logs`, `doctor`, `env`, `version`, `cache`, `ci init`, `analytics`, `changelog`, `docs`, `language`, `completion`, `bug`, `self-update`, `self-uninstall`, `diagnose proxy`, `diagnose accelerator`, `diagnose update` | [diagnostics-maintenance.md](references/diagnostics-maintenance.md) |
-| `mcp` (+ `configure`), `setup claude`, `skill` (install / refresh / show), `plugin` (install / remove / upgrade / list / changelog), local `pipeline` (install / upgrade / list / list-versions), `command` / `commands` / `status` / `list`, `job` (status / wait / cancel), `shell` | [integration-advanced.md](references/integration-advanced.md) |
-| Play mode verification loop (`editor_play`, `wait_for`, `capture_game_view`, `console`, `eval`) | [playmode-verification-loop.md](references/playmode-verification-loop.md) |
-| `vcs` — `setup` / `status` / `sync` / `switch` / `doctor` / `providers` / `merge-setup` / `conflicts` / `explain` / `resolve` / `diff` / `blame` / `summarize` / `affected` / `hooks`, `vcs git` (`migrate-lfs` / `worktree`), `vcs uvcs` (`locks` / `changesets` / `review`), `uvcs` / `cm` passthrough | [version-control.md](references/version-control.md) |
-| `collaboration` (alias `collab`) — `annotations` / `attachments` / `thumbnail` / `reactions` / `read` / `subscribe` / `jira` | [collaboration.md](references/collaboration.md) |
-| Global flags, `UNITY_*` env vars, exit codes, pagers, `notifications`, output parsing | [cli-conventions.md](references/cli-conventions.md) |
-| `plugin` catalog — `ai` generators, `TOOL_NOT_INSTALLED` | [catalog-plugins.md](references/catalog-plugins.md) |
+The full per-command reference (syntax, flags, examples) lives in grouped files listed under
+[References](#references). **Read the file for the command group you need**; the global flags,
+environment variables and exit codes in [cli-conventions.md](references/cli-conventions.md) apply throughout.
 
 ## Common workflows
 
@@ -233,3 +216,27 @@ Check the catalog (`unity plugin list --format json`) for the Unity AI Generator
 unity doctor --format json             # auth + installed editors + recent errors
 unity logs --follow --level info       # follow live logs during an install
 ```
+
+## References
+
+- [references/auth-license-cloud.md](references/auth-license-cloud.md): read when using `auth` (login / logout / status / list / switch / default / consumers / revoke), `license` (activate / return / server) or `cloud` (org / project).
+- [references/cloud-automation.md](references/cloud-automation.md): read when using `pipeline cloud-build` or `pipeline automation` (apps, pipelines, jobs, automations, bots, profiles, templates).
+- [references/editors-install.md](references/editors-install.md): read when using `editors`, `install`, `uninstall`, `modules` or `install-modules`.
+- [references/projects-templates.md](references/projects-templates.md): read when using `projects`, `open`, `close`, `releases`, `templates` or `assets`.
+- [references/new-project-bootstrap.md](references/new-project-bootstrap.md): read when taking an idea to a created, version-controlled, Pipeline-ready project with raw CLI commands.
+- [references/config-hub.md](references/config-hub.md): read when using `config`, `context` or `hub install`.
+- [references/build-run-test.md](references/build-run-test.md): read when using `run`, `test`, `build` (+ `build run`), `recompile` or `watch`.
+- [references/diagnostics-maintenance.md](references/diagnostics-maintenance.md): read when using `logs`, `doctor`, `env`, `version`, `cache`, `ci init`, `analytics`, `changelog`, `docs`, `language`, `completion`, `bug`, `self-update`, `self-uninstall` or `diagnose`.
+- [references/integration-advanced.md](references/integration-advanced.md): read when using `mcp`, `setup claude`, `skill`, `plugin`, local `pipeline`, `command` / `commands` / `status` / `list`, `job` or `shell`, targeting one of several Editors, or recovering from Safe Mode.
+- [references/playmode-verification-loop.md](references/playmode-verification-loop.md): read when verifying a running game (`editor_play`, `wait_for`, `capture_game_view`, `console`, `eval`).
+- [references/version-control.md](references/version-control.md): read when using `vcs`, `vcs git`, `vcs uvcs` or the `uvcs` / `cm` passthrough.
+- [references/collaboration.md](references/collaboration.md): read when using `collaboration` (alias `collab`): annotations, attachments, thumbnails, reactions, read, subscribe, jira.
+- [references/cli-conventions.md](references/cli-conventions.md): read before scripting the CLI or parsing its output (global flags, `UNITY_*` env vars, exit codes, pagers, `notifications`).
+- [references/catalog-plugins.md](references/catalog-plugins.md): read when using the `plugin` catalog (`ai` generators) or handling `TOOL_NOT_INSTALLED`.
+
+## Related skills
+
+- unity-editor-safety: confirming a C# edit compiled via Editor.log, Safe Mode and stale-assembly recovery, asset/YAML safety.
+- unity-package-management: adding, removing or upgrading UPM packages.
+- new-unity-project: the guided idea-to-project flow built on this skill's bootstrap recipe.
+- project-auditor-fixes: running Project Auditor through `unity command audit`.

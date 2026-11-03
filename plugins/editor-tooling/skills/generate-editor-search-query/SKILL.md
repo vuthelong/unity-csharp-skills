@@ -1,6 +1,6 @@
 ---
 name: generate-editor-search-query
-description: "Turns natural-language find/locate/list requests into Unity Search (Quick Search) queries (t:, dir:, l:, ref=, search expressions) and opens the Search window pre-filled in the live Editor through unity command eval. Use for read-only lookups of project assets or scene objects and components. Triggers: \"find all materials using X\", \"which prefabs reference this\", \"what Unity Search query should I use\". Not for repo text search, build logs, package installs or modifying results."
+description: "Turns natural-language find/locate/list requests into Unity Search (Quick Search) queries (t:, dir:, l:, ref=, search expressions) and opens the Search window pre-filled in the live Editor through unity command eval. Use when looking up project assets or scene objects and components read-only. Triggers: \"find all materials using X\", \"which prefabs reference this\", \"what Unity Search query should I use\", \"list every Light in the scene\". Not for package installs (unity-package-management) or fixing the assets it finds (project-auditor-fixes)."
 license: Unity Companion License
 metadata:
   category: editor-tooling
@@ -41,26 +41,9 @@ Scope read-only Unity Search / Quick Search queries to:
 
 Do not install packages, run menu commands, edit assets, modify scenes, search external documentation, search repository text, inspect build logs, delete results, fix search results, or perform dependency graph analysis. If the user asks to act on results, first open Search or provide the query, then ask for confirmation before any separate modifying skill or workflow.
 
-## References
-
-Before generating non-trivial queries, read [references/query-patterns.md](references/query-patterns.md).
-
-Before opening the Search window, read [references/open-search-window.md](references/open-search-window.md).
-
-Official English references:
-
-- [Unity Search](https://docs.unity3d.com/Manual/search-overview.html)
-- [Search expressions](https://docs.unity3d.com/Manual/search-expressions.html)
-- [SearchService.ShowWindow](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Search.SearchService.ShowWindow.html)
-
 ## Passing C# to `eval`
 
-`eval` compiles a **statement block, not a file**. Two consequences, both compile errors:
-
-- **No `using` directives.** The compiler reads `using UnityEditor;` as a resource-disposal
-  statement and rejects it (`CS0210`).
-- **Types must be fully qualified.** A bare `SearchService` does not resolve (`CS0246`), and a
-  bare `Object` is ambiguous with `object` (`CS0104`).
+Run the snippet with `unity command eval` (see `unity-cli` → Eval syntax: statement block, no `using`, fully qualified types).
 
 The `unity-cli` skill owns the prerequisites — installing the CLI, confirming a connected Editor,
 adding the project's `com.unity.pipeline` package, and discovering the command catalog. You need
@@ -89,7 +72,7 @@ When opening Search:
 
 1. Base64-encode the query (UTF-8) and embed only the base64 text in the generated C# string, decoding it back to a string inside the snippet.
 2. Prefer asset and scene providers for this v1 skill.
-3. Fall back to active providers if a provider is unavailable.
+3. Fall back to all active providers only when neither the `asset` nor the `scene` provider is available.
 4. Log the query that was opened.
 5. Never claim Search opened if the command failed.
 
@@ -120,3 +103,15 @@ Before reporting success:
 - Search was opened only when the user did not opt out
 - any fallback or uncertainty is stated plainly
 - no asset, scene, package, project setting, or search result was modified
+
+## References
+
+- [references/query-patterns.md](references/query-patterns.md): read before generating any non-trivial query.
+- [references/open-search-window.md](references/open-search-window.md): read before opening the Search window (the Editor-side snippet and its fallbacks).
+- Official docs: [Unity Search](https://docs.unity3d.com/Manual/search-overview.html), [Search expressions](https://docs.unity3d.com/Manual/search-expressions.html), [SearchService.ShowWindow](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Search.SearchService.ShowWindow.html).
+
+## Related skills
+
+- unity-cli: connecting to the Editor and the eval syntax.
+- project-auditor-fixes: fixing import and settings issues on the assets a query finds.
+- unity-editor-safety: GUID reference checks before moving or deleting found assets.

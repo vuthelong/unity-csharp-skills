@@ -62,7 +62,7 @@ If compilation or execution fails:
 
 For v1, prefer the `asset` and `scene` providers because this skill is scoped to project assets and scene objects.
 
-Use active providers only as a fallback when one or both preferred providers are unavailable.
+Use all active providers only as a fallback when neither preferred provider is available. If only one is available, the snippet searches with that one.
 
 ## Safety Rules
 

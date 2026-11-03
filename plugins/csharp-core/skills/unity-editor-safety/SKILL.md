@@ -1,6 +1,6 @@
 ---
 name: unity-editor-safety
-description: "Safety rules and recovery steps for an agent changing a Unity 6 project: confirming C# edits really compiled via Editor.log, Safe Mode and stale-assembly recovery, domain reload side effects, one Editor per project, never hand-editing open scenes, preserving GUIDs/fileIDs in .unity/.prefab/.meta YAML. Use after editing .cs files or when Unity shows \"Enter Safe Mode?\", changes \"don't take effect\", tests fail exactly as before a fix, or before moving or deleting assets. Not for `unity` CLI connection failures or running builds/tests (use unity-cli)."
+description: "Safety rules and recovery steps for an agent changing a Unity 6 project: confirming C# edits really compiled, Safe Mode and stale-assembly recovery, domain reload side effects, one Editor per project, never hand-editing open scenes, preserving GUIDs/fileIDs in .unity/.prefab/.meta YAML. Use after editing .cs files or before moving or deleting assets. Triggers: \"Enter Safe Mode?\", \"my changes don't take effect\", \"tests fail exactly as before the fix\", \"can I delete this asset\". Not for unity CLI commands, connection failures or running builds and tests (unity-cli)."
 license: MIT
 metadata:
   category: csharp-core
@@ -24,9 +24,9 @@ Unity projects have two copies of the truth: files on disk and the Editor's in-m
 
 ## After editing C#: verify the compile
 
-1. Get Unity to notice the change. The Editor imports external file changes when it regains focus (Preferences > Asset Pipeline > Auto Refresh). If the user has the Editor open but unfocused, ask them to focus it, or trigger a refresh through a connected Editor tool (`AssetDatabase.Refresh()` / `CompilationPipeline.RequestScriptCompilation()`).
+1. With a connected Editor (`unity` CLI + `com.unity.pipeline`), run `unity recompile --format json`: it triggers the compile and reports the result (exit codes per `unity-cli`); then skip to step 5. Otherwise get Unity to notice the change: the Editor imports external file changes when it regains focus (Preferences > Asset Pipeline > Auto Refresh), so ask the user to focus it, or trigger `AssetDatabase.Refresh()` / `CompilationPipeline.RequestScriptCompilation()` through a connected Editor tool.
 2. Wait until compilation finishes (the Editor's busy indicator, or the log stops growing).
-3. Read the newest compile result from `Editor.log`:
+3. Read the newest compile result from `Editor.log` (or the `-logFile` path of a headless run):
    - Windows `%LOCALAPPDATA%\Unity\Editor\Editor.log`
    - macOS `~/Library/Logs/Unity/Editor.log`
    - Linux `~/.config/unity3d/Editor.log`
@@ -69,12 +69,13 @@ Every script recompile (and, by default, entering Play Mode) reloads the scripti
 
 ## Headless runs and tests
 
-- Use the exact Editor version from `ProjectSettings/ProjectVersion.txt`. A different version silently upgrades project files, packages and serialized assets.
-- Close the interactive Editor first; a headless run fails with a project-lock error while it is open.
-- Tests: pick the runner with the rule in `unity-cli` → "Run tests headless" (live Editor via `unity command run_tests`; Editor closed via `unity test`, exit 8 = failures; raw fallback below). Raw: `Unity -batchmode -nographics -projectPath <p> -runTests -testPlatform EditMode -testResults r.xml -logFile run.log`. Never add `-quit` to `-runTests` (the Editor exits before tests run and still returns 0). Raw exit 0 = passed, 2 = failures, 3 = run error. Check that `r.xml` exists and the test count is non-zero; a filter that matches nothing "passes".
-- Always pass `-logFile`; the headless run does not write to the interactive `Editor.log`, so read its own log for errors.
-- Some tests only fail under `-nographics` (GPU readback, SceneView, screenshots). Confirm them in the GUI Editor before "fixing" them.
-- Run one test session at a time per project.
+Running tests and builds belongs to `unity-cli` ("Run tests headless"). If an Editor has the project open, use it (`unity command run_tests`); run headless (`unity test` or `-batchmode`) only when no Editor has the project open. Safety rules that apply either way:
+
+- Never start a second Editor or a batch run on a project that is open (`Temp/UnityLockfile` plus a live process).
+- Use the exact Editor version from `ProjectSettings/ProjectVersion.txt`; another version silently upgrades project files.
+- Always pass `-logFile` to batch runs and read that log; they do not write the interactive `Editor.log`.
+- Confirm the results file exists and the test count is non-zero; a filter that matches nothing "passes".
+- Some tests only fail under `-nographics`; confirm them in the GUI Editor before "fixing" them.
 
 ## Verification checklist before reporting done
 
@@ -84,9 +85,14 @@ Every script recompile (and, by default, entering Play Mode) reloads the scripti
 - [ ] Affected tests ran (non-zero count) and passed.
 - [ ] No scene was saved, closed or discarded that the user did not ask for.
 
+## References
+
+- [references/compile-recovery.md](references/compile-recovery.md): read for Editor-state triage, Safe Mode, stale logs, wrong-version logs, local packages and hangs.
+- [references/asset-files.md](references/asset-files.md): read before editing or moving `.unity`, `.prefab`, `.asset` or `.meta` files.
+
 ## Related skills
 
-- `unity-cli` - drive a running Editor from the terminal instead of hand-editing files.
-- `csharp-unity` - static reset hooks, editor scripting APIs, Unity 6 API changes.
-- `review-unity-csharp` - finding bugs and leaks once the code compiles.
-- `unity-package-management` - package installs that trigger resolves and domain reloads.
+- unity-cli: drive a running Editor, recompile, and run tests or builds from the terminal instead of hand-editing files.
+- csharp-unity: static reset hooks, editor scripting APIs, Unity 6 API changes.
+- review-unity-csharp: finding bugs and leaks once the code compiles.
+- unity-package-management: package installs that trigger resolves and domain reloads.

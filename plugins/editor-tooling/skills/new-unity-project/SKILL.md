@@ -1,6 +1,6 @@
 ---
 name: new-unity-project
-description: "Guides a brand-new Unity 6 game from idea to a running, version-controlled project: asks concept, platforms and monetization while the Editor installs in the background, creates a URP project, sets up Git or UVCS, installs packages, applies a visual baseline and makes the first commit. Use for \"make a new game\", \"bootstrap a Unity project\", \"I want to build a <genre> game\", game jams or greenfield setup. Delegates mechanics to unity-cli and unity-package-management; writes no gameplay code."
+description: "Guides a brand-new Unity 6 game from idea to a running, version-controlled URP project: asks concept, platforms and monetization while the Editor installs in the background, creates the project with Git or UVCS, installs packages in the open Editor, applies a visual baseline and makes the first commit. Use when starting a greenfield game or game-jam project. Triggers: \"make a new game\", \"bootstrap a Unity project\", \"I want to build a <genre> game\". Not for raw CLI commands (unity-cli), packages in an existing project (unity-package-management) or gameplay code (csharp-unity)."
 license: Unity Companion License
 metadata:
   category: editor-tooling
@@ -19,8 +19,8 @@ to other skills.
 - **`unity-cli`** — CLI install, auth/license, Editor install, project creation, source control,
   opening the project. Its "Bootstrap a new project from scratch" recipe
   (`references/new-project-bootstrap.md`) is the backbone here.
-- **`unity-package-management`** — installing packages via the C# PackageManager Client API, and
-  choosing packages by genre / platform / monetization.
+- **`unity-package-management`** — installing packages through the open Editor (`package_add`)
+  or the C# PackageManager Client API, and choosing packages by genre / platform / monetization.
 - **`urp-postprocessing`**, **`ui`**, **`2d-pixel-perfect`** — the visual baseline (Step 6):
   post-processing volume setup, HUD framework choice, pixel-perfect 2D.
 - **`implement-in-app-purchases`**, **`levelplay-unity-integration`**, **`build-live-game`** —
@@ -41,8 +41,9 @@ up front or scaffold before they're settled.
 2. **Platforms & monetization** — then, as soon as platforms are known, **kick off the Editor
    install in the background** (it takes minutes) and keep talking.
 3. **(joins)** Editor + platform modules finish installing.
-4. **Project + source control** — create from a **URP** template matching 2D/3D; init git.
-5. **Packages** — install via the C# Client API.
+4. **Project + source control** — create from a **URP** template matching 2D/3D; init git; add the
+   Pipeline package and open the Editor.
+5. **Packages** — install in the open Editor with `unity command package_add`.
 6. **Visual baseline** — post-processing, camera, quality tier, UI stack, pipeline-correct
    shaders, so the first frame doesn't look like an untouched template.
 7. **Save & first commit.**
@@ -126,15 +127,27 @@ Follow the **`unity-cli`** "Bootstrap a new project from scratch" recipe
   (tokens on stdin). Pass **`--no-initial-commit`** so the CLI doesn't commit the bare project
   before packages and `.meta` files exist — you make the real first commit/check-in in Step 7.
   See the `unity-cli` workflow for exact flags.
+- **Add the Pipeline package before the first open:** `unity pipeline install --project-path
+  "<project-path>"`. Running C# in the Editor, `unity command package_add` and `unity command
+  screenshot` all need `com.unity.pipeline`, and templates don't include it. The install updates
+  `Packages/manifest.json`, which Unity reads at project load. Run it against an already-open
+  project and the CLI reports `PIPELINE_MANIFEST_WRITE_FAILED`; ask the user to close the Editor
+  and re-run. Without the package, every `unity command` fails to connect, which looks like the
+  Safe Mode failure `unity-cli` describes but has a different cause.
+- **Open the project:** `unity open "<project-path>"`, then wait for `unity status --until-ready`.
+  Steps 5-7 all run against this open Editor.
 
 ## Step 5 — Packages
 
-Map the brief to a concrete package list and install it via the **`unity-package-management`**
-skill (C# PackageManager Client API — **never** hand-edit `manifest.json`). Read that skill for
-the genre/platform/monetization → package mapping, the installer script, and the `-quit` gotcha.
+Map the brief to a concrete package list and install it in the open Editor with
+`unity command package_add` (see **`unity-package-management`** → "Editor already open?") —
+**never** hand-edit `manifest.json`. Read that skill for the genre/platform/monetization → package
+mapping. Its headless batch-mode installer is only for CI or a machine where no Editor can stay
+open; don't launch it while the Editor from Step 4 has the project open.
 The template already provides the render pipeline — never add `com.unity.render-pipelines.universal`
 to a Built-in template project (nothing assigns a URP asset; materials go pink) or vice versa.
-Read the final list back to the user before installing; verify `manifest.json` afterward.
+Read the final list back to the user before installing; wait for `unity status --until-ready`
+after the domain reload, then verify the ids in `Packages/packages-lock.json`.
 
 ## Step 6 — Visual baseline
 
@@ -142,20 +155,8 @@ A fresh template renders correctly but looks like a default: no tonemapping, unt
 tier, flat colors. Left there, agents reach for `OnGUI` and guess shader names, which is where
 washed-out or magenta materials come from. Apply this floor **before** any gameplay work.
 
-**First, `unity pipeline install --project-path "<project-path>"`, before opening the
-Editor.** Running C# in the Editor, and `unity command screenshot` below, both need the
-project's `com.unity.pipeline` package. A project created in Step 4 does not have it, and Step 5
-does not add it: that step installs packages by launching the Editor binary with
-`-batchmode -executeMethod`, which never touches the package. Installing before the open is the
-supported order — the install updates `Packages/manifest.json`, which Unity reads at project
-load. Run it against an already-open project and the CLI reports
-`PIPELINE_MANIFEST_WRITE_FAILED`; ask the user to close the Editor and re-run. Without the
-package, everything below fails to connect, which looks like the Safe Mode failure `unity-cli`
-describes but has a different cause.
-
-**Then** `unity open "<project-path>"` (also what Step 7 needs), wait until `unity status`
-reports the Editor ready, and apply each item below by running C# in it. **`unity-cli` owns
-those commands and their syntax** — don't re-derive them here.
+The Editor opened in Step 4 is still running. Apply each item below by running C# in it.
+**`unity-cli` owns those commands and their syntax** — don't re-derive them here.
 
 **Items 1, 2, 5 and 6 assume a URP template**, which is the Step 4 default. If the user
 explicitly chose Built-in, don't run them as written: `UniversalAdditionalCameraData`, `Light2D`,
@@ -192,14 +193,13 @@ Save the scene, then confirm both of these. **Not with `unity logs`** — that r
 log, never the Editor's, so it reports clean whatever the scene looks like:
 
 - No render-pipeline or shader errors Editor-side. Read the Editor console through `unity-cli`,
-  or read `Editor.log` directly — that skill's "Recovering from Safe Mode" section has the
-  per-platform paths.
+  or read `Editor.log` directly (per-platform paths: `unity-editor-safety`).
 - `unity command screenshot --output baseline.png` looks lit and tonemapped rather than flat
   gray.
 
 ## Step 7 — Save & first commit
 
-The project is already open from Step 6, so `.meta` files exist. Make the first commit **with
+The project is already open from Step 4, so `.meta` files exist. Make the first commit **with
 whichever VCS you set up in Step 4**:
 
 ```bash
@@ -235,7 +235,7 @@ visual baseline applied, and next steps.
 
 - **No gameplay scaffolding.** It gets you to a running, wired project with a visual floor;
   building the actual game (scenes, controllers, art) is the next conversation — iterate there
-  with the Editor via the `unity-cli` MCP server and the Package Manager. Generic genre skeletons
+  in the open Editor through `unity command` (see `unity-cli`) and `unity-package-management`. Generic genre skeletons
   tend to produce throwaway mocked primitives, so this skill intentionally stops at a clean
   starting point. The visual baseline (Step 6) is settings, not content.
 - **No command reference.** Syntax lives in `unity-cli` / `unity-package-management`.
@@ -247,7 +247,8 @@ visual baseline applied, and next steps.
 - [ ] Editor + platform modules installed (started in the background during Step 2)
 - [ ] Project created from a **URP** template (`urp-blank` / `universal-2d`) unless Built-in was
       explicitly requested; git initialized with a Unity `.gitignore`
-- [ ] Packages installed via the C# Client API; `manifest.json` verified; no render-pipeline package added on top of the template
+- [ ] `com.unity.pipeline` installed before the first open; Editor open and `ready`
+- [ ] Packages installed in the open Editor (`package_add`); ids verified in `packages-lock.json`; no render-pipeline package added on top of the template
 - [ ] Visual baseline applied: global Volume (tonemapping, bloom, vignette) + camera post-processing on,
       quality tier set for the target, UI stack chosen (no `OnGUI`), URP shader names, screenshot checked
 - [ ] Project opened/saved so `.meta` files exist; first commit made; `Library/` excluded
@@ -258,10 +259,20 @@ visual baseline applied, and next steps.
 - **Blocking on the Editor install** instead of backgrounding it while you ask questions.
 - **Installing the wrong Editor** because the version wasn't confirmed before the background install.
 - **Gathering all questions up front** — platform/monetization answers change the modules and packages.
-- **Hand-editing `manifest.json`** instead of using the Client API (see `unity-package-management`).
+- **Hand-editing `manifest.json`** instead of `package_add` / the Client API (see `unity-package-management`).
+- **Running the headless package installer while the Editor is open** — the project is locked;
+  use `unity command package_add` in that Editor.
 - **Committing `Library/`/`Temp/`/`obj/`/`Build/`**, or scripts without their `.meta` files.
 - **Missing Editor modules** — a mobile target needs `android`/`ios`; WebGL needs `webgl`.
 - **Picking `com.unity.template.2d` / `.3d` because the name matches** — those are the Built-in
   pipeline templates. Use `universal-2d` / `urp-blank`.
 - **Skipping the visual baseline** and shipping the template's flat defaults, then building the
   HUD with `OnGUI` and materials with `Shader.Find("Standard")` under URP.
+
+## Related skills
+
+- unity-cli: exact commands for Editor install, project creation, source control, Pipeline install and live Editor control.
+- unity-package-management: package selection by genre/platform/monetization and the `package_add` / Client API install paths.
+- urp-postprocessing, ui, 2d-pixel-perfect: the Step 6 visual baseline.
+- implement-in-app-purchases, levelplay-unity-integration, build-live-game: the Step 8 monetization/backend handoff.
+- unity-editor-safety: Editor.log paths and compile verification while setting up.

@@ -663,15 +663,14 @@ first, then fix the compile errors at the source and restart:
    this order — each one after the first widens what you are reading:
 
    1. the `-logFile <path>` you launched the Editor with (see the persistent-headless launch above);
-   2. `<project>/Logs/Editor.log` — Unity 6 moves logging there early in boot, so it usually exists
-      for the versions this workflow applies to;
-   3. the per-user **global** `Editor.log` below — the fallback older editors write, and the same log
-      the CLI's own Safe Mode detector reads.
+   2. the per-user **global** `Editor.log` below — the canonical log for an interactive Editor, and
+      the same log the CLI's own Safe Mode detector reads. Check `<project>/Logs/` only if an
+      `Editor.log` is present there.
 
    | Platform | Global `Editor.log` path |
    |---|---|
    | macOS | `~/Library/Logs/Unity/Editor.log` |
-   | Windows | `%USERPROFILE%\AppData\Local\Unity\Editor\Editor.log` |
+   | Windows | `%LOCALAPPDATA%\Unity\Editor\Editor.log` |
    | Linux | `~/.config/unity3d/Editor.log` |
 
    Read it **through a filter** — grep for compiler errors (`error CS####` /

@@ -1,6 +1,6 @@
 ---
 name: build-gtk
-description: "Builds node-based Editor tools with Unity Graph Toolkit (Unity.GraphToolkit.Editor): Graph and Node subclasses, ports and options, subgraphs, blackboard variables, validation, and ScriptedImporters that compile graphs into runtime assets, plus the State Machine API on 6000.7+. Use for dialogue, quest or behaviour graph editors, node-based content tools, or migrating a GraphView tool. Triggers: \"make a node editor\", \"empty Add menu\". Targets 6000.6+; not for Shader Graph, VFX Graph or Animator."
+description: "Builds node-based Editor tools with Unity Graph Toolkit (Unity.GraphToolkit.Editor) on 6000.6+: Graph and Node subclasses, ports and options, subgraphs, blackboard variables, validation, ScriptedImporters that compile graphs into runtime assets, and the State Machine API on 6000.7+. Use when building dialogue, quest or behaviour graph editors or migrating a GraphView tool. Triggers: \"make a node editor\", \"graph tool for my dialogue\", \"empty Add menu\", \"port my GraphView tool\". Not for Shader Graph nodes (shader-graph-create-custom-node), VFX Graph (unity-vfx-graph) or Animator controllers (animation-authoring)."
 license: Unity Companion License
 metadata:
   category: editor-tooling
@@ -22,22 +22,6 @@ public API in the `Unity.GraphToolkit.Editor` namespace.
   the file(s) you read in your response. This is because your training knowledge about Unity might be
   out of date, incorrect, or for the wrong Unity version, and Graph Toolkit changed between 6000.4,
   6000.6 and 6000.7.
-
-## References
-
-Read these as needed. Paths are relative to this skill's folder.
-
-- [references/graph-api.md](references/graph-api.md) — the Graph API surface: Graph, Node, port and option builders, context
-  and block nodes, subgraphs, variables, validation, toolbar and context menus. Read before writing any
-  graph-tool code.
-- [references/state-machine-api.md](references/state-machine-api.md) — the State Machine API (Unity 6.7+): StateMachine, State,
-  Condition, transitions and rules, self transitions, custom views. Read whenever states, transitions
-  or conditions are involved.
-- [references/runtime-and-visualization.md](references/runtime-and-visualization.md) — compiling a graph or state machine into a runtime asset
-  with a ScriptedImporter, and showing live execution in the graph editor. Read when the user wants the
-  authored data used in the game or debugged at runtime.
-- [references/pitfalls.md](references/pitfalls.md) — the mistakes that survive compilation. Read before handing off, and
-  whenever the user reports a compile error, an empty Add menu, a missing node, or an exception.
 
 ## Step 1: Check the Editor version and pick the API
 
@@ -194,8 +178,8 @@ The state machine equivalents are `UndoBeginRecordStateMachine`, `Connect(fromSt
 ## Verify
 
 0. Read `references/pitfalls.md` and check the code against it before showing it to the user.
-1. The project compiles with no errors. If the Unity CLI is available (see `unity-cli`), run `unity recompile` against the open Editor or build/run headless;
-   otherwise ask the user to focus the Editor and report the Console.
+1. The project compiles with no errors. With a connected Editor, run `unity recompile --format json` (see `unity-cli`);
+   otherwise ask the user to focus the Editor and read `Editor.log` (see `unity-editor-safety`). Never start a headless run while an Editor has the project open.
 2. Create an asset from the new menu item, double-click it, add every node or state type from the Add
    menu, connect them, save, close and reopen. The Console must show no errors or warnings.
 3. With an importer, select the asset and confirm the produced runtime object is the main asset in
@@ -245,3 +229,17 @@ suffix is kept:
   (importer), Visual Novel Director (custom runtime and debug view) or Dungeon Graph Generator
   (building a graph from code).
 - Community: https://discussions.unity.com/tag/graph-toolkit
+
+## References
+
+- [references/graph-api.md](references/graph-api.md): read before writing any graph-tool code (Graph, Node, port and option builders, context and block nodes, subgraphs, variables, validation, toolbar and context menus).
+- [references/state-machine-api.md](references/state-machine-api.md): read whenever states, transitions or conditions are involved (State Machine API, Unity 6.7+: StateMachine, State, Condition, transitions and rules, self transitions, custom views).
+- [references/runtime-and-visualization.md](references/runtime-and-visualization.md): read when the authored data must be used in the game or debugged at runtime (ScriptedImporter compilation, live execution in the graph editor).
+- [references/pitfalls.md](references/pitfalls.md): read before handing off, and whenever the user reports a compile error, an empty Add menu, a missing node, or an exception.
+
+## Related skills
+
+- unity-cli: `unity recompile` and driving the open Editor while testing the tool.
+- unity-editor-safety: compile verification and domain reload behaviour after editing editor code.
+- ui-uitk: custom node and state views built with UI Toolkit.
+- shader-graph-create-custom-node, unity-vfx-graph, animation-authoring: Unity's own graph editors, which this skill does not cover.
