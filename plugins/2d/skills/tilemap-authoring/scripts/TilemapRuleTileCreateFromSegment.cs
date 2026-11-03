@@ -14,7 +14,7 @@ public static class TilemapRuleTileCreateFromSegment
     /// Grid position to Unity neighbor Vector3Int mapping.
     /// Index 4 (center) is not included as it's not a neighbor.
     /// </summary>
-    static readonly Dictionary<int, Vector3Int> k_GridIndexToPosition = new()
+    private static readonly Dictionary<int, Vector3Int> GridIndexToPosition = new()
     {
         { 0, new Vector3Int(-1, 1, 0) },   // Top-Left
         { 1, new Vector3Int(0, 1, 0) },    // Top
@@ -31,7 +31,7 @@ public static class TilemapRuleTileCreateFromSegment
     /// The 47 known tile patterns from the Common Tile Patterns table.
     /// Patterns not in this set are discarded by default.
     /// </summary>
-    static readonly HashSet<string> k_KnownPatterns = new()
+    private static readonly HashSet<string> KnownPatterns = new()
     {
         ". . . / . * . / . . .",  // Fully surrounded
         "X . . / . * . / . . .",  // Top left corner missing
@@ -108,7 +108,7 @@ public static class TilemapRuleTileCreateFromSegment
             string pattern = SpriteSegment3x3Grid.AnalyzeSpriteGrid(sprite, matchThreshold, colorTolerance);
 
             // Step 2: Discard patterns not in the known set
-            if (filterToKnownPatterns && !k_KnownPatterns.Contains(pattern))
+            if (filterToKnownPatterns && !KnownPatterns.Contains(pattern))
             {
                 Debug.Log($"Sprite '{sprite.name}' skipped (unknown pattern: {pattern})");
                 continue;
@@ -134,7 +134,7 @@ public static class TilemapRuleTileCreateFromSegment
     /// <summary>
     /// Returns true if the pattern is one of the 47 known Common Tile Patterns.
     /// </summary>
-    public static bool IsKnownPattern(string pattern) => k_KnownPatterns.Contains(pattern);
+    public static bool IsKnownPattern(string pattern) => KnownPatterns.Contains(pattern);
 
     /// <summary>
     /// Creates a single TilingRule from a SpriteSegment3x3Grid output pattern.
@@ -166,7 +166,7 @@ public static class TilemapRuleTileCreateFromSegment
             if (cell == ".")
             {
                 neighbors.Add(RuleTile.TilingRuleOutput.Neighbor.This);
-                neighborPositions.Add(k_GridIndexToPosition[i]);
+                neighborPositions.Add(GridIndexToPosition[i]);
                 specificity++;
             }
             // 'X' is implicitly DontCare - position not added

@@ -64,7 +64,7 @@ public static class RuleTileTemplates
         return ruleTile;
     }
 
-    static RuleTile.TilingRule CreateEmptyRule(string pattern, RuleTile.TilingRuleOutput.Transform transform)
+    private static RuleTile.TilingRule CreateEmptyRule(string pattern, RuleTile.TilingRuleOutput.Transform transform)
     {
         var (rule, _) = TilemapRuleTileCreateFromSegment.CreateTilingRuleFromPattern(pattern, null, transform);
         rule.m_Sprites = new Sprite[1];

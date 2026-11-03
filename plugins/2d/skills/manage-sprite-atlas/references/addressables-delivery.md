@@ -18,7 +18,7 @@ DLC, seasonal content, per-level art (many levels), skins/cosmetics, localized s
      ```
      Editor asmdef references `Unity.Addressables`, `Unity.Addressables.Editor`, `Unity.ResourceManager`; runtime asmdef references `Unity.Addressables`, `Unity.ResourceManager`.
    - or Project Settings > Player > Scripting Define Symbols (affects every assembly, only for the targets you set).
-3. **Prebuild generator** ([../scripts/SpriteAtlasPrebuildGenerator.cs](../scripts/SpriteAtlasPrebuildGenerator.cs)) with `k_UseAddressables = true`: generates atlases with `includeInBuild = false`, creates/updates an Addressables entry per atlas with the atlas file name as address, and sets `BuildAddressablesWithPlayerBuild = BuildWithPlayer` so content is built as part of the player build.
+3. **Prebuild generator** ([../scripts/SpriteAtlasPrebuildGenerator.cs](../scripts/SpriteAtlasPrebuildGenerator.cs)) with `UseAddressables = true`: generates atlases with `includeInBuild = false`, creates/updates an Addressables entry per atlas with the atlas file name as address, and sets `BuildAddressablesWithPlayerBuild = BuildWithPlayer` so content is built as part of the player build.
 4. **Runtime loader** ([../scripts/SpriteAtlasLateBinding.cs](../scripts/SpriteAtlasLateBinding.cs)): registers `SpriteAtlasManager.atlasRequested` before the first scene loads, loads `Addressables.LoadAssetAsync<SpriteAtlas>(tag)`, de-duplicates in-flight requests, exposes `Preload`, `Release`, `ReleaseAll`. No scene object needed.
 
 ## Addresses

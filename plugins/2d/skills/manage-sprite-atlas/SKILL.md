@@ -1,6 +1,6 @@
 ---
 name: manage-sprite-atlas
-description: Creates, configures, and loads Sprite Atlas V2 assets from editor C#, by default through a prebuild generator - packables, packing and per-platform texture settings, HD/SD variants, late binding with Addressables, and runtime GetSprite caching. Use when the user wants to create or optimize sprite atlases, cut draw calls or texture memory for 2D/UI sprites, fix sprites missing at runtime because of atlases, or load atlases on demand.
+description: "Creates, configures and loads Sprite Atlas V2 assets from editor C#, by default through a prebuild generator: packables, packing and per-platform texture settings, HD/SD variants, Addressables late binding and runtime GetSprite caching. Use when creating or optimizing sprite atlases. Triggers: \"create a sprite atlas\", \"cut draw calls for 2D or UI sprites\", \"sprites missing at runtime because of atlases\", \"load atlases on demand\", \"atlas does nothing\". Not for slicing sprite sheets (sprite-editor), source texture import settings (unity-texture-import) or Spine atlases (spine-unity)."
 license: Unity Companion License
 metadata:
   category: 2d
@@ -25,7 +25,7 @@ Never create or edit a `SpriteAtlas` in editor code. The one editor use is readi
 ## Before writing code
 
 1. **Look for earlier generated scripts.** Search for `// [UNITY-SKILL:SPRITEATLAS]`. If found, list them and ask: update in place, create new ones with different names, or abort (make no changes).
-2. **Ask for the delivery mechanism.**
+2. **Ask for the delivery mechanism.** For late binding, [scripts/SpriteAtlasLateBinding.cs](scripts/SpriteAtlasLateBinding.cs) is a ready-made `SpriteAtlasManager.atlasRequested` handler for atlases not included in the build (Addressables when `UNITY_ADDRESSABLES` is defined).
    - **Built-in** (`includeInBuild = true`): core UI, always-needed gameplay sprites. Simple, instant.
    - **Addressables late binding** (`includeInBuild = false`): DLC, per-level art, skins, localized sprites. Needs `com.unity.addressables`; read [references/addressables-delivery.md](references/addressables-delivery.md) and generate everything it lists.
 3. **Read the scripts you will adapt**: [scripts/SpriteAtlasAuthoring.cs](scripts/SpriteAtlasAuthoring.cs) (helpers), [scripts/SpriteAtlasPrebuildGenerator.cs](scripts/SpriteAtlasPrebuildGenerator.cs) (default entry point), and [references/pitfalls.md](references/pitfalls.md). Writing atlas code from memory is the main source of atlases that import fine and then do nothing.
@@ -56,10 +56,16 @@ Manual one-off authoring (atlas assets committed to the repo, created once) is f
 
 ## References
 
-- [references/api.md](references/api.md): full V2 API (members, settings structs, platform names and formats). Read when writing any atlas code.
-- [references/pitfalls.md](references/pitfalls.md): invalid patterns, runtime gotchas, V1 to V2 migration, checklists. Read before generating code and when an atlas "does nothing".
-- [references/addressables-delivery.md](references/addressables-delivery.md): late binding, defines, asmdefs, Addressables build integration.
-- [scripts/SpriteAtlasLateBinding.cs](scripts/SpriteAtlasLateBinding.cs): ready-made `SpriteAtlasManager.atlasRequested` handler for atlases not included in the build (Addressables when `UNITY_ADDRESSABLES` is defined).
-- [references/custom-packing.md](references/custom-packing.md): `ScriptablePacker` custom packing algorithms.
+- [references/api.md](references/api.md): read when writing any atlas code (full V2 API, settings structs, platform names and formats).
+- [references/pitfalls.md](references/pitfalls.md): read before generating code and when an atlas "does nothing" (invalid patterns, runtime gotchas, V1 to V2 migration, checklists).
+- [references/addressables-delivery.md](references/addressables-delivery.md): read when atlases are delivered through Addressables late binding (defines, asmdefs, build integration).
+- [references/custom-packing.md](references/custom-packing.md): read when writing a `ScriptablePacker` custom packing algorithm.
 
-Related: `sprite-editor` (slicing before packing), `tilemap-authoring` (tile atlases), `unity-texture-import` (source texture settings), `ui-ugui` (UI Image constraints).
+## Related skills
+- `sprite-editor`: slicing sheets before packing.
+- `tilemap-authoring`: tile atlases.
+- `2d-pixel-perfect`: pixel-art atlas settings and seams.
+- `unity-texture-import`: source texture settings.
+- `addressables-asset-loading`: shipping atlases as Addressables and `AssetReferenceAtlasedSprite`.
+- `spine-unity`: Spine atlases are separate; never pack Spine pages into a SpriteAtlas.
+- `ui-ugui`: UI Image constraints on rotated or tight-packed sprites.

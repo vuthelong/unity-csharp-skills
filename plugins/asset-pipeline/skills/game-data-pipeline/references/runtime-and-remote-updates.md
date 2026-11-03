@@ -27,48 +27,16 @@ Never hold a row across a reload. Store ids in game state and look rows up again
 
 ## Boot without DI
 
+Use the bootstrap from `game-bootstrap-flow`: add a `GameDataBootService : MonoBehaviour, IGameService` child to the bootstrap prefab after `Platform` and before `Saves`, and load the tables in its `InitializeAsync`. The full component is in that skill's "Flow example". `IGameService.InitializeAsync` returns `Awaitable`, and an `async Awaitable` method awaits `GameDataService.LoadAsync` (a `UniTask`) directly, so no adapter is needed:
+
 ```csharp
-using System.Threading;
-using Cysharp.Threading.Tasks;
-using Game.Data;
-using UnityEngine;
-using UnityEngine.AddressableAssets;
-
-public sealed class Boot : MonoBehaviour
+public async Awaitable InitializeAsync(CancellationToken cancellationToken)
 {
-    #region Properties
-
-    public static GameDataService GameData { get; private set; }
-
-    #endregion
-
-    #region Unity Lifecycle
-
-    private void Start()
-    {
-        BootAsync(destroyCancellationToken).Forget();
-    }
-
-    private void OnDestroy()
-    {
-        GameData?.Dispose();
-        GameData = null;
-    }
-
-    #endregion
-
-    #region Boot
-
-    private static async UniTaskVoid BootAsync(CancellationToken cancellationToken)
-    {
-        await Addressables.InitializeAsync().ToUniTask(cancellationToken: cancellationToken);
-        GameData = new GameDataService();
-        await GameData.LoadAsync(cancellationToken);
-    }
-
-    #endregion
+    await this._gameData.LoadAsync(cancellationToken);
 }
 ```
+
+Consumers read the service through `GameBootstrap.Current` after `GameBootstrap.Ready`. Do not add a second `Boot` MonoBehaviour or a static `GameData` property next to the bootstrap.
 
 ## VContainer registration (optional)
 

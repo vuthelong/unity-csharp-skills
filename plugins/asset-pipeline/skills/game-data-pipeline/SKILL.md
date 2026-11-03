@@ -1,6 +1,6 @@
 ---
 name: game-data-pipeline
-description: Builds an end-to-end game data pipeline in Unity 6 - CSV or Google Sheets baked into ScriptableObject tables, auto-registered as Addressables, loaded by label into id lookups with UniTask, validated in builds, and updated remotely via catalog updates. Use for game config, balance or design data tables, static data, a GameDataService, or "data not updating after reimport / content update". General Addressables loading and memory belong to addressables-asset-loading.
+description: "Builds a game data pipeline for Unity 6 projects that use ZBase.Csv-Reader and Odin Inspector: CSV or Google Sheets baked into ScriptableObject tables, registered as Addressables, loaded by label into id lookups with UniTask, validated before builds and updated remotely. Use when adding balance or design data tables. Triggers: \"add game config tables\", \"import balance data from Google Sheets\", \"data not updating after reimport\", \"duplicate ids in data\". Not for projects without Odin or ZBase.Csv-Reader, or MessagePack binary databases (mastermemory), save games (save-system) or general Addressables loading (addressables-asset-loading)."
 license: MIT
 metadata:
   category: asset-pipeline
@@ -14,6 +14,8 @@ metadata:
 Google Sheets --download--> Assets/GameData/Csv/*.csv --CsvPostprocessor--> Assets/GameData/Generated/*.asset
       --GameDataAddressables (GameData group, label "gamedata")--> bundle --GameDataService.LoadAsync--> Dictionary<int, TRow>
 ```
+
+**Requirements, check first:** this pipeline needs `com.zbase.csv-reader` and Odin Inspector (a paid asset) on every machine that re-bakes data, plus UniTask and Addressables. If the project has no Odin or no ZBase.Csv-Reader, do not install them for this: use `mastermemory` (CSV to a MessagePack binary database) or a plain ScriptableObject `AssetPostprocessor`/`ScriptedImporter` that reads the CSV yourself, and reuse only the Addressables, validation and runtime parts of this skill.
 
 This skill owns the glue between the stages. For the CSV reader itself (install, Odin/UniTask dependencies, column mapping, attributes, converters, Google Sheets credentials) see `zbase-csv-reader`. For general Addressables loading of art and prefabs see `addressables-asset-loading`. For async rules see `unitask`; for DI see `vcontainer`.
 
@@ -38,7 +40,7 @@ Copy them into the project, rename the `Game.Data` namespace if needed, and adju
 3. **Register it in Tools > Csv-Reader.** Add `Game.Data` to `assemblyNames`, add a `ClassInfo` with `className = Game.Data.HeroTable`, `fieldSetValue = rows` (the protected field on the base class), source file or folder. Use **Export CSV Template** to get the header.
 4. **Import.** Saving or downloading a CSV bakes it automatically. After a code change use **Tools > Game Data > Reimport All CSV**. In CI run `GameDataBatch.RunFromCommandLine`. Read `references/import-and-ci.md`.
 5. **Addressables.** The postprocessor syncs on every generated-asset import: `GameData` group, address `gamedata/<ClassName>`, label `gamedata`, schema version stamp, stale entries pruned. Manual: **Tools > Game Data > Sync Addressables**. Read `references/addressables-setup.md` for schema settings and GUID stability.
-6. **Load at runtime.** `await gameData.LoadAsync(ct)` once at boot, then `TryGet<HeroRow>(id, out var row)`. Dispose (or `Unload`) to release. Read `references/runtime-and-remote-updates.md` for boot code and VContainer registration.
+6. **Load at runtime.** `await gameData.LoadAsync(ct)` once at boot as the game-data step of `game-bootstrap-flow` (after platform, before save), then `TryGet<HeroRow>(id, out var row)`. Dispose (or `Unload`) to release. Read `references/runtime-and-remote-updates.md` for the bootstrap service and VContainer registration.
 7. **Validate.** **Tools > Game Data > Validate**; the same check runs before every player build and in the CI command.
 8. **Optional remote balance updates.** Make the group remote, keep `addressables_content_state.bin` per release, publish with Update a Previous Build, and at a safe point run `CheckForCatalogUpdates` -> `Unload` -> `UpdateCatalogs` -> `ReloadAsync`. Read `references/runtime-and-remote-updates.md`.
 
@@ -75,3 +77,21 @@ Copy them into the project, rename the `Game.Data` namespace if needed, and adju
 - **Overlapping CSV paths.** Upstream matches CSV paths by substring; one source folder that prefixes another makes the wrong class claim the file.
 - **Code changes do not re-bake.** After changing a row type, reimport all CSVs, then validate.
 - **Remote data and old clients.** Remote content cannot ship code. Put the app version in the remote load path and bump `CodeSchemaVersion` on every row-shape change.
+
+## References
+
+- [references/layout-and-data-design.md](references/layout-and-data-design.md): read before writing the first table, laying out folders and asmdefs, or choosing row field types.
+- [references/import-and-ci.md](references/import-and-ci.md): read when importing CSVs, re-baking after code changes, or running the pipeline in CI.
+- [references/addressables-setup.md](references/addressables-setup.md): read when changing the group schema, addresses, labels or GUID stability rules.
+- [references/runtime-and-remote-updates.md](references/runtime-and-remote-updates.md): read when wiring `GameDataService` into boot or VContainer, or shipping remote balance updates.
+
+## Related skills
+
+- `zbase-csv-reader`: the CSV reader this pipeline requires (install, column mapping, Google Sheets credentials).
+- `mastermemory`: the alternative for projects without Odin or ZBase, or for large tables shared with a .NET server.
+- `game-bootstrap-flow`: the boot service that loads `GameDataService` before saves.
+- `save-system`: saves store the ids defined here.
+- `addressables-asset-loading`: general Addressables loading, groups and memory.
+- `unitask`: async rules for `GameDataService`.
+- `vcontainer`: DI registration of `GameDataService`.
+- `localization`: display strings referenced by key from data rows.

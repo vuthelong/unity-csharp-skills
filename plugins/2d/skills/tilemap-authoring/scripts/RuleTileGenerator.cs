@@ -6,24 +6,24 @@ using UnityEngine;
 
 public class RuleTileGenerator : EditorWindow
 {
-    float m_MatchThreshold = 0.75f;
-    float m_ColorTolerance = 0.04f;
-    bool m_FilterToKnownPatterns = true;
+    private float _matchThreshold = 0.75f;
+    private float _colorTolerance = 0.04f;
+    private bool _filterToKnownPatterns = true;
 
     [MenuItem("Tools/2D/Generate RuleTile from Selected Texture")]
-    static void ShowWindow()
+    private static void ShowWindow()
     {
         GetWindow<RuleTileGenerator>("RuleTile Generator");
     }
 
-    void OnGUI()
+    private void OnGUI()
     {
-        m_MatchThreshold = EditorGUILayout.Slider("Match Threshold", m_MatchThreshold, 0.5f, 0.9f);
-        m_ColorTolerance = EditorGUILayout.Slider("Color Tolerance", m_ColorTolerance, 0.0f, 0.2f);
-        m_FilterToKnownPatterns = EditorGUILayout.Toggle("Known Patterns Only", m_FilterToKnownPatterns);
+        this._matchThreshold = EditorGUILayout.Slider("Match Threshold", this._matchThreshold, 0.5f, 0.9f);
+        this._colorTolerance = EditorGUILayout.Slider("Color Tolerance", this._colorTolerance, 0.0f, 0.2f);
+        this._filterToKnownPatterns = EditorGUILayout.Toggle("Known Patterns Only", this._filterToKnownPatterns);
 
         if (GUILayout.Button("Generate from Selected Texture"))
-            Generate(Selection.activeObject as Texture2D, m_MatchThreshold, m_ColorTolerance, m_FilterToKnownPatterns);
+            Generate(Selection.activeObject as Texture2D, this._matchThreshold, this._colorTolerance, this._filterToKnownPatterns);
     }
 
     public static RuleTile Generate(Texture2D texture, float matchThreshold = 0.75f, float colorTolerance = 0.04f, bool filterToKnownPatterns = true)

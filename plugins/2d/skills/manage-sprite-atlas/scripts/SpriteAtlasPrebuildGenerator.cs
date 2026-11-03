@@ -14,7 +14,7 @@ using UnityEditor.AddressableAssets.Settings;
 
 public class SpriteAtlasPrebuildGenerator : IPreprocessBuildWithReport
 {
-    static readonly bool k_UseAddressables = false;
+    private static readonly bool UseAddressables = false;
 
     public int callbackOrder => -100;
 
@@ -29,7 +29,7 @@ public class SpriteAtlasPrebuildGenerator : IPreprocessBuildWithReport
         if (mode == SpritePackerMode.Disabled)
             throw new BuildFailedException("Sprite Packer Mode could not be enabled; atlases would not pack.");
 
-        bool includeInBuild = !k_UseAddressables;
+        bool includeInBuild = !UseAddressables;
         var generated = new List<string>();
 
         Generate(generated, "Assets/Atlases/UI.spriteatlasv2",
@@ -43,13 +43,13 @@ public class SpriteAtlasPrebuildGenerator : IPreprocessBuildWithReport
 
         AssetDatabase.SaveAssets();
 
-        if (k_UseAddressables)
+        if (UseAddressables)
             RegisterWithAddressables(generated);
 
         return generated;
     }
 
-    static void Generate(List<string> generated, string atlasPath, Object[] packables, AtlasPreset preset, bool includeInBuild)
+    private static void Generate(List<string> generated, string atlasPath, Object[] packables, AtlasPreset preset, bool includeInBuild)
     {
         if (!SpriteAtlasAuthoring.CreateOrUpdateAtlas(atlasPath, packables))
             return;
@@ -59,7 +59,7 @@ public class SpriteAtlasPrebuildGenerator : IPreprocessBuildWithReport
         Debug.Log($"[SpriteAtlas] Generated {atlasPath} ({packables.Length} packables, includeInBuild={includeInBuild})");
     }
 
-    static void RegisterWithAddressables(List<string> atlasPaths)
+    private static void RegisterWithAddressables(List<string> atlasPaths)
     {
 #if UNITY_ADDRESSABLES
         var settings = AddressableAssetSettingsDefaultObject.Settings;
@@ -80,7 +80,7 @@ public class SpriteAtlasPrebuildGenerator : IPreprocessBuildWithReport
         settings.BuildAddressablesWithPlayerBuild = AddressableAssetSettings.PlayerBuildOption.BuildWithPlayer;
         settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryModified, null, true);
 #else
-        throw new BuildFailedException("k_UseAddressables is true but UNITY_ADDRESSABLES is not defined. See references/addressables-delivery.md.");
+        throw new BuildFailedException("UseAddressables is true but UNITY_ADDRESSABLES is not defined. See references/addressables-delivery.md.");
 #endif
     }
 }

@@ -6,27 +6,27 @@ using UnityEngine.U2D;
 
 public sealed class AtlasSpriteCache : IDisposable
 {
-    const string k_CloneSuffix = "(Clone)";
+    private const string CloneSuffix = "(Clone)";
 
-    readonly SpriteAtlas m_Atlas;
-    readonly Dictionary<string, Sprite> m_Sprites = new();
-    bool m_AllCached;
+    private readonly SpriteAtlas _atlas;
+    private readonly Dictionary<string, Sprite> _sprites = new();
+    private bool _allCached;
 
     public AtlasSpriteCache(SpriteAtlas atlas)
     {
-        m_Atlas = atlas;
+        this._atlas = atlas;
     }
 
     public Sprite Get(string spriteName)
     {
-        if (m_Atlas == null || string.IsNullOrEmpty(spriteName))
+        if (this._atlas == null || string.IsNullOrEmpty(spriteName))
             return null;
 
-        if (!m_Sprites.TryGetValue(spriteName, out var sprite))
+        if (!this._sprites.TryGetValue(spriteName, out var sprite))
         {
-            sprite = m_Atlas.GetSprite(spriteName);
+            sprite = this._atlas.GetSprite(spriteName);
             if (sprite != null)
-                m_Sprites[spriteName] = sprite;
+                this._sprites[spriteName] = sprite;
         }
         return sprite;
     }
@@ -34,49 +34,49 @@ public sealed class AtlasSpriteCache : IDisposable
     public int GetAll(List<Sprite> results)
     {
         results.Clear();
-        if (m_Atlas == null)
+        if (this._atlas == null)
             return 0;
 
-        if (!m_AllCached)
+        if (!this._allCached)
         {
-            var buffer = new Sprite[m_Atlas.spriteCount];
-            int count = m_Atlas.GetSprites(buffer);
-            for (int i = 0; i < count; i++)
+            var buffer = new Sprite[this._atlas.spriteCount];
+            var count = this._atlas.GetSprites(buffer);
+            for (var i = 0; i < count; i++)
             {
                 var clone = buffer[i];
                 if (clone == null)
                     continue;
 
-                string key = clone.name.EndsWith(k_CloneSuffix, StringComparison.Ordinal)
-                    ? clone.name.Substring(0, clone.name.Length - k_CloneSuffix.Length)
+                var key = clone.name.EndsWith(CloneSuffix, StringComparison.Ordinal)
+                    ? clone.name.Substring(0, clone.name.Length - CloneSuffix.Length)
                     : clone.name;
 
-                if (m_Sprites.ContainsKey(key))
+                if (this._sprites.ContainsKey(key))
                     DestroySprite(clone);
                 else
-                    m_Sprites[key] = clone;
+                    this._sprites[key] = clone;
             }
-            m_AllCached = true;
+            this._allCached = true;
         }
 
-        results.AddRange(m_Sprites.Values);
+        results.AddRange(this._sprites.Values);
         return results.Count;
     }
 
     public void Clear()
     {
-        foreach (var sprite in m_Sprites.Values)
+        foreach (var sprite in this._sprites.Values)
         {
             if (sprite != null)
                 DestroySprite(sprite);
         }
-        m_Sprites.Clear();
-        m_AllCached = false;
+        this._sprites.Clear();
+        this._allCached = false;
     }
 
     public void Dispose() => Clear();
 
-    static void DestroySprite(Sprite sprite)
+    private static void DestroySprite(Sprite sprite)
     {
         if (Application.isPlaying)
             UnityEngine.Object.Destroy(sprite);

@@ -1,6 +1,6 @@
 ---
 name: spine-unity
-description: Integrates Spine 2D skeletal animation into Unity 6 with spine-unity 4.2 or 4.3 and the Spine URP Shaders - install, export settings, texture workflow, SkeletonAnimation / SkeletonGraphic setup, AnimationState tracks, mixing and events, skins, bone following, Spine in a 3D URP scene, pooling, and the 4.2 to 4.3 upgrade. Use when the user mentions Spine, spine-unity, SkeletonAnimation, .skel.bytes or .atlas.txt, or Spine characters rendering wrong.
+description: "Integrates Spine 2D skeletal animation into Unity 6 with spine-unity 4.2 or 4.3 and the Spine URP Shaders: install, export settings, texture workflow, SkeletonAnimation and SkeletonGraphic setup, AnimationState tracks, skins, bone following, Spine in a 3D URP scene, pooling and the 4.2 to 4.3 upgrade. Use when a project uses Spine. Triggers: \"Spine\", \"spine-unity\", \"SkeletonAnimation\", \".skel.bytes or .atlas.txt\", \"Spine character renders pink or with fringes\". Not for Mecanim clips and controllers (animation-authoring) or Unity SpriteAtlas (manage-sprite-atlas)."
 license: MIT
 metadata:
   category: asset-pipeline
@@ -93,7 +93,7 @@ Summary; details and shader settings in [references/urp-3d-rendering.md](referen
 | Mesh generation | Every visible skeleton rebuilds its mesh each frame on the CPU. Lower vertex counts in Spine (weighted meshes, fewer bones). Set `UpdateWhenInvisible` to `OnlyAnimationStatus` or `EverythingExceptMesh`, and `UpdateMode` to `Nothing` for far-off actors |
 | Clipping attachments | CPU triangle clipping every frame against the polygon. Keep clipping polygons to few vertices, clip few slots, and avoid them on crowds; `MeshSettings.useClipping` can disable them globally per renderer |
 | Skeleton data parsing | The first instance parses the `.skel.bytes`/`.json` (JSON is much slower). Prewarm on a loading screen with `skeletonDataAsset.GetSkeletonData(false)` |
-| Instantiation | Pool skeleton GameObjects (`zbase-pooling` or `UnityEngine.Pool`). On release: `AnimationState.ClearTracks()`, `Skeleton.SetupPose()`, reset skin and color, unsubscribe events |
+| Instantiation | Pool skeleton GameObjects with `UnityEngine.Pool` (`zbase-pooling` only if the project already uses ZBase). On release: `AnimationState.ClearTracks()`, `Skeleton.SetupPose()`, reset skin and color, unsubscribe events |
 | Threading | 4.3 can run animation updates on worker threads (`ThreadedAnimation` per component or the Spine preferences). Listener callbacks are queued and issued on the main thread; profile before enabling |
 | Repacked skins | `GetRepackedSkin` creates new textures and materials that you must `Destroy`; call `AtlasUtilities.ClearCache()` after repacking |
 
@@ -116,12 +116,18 @@ Addressables: atlas textures can be loaded on demand with the `com.esotericsoftw
 | `AnimationState` null in Awake | Access in Start |
 | Mix-and-match textures leak | Repacked skin textures/materials not destroyed |
 
+## References
+
+- [references/versions-and-upgrade.md](references/versions-and-upgrade.md): read when the project is on 4.2, translating names, or upgrading 4.2 to 4.3.
+- [references/playback-api.md](references/playback-api.md): read when driving `AnimationState` from code (tracks, mixing, events).
+- [references/urp-3d-rendering.md](references/urp-3d-rendering.md): read when rendering Spine in URP or in a 3D scene (shaders, sorting, lighting, shadows).
+
 ## Related skills
 
 - `animation-authoring`: Animator controllers when using SkeletonMecanim.
 - `unity-texture-import`: atlas page import and compression.
 - `unity-lighting`: URP light and shadow settings the Spine lit shaders depend on.
 - `manage-sprite-atlas`: Unity SpriteAtlas, which is separate from Spine atlases (do not pack Spine pages into a SpriteAtlas).
-- `zbase-pooling`: pooling skeleton instances.
+- `zbase-pooling`: pooling skeleton instances when the project already uses ZBase; otherwise `UnityEngine.Pool` from `csharp-unity`.
 - `addressables-asset-loading`: loading Spine assets on demand.
 - `csharp-unity`: code style for the examples.

@@ -85,7 +85,7 @@ namespace SpriteEditorTools
             }
         }
 
-        static bool DiamondHasContent(Rect rect, Vector2 size, float gradient, int textureWidth, bool[] alphaPixelCache)
+        private static bool DiamondHasContent(Rect rect, Vector2 size, float gradient, int textureWidth, bool[] alphaPixelCache)
         {
             int sx = (int)rect.x;
             int sy = (int)rect.y;

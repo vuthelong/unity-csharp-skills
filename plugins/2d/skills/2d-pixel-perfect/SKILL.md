@@ -1,6 +1,6 @@
 ---
 name: 2d-pixel-perfect
-description: Sets up, diagnoses, and fixes pixel-perfect 2D rendering with the Pixel Perfect Camera in URP or the Built-in pipeline, plus point-filtered, uncompressed sprite import. Use when a pixel-art 2D game looks blurry, shimmers, jitters while the camera moves, shows tilemap seams or non-integer scaling, or when choosing a reference resolution, PPU, or a Cinemachine pixel-perfect setup. Not for HD 2D art, UI-only scenes, or HDRP.
+description: "Sets up, diagnoses and fixes pixel-perfect 2D rendering with the Pixel Perfect Camera in URP or the Built-in pipeline, plus point-filtered, uncompressed sprite import and the Cinemachine pixel-perfect extension. Use for pixel-art 2D games that look wrong on screen. Triggers: \"pixel art looks blurry\", \"sprites shimmer when the camera moves\", \"tilemap seams\", \"non-integer scaling\", \"which reference resolution and PPU\". Not for HD 2D art or UI-only scenes (ui-ugui), tile painting and rule tiles (tilemap-authoring) or atlas packing (manage-sprite-atlas)."
 license: Unity Companion License
 metadata:
   category: 2d
@@ -116,10 +116,23 @@ Screen is not an integer multiple of the reference resolution. Pick a reference 
 
 ## Fallbacks (HDRP or custom SRP)
 
-The Pixel Perfect Camera is unsupported in HDRP. Render the scene into a low-res `RenderTexture` with `filterMode = FilterMode.Point`, then upscale by an integer factor (a fullscreen pass or a UI `RawImage`). `OnRenderImage` and `Graphics.Blit` in camera callbacks do not run under SRP render graph. If you still want sprite snapping, set `UnityEngine.U2D.PixelPerfectRendering.pixelSnapSpacing = camera.orthographicSize * 2f / camera.pixelHeight` yourself; do not reuse `CameraSetupURP` (it imports `UnityEngine.Rendering.Universal` and will not compile without URP). This HDRP path is untested by this skill's scripts.
+HDRP is out of scope for this skill and the Pixel Perfect Camera is unsupported there; this section is a best-effort workaround only. Render the scene into a low-res `RenderTexture` with `filterMode = FilterMode.Point`, then upscale by an integer factor (a fullscreen pass or a UI `RawImage`). `OnRenderImage` and `Graphics.Blit` in camera callbacks do not run under SRP render graph. If you still want sprite snapping, set `UnityEngine.U2D.PixelPerfectRendering.pixelSnapSpacing = camera.orthographicSize * 2f / camera.pixelHeight` yourself; do not reuse `CameraSetupURP` (it imports `UnityEngine.Rendering.Universal` and will not compile without URP). This HDRP path is untested by this skill's scripts.
 
 ## Rules
 
 - Detect the pipeline before writing, diagnosing, or fixing anything.
 - Diagnose first; report; then change only what is broken.
-- Do not use this skill for HD 2D or high-resolution art: point filtering and snapping make smooth art look wrong. For UI-only scenes use the Canvas Scaler (see `ui-ugui`).
+- Do not use this skill for HD 2D or high-resolution art: point filtering and snapping make smooth art look wrong. For UI-only scenes use the Canvas Scaler (see `ui-ugui`). In HDRP give only the Fallbacks workaround.
+
+## References
+
+- [references/api-reference.md](references/api-reference.md): read when writing or reviewing camera code (property and method tables, URP/Built-in enum mapping, recommended configurations).
+
+## Related skills
+- `tilemap-authoring`: Grid, Tilemap and tile setup.
+- `manage-sprite-atlas`: packing tiles with padding to stop seams.
+- `cinemachine-cameras`: the camera rig the `CinemachinePixelPerfect` extension sits on.
+- `unity-texture-import`: general texture import rules.
+- `optimize-text-mesh-pro`: sharp UI text at low reference resolutions.
+- `validate-urp-render-graph-renderer-feature`: reviewing a custom post-upscale pass.
+- `ui-ugui`: UI-only scenes and Canvas Scaler.

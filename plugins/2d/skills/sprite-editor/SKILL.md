@@ -1,6 +1,6 @@
 ---
 name: sprite-editor
-description: Edits sprite metadata (rects, names, pivots, 9-slice borders, outlines, physics shapes) and slices sprite sheets (automatic, grid, isometric) through ISpriteEditorDataProvider, run in the Editor via unity command eval or as a generated Editor script. Use when the user asks to slice a sprite sheet, set pivots or borders, rename sprites, set custom outlines, or extract a sprite to PNG. Not for atlas packing or texture compression.
+description: "Edits sprite metadata (rects, names, pivots, 9-slice borders, outlines, physics shapes) and slices sprite sheets (automatic, grid, isometric) through ISpriteEditorDataProvider, run in a live Editor or as a generated Editor script. Use when changing how a texture is cut into sprites. Triggers: \"slice this sprite sheet\", \"set pivots\", \"set 9-slice borders\", \"rename sprites\", \"custom outline\", \"extract a sprite to PNG\". Not for atlas packing (manage-sprite-atlas), texture compression (unity-texture-import) or rule tiles (tilemap-authoring)."
 license: Unity Companion License
 metadata:
   category: 2d
@@ -23,7 +23,7 @@ Sprite metadata lives inside the asset importer, not in a file you can safely ed
 
 ## Passing C# to `eval`
 
-Eval syntax and prerequisites: see the `unity-cli` skill (unity-editor-tooling plugin) → Eval syntax.
+Eval syntax and prerequisites: see unity-cli -> Eval syntax.
 
 The files in `scripts/` are written as normal C# with usings. When you inline them into `eval`, qualify every type (`UnityEditor.U2D.Sprites.SpriteRect`, `UnityEngine.Object`); when you save them into the project, put them in an `Editor` folder.
 
@@ -44,7 +44,6 @@ Slicing (all go through [scripts/GenerateNewSpriteRects.cs](scripts/GenerateNewS
 - [scripts/GetTextureSourceImageSize.cs](scripts/GetTextureSourceImageSize.cs): original source image width/height (the space sprite rects use) without making a readable copy.
 - [scripts/SpriteToPng.cs](scripts/SpriteToPng.cs): render one sprite's mesh to PNG bytes.
 
-Read [references/scripts-guide.md](references/scripts-guide.md) when slicing or combining scripts (modes, parameters, name generators). Read [references/api-reference.md](references/api-reference.md) for every data provider interface, `SpriteRect` fields, and coordinate-space rules.
 
 ## Rules
 
@@ -55,3 +54,15 @@ Read [references/scripts-guide.md](references/scripts-guide.md) when slicing or 
 - Prefer standalone `eval` snippets. Do not wrap the work in an `AssetPostprocessor`; a `[MenuItem]` wrapper is fine for the no-`eval` fallback.
 - Do not use the legacy `TextureImporter.spritesheet` / `SpriteMetaData` path; it bypasses the data provider and does not work for PSD or custom importers.
 - `UnityEditorInternal.InternalSpriteUtility` (used for auto and grid detection) is internal API; it works in 6000.x but can change between minors. If it fails to compile, fall back to computing rects yourself.
+
+## References
+
+- [references/templates.md](references/templates.md): read before building any snippet (Safe Core Pattern and capability checks).
+- [references/scripts-guide.md](references/scripts-guide.md): read when slicing or combining scripts (modes, parameters, name generators).
+- [references/api-reference.md](references/api-reference.md): read for every data provider interface, `SpriteRect` fields, and coordinate-space rules.
+
+## Related skills
+- `unity-cli`: connecting to the Editor and eval syntax.
+- `manage-sprite-atlas`: packing the sliced sprites.
+- `tilemap-authoring`: turning sliced tiles into Tile and RuleTile assets.
+- `unity-texture-import`: compression and other texture import settings.

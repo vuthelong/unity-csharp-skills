@@ -7,7 +7,7 @@ namespace PixelPerfect.Editor
 {
     public static class SpriteImportSettings
     {
-        static readonly string[] k_OverridePlatforms = { "Android", "iPhone", "WebGL", "Standalone" };
+        private static readonly string[] OverridePlatforms = { "Android", "iPhone", "WebGL", "Standalone" };
 
         public static TextureImporter GetImporter(Sprite sprite)
         {
@@ -60,14 +60,14 @@ namespace PixelPerfect.Editor
             return fixedCount;
         }
 
-        static void ApplyPixelArtSettings(TextureImporter importer, int targetPPU)
+        private static void ApplyPixelArtSettings(TextureImporter importer, int targetPPU)
         {
             importer.filterMode = FilterMode.Point;
             importer.mipmapEnabled = false;
             importer.textureCompression = TextureImporterCompression.Uncompressed;
             importer.spritePixelsPerUnit = targetPPU;
 
-            foreach (var platform in k_OverridePlatforms)
+            foreach (var platform in OverridePlatforms)
             {
                 var settings = importer.GetPlatformTextureSettings(platform);
                 if (!settings.overridden) continue;
@@ -77,9 +77,9 @@ namespace PixelPerfect.Editor
             }
         }
 
-        static bool HasCompressedPlatformOverride(TextureImporter importer)
+        private static bool HasCompressedPlatformOverride(TextureImporter importer)
         {
-            foreach (var platform in k_OverridePlatforms)
+            foreach (var platform in OverridePlatforms)
             {
                 var settings = importer.GetPlatformTextureSettings(platform);
                 if (settings.overridden && settings.format != TextureImporterFormat.RGBA32) return true;
@@ -87,7 +87,7 @@ namespace PixelPerfect.Editor
             return false;
         }
 
-        static bool NeedsFix(TextureImporter importer, int targetPPU)
+        private static bool NeedsFix(TextureImporter importer, int targetPPU)
         {
             return importer.filterMode != FilterMode.Point
                 || importer.mipmapEnabled

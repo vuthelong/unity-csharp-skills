@@ -1,6 +1,6 @@
 ---
 name: tilemap-authoring
-description: Builds 2D tile levels with Unity Tilemap and Rule Tiles from C# - Grid and Tilemap hierarchies, Tile and RuleTile assets, rectangular, isometric, and hex Tile Palettes, painting with SetTile/SetTiles, tilemap colliders, and tiling rules generated from terrain sprites. Use when the user wants a tilemap level, a tile palette, auto-tiling walls or terrain, neighbor rules, an empty RuleTile template, or isometric/hex sorting fixes.
+description: "Builds 2D tile levels with Unity Tilemap and Rule Tiles from C#: Grid and Tilemap hierarchies, Tile and RuleTile assets, rectangular, isometric and hex Tile Palettes, painting with SetTile/SetTiles, tilemap colliders and tiling rules generated from terrain sprites. Use when building 2D tile levels or palettes. Triggers: \"make a tilemap level\", \"create a tile palette\", \"auto-tile walls\", \"neighbor rules\", \"empty RuleTile template\", \"isometric sorting is wrong\". Not for tile seams and blur (2d-pixel-perfect), slicing tile sheets (sprite-editor) or tile atlases (manage-sprite-atlas)."
 license: Unity Companion License
 metadata:
   category: 2d
@@ -81,3 +81,16 @@ Algorithm, symbol mapping, thresholds, and the pattern table: [references/rule-t
 - Seams between tiles are a texture/camera problem, not a tilemap one: see `2d-pixel-perfect` and pack tiles with `manage-sprite-atlas` (padding >= 4, tight packing off).
 - Prefer `Object.FindFirstObjectByType<Grid>()` / `FindAnyObjectByType`; `FindObjectOfType` is obsolete on 6000.x.
 - Never hand-edit `.prefab`/`.asset` YAML for palettes or rule tiles; use the APIs.
+
+## References
+
+- [references/tilemap-api.md](references/tilemap-api.md): read when creating Grids and Tilemaps, painting or adding colliders from code.
+- [references/palettes-and-sorting.md](references/palettes-and-sorting.md): read when creating Tile Palettes or fixing isometric or hex sorting.
+- [references/rule-tiles.md](references/rule-tiles.md) and [references/ruletile-patterns.md](references/ruletile-patterns.md): read when generating RuleTiles from sprites (algorithm, symbol mapping, thresholds, pattern table).
+- [references/hexagonal-ruletile-patterns.md](references/hexagonal-ruletile-patterns.md): read when building a hexagonal RuleTile template.
+
+## Related skills
+- `2d-pixel-perfect`: tile seams, blur and camera snapping.
+- `sprite-editor`: slicing tile sheets.
+- `manage-sprite-atlas`: packing tiles (padding >= 4, tight packing off).
+- `unity-package-management`: installing `com.unity.2d.tilemap.extras`.

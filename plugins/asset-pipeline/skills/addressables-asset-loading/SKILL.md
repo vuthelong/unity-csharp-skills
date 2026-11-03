@@ -1,6 +1,6 @@
 ---
 name: addressables-asset-loading
-description: Loads, releases and ships content with Unity Addressables in Unity 6 - groups and packing, addresses vs AssetReference vs labels, async loading and scenes, handle ownership and Release, remote content, catalogs, content updates, CCD, Analyze and memory profiling. Use when the user mentions Addressables, AssetReference, AsyncOperationHandle, remote bundles or catalog updates, "memory not freed after Release", or duplicated assets in bundles. For CSV/config data tables use game-data-pipeline.
+description: "Loads, releases and ships content with Unity Addressables in Unity 6: groups and packing, addresses vs AssetReference vs labels, async loading and scenes, handle ownership and Release, remote content, catalogs, content updates, CCD, Analyze and memory profiling. Use when loading or shipping content through Addressables. Triggers: \"AssetReference\", \"AsyncOperationHandle\", \"memory not freed after Release\", \"duplicated assets in bundles\", \"remote catalog update\". Not for CSV or config data tables (game-data-pipeline), SpriteAtlas setup (manage-sprite-atlas) or object pooling (csharp-unity)."
 license: MIT
 metadata:
   category: asset-pipeline
@@ -66,7 +66,7 @@ Restrict a generic `AssetReference` in the Inspector with `[AssetReferenceUILabe
 2. **Track handles, not results**, when results can be shared. `Addressables.Release(object)` looks up the handle by the exact result instance; releasing a copy (for example a new `List` built from the result) does nothing and logs an error.
 3. **Check `handle.IsValid()`** before releasing in teardown paths that can run twice (`OnDisable` then `OnDestroy`, pool clear plus scene unload). A released handle is invalid; releasing it again throws "Attempting to use an invalid operation handle".
 4. **Release failed handles too.** A failed load still holds a reference until released. With 4.x `await handle`, catch `AsyncOperationHandleException` and `e.Handle.Release()` in the catch.
-5. **Instantiated objects**: `InstantiateAsync` instances must go through `ReleaseInstance`. If you `Destroy` them yourself, their handle leaks unless `trackHandle` was true and the scene unloads. Prefer loading the prefab once and using `Object.Instantiate` or a pool (see `zbase-pooling`), keeping a single prefab handle.
+5. **Instantiated objects**: `InstantiateAsync` instances must go through `ReleaseInstance`. If you `Destroy` them yourself, their handle leaks unless `trackHandle` was true and the scene unloads. Prefer loading the prefab once and using `Object.Instantiate` or a pool, keeping a single prefab handle. Pool with `UnityEngine.Pool` (see `csharp-unity`); use `zbase-pooling` only if the project already uses ZBase.
 6. **Scene-scoped content**: `LoadSceneMode.Single` releases Addressables scenes but not assets you loaded separately. Those need explicit `Release`.
 7. **Release order**: release instances before the prefab handle, and ScriptableObject data before the assets it references.
 
@@ -99,13 +99,20 @@ Pass a lifetime token (`destroyCancellationToken`, or a source canceled in `OnDi
 | Remote content fails after Player update | Catalog/bundles built with a different Unity version or with serialized type changes; rebuild content for each Player version |
 | `MissingReferenceException` after scene unload | Objects instantiated into an Addressables scene and moved elsewhere are unloaded with that scene's bundle |
 
+## References
+
+- [references/groups-and-builds.md](references/groups-and-builds.md): read when organizing groups, building content, or shipping remote content and updates.
+- [references/loading-patterns.md](references/loading-patterns.md): read when writing load and release code (patterns and full examples).
+- [references/memory-and-debugging.md](references/memory-and-debugging.md): read when profiling memory or debugging leaked handles.
+
 ## Related skills
 
 - `unitask`: `ToUniTask`, cancellation, `UniTaskVoid`.
-- `zbase-pooling`: Addressables-backed GameObject pools (`AddressGameObjectPool`, `AssetRefGameObjectPool`).
+- `zbase-pooling`: Addressables-backed GameObject pools (`AddressGameObjectPool`, `AssetRefGameObjectPool`) when the project already uses ZBase.
 - `game-data-pipeline`: CSV game data baked to ScriptableObjects and shipped as Addressables.
 - `zbase-csv-reader`: the CSV baker used by that pipeline.
 - `manage-sprite-atlas`: SpriteAtlas setup before making atlases Addressable.
 - `unity-texture-import`: texture memory, which dominates most bundles.
 - `spine-unity` and `blender-to-unity-pipeline`: preparing the content you ship.
-- `csharp-unity`: code style for the examples.
+- `csharp-unity`: default pooling with `UnityEngine.Pool` and code style for the examples.
+- `game-bootstrap-flow`: Addressable scenes in the loading flow.

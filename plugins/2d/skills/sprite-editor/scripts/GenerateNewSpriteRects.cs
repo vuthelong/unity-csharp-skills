@@ -20,7 +20,7 @@ namespace SpriteEditorTools
             AddNewSpriteMethod addNewSpriteMethod, Func<int, string> nameGenerator,
             float kOverlapTolerance = 0.00001f, float kBestFitTolerance = 0.5f, bool bestFit = false)
         {
-            const int k_NameFindBreakLimit = 1000000;
+            const int NameFindBreakLimit = 1000000;
             var existingSpriteRects = spriteDataProvider.GetSpriteRects();
             var existingFileIds = GetExistingFileIds(spriteDataProvider);
             var newRects = new List<SpriteRect>();
@@ -29,7 +29,7 @@ namespace SpriteEditorTools
             string NextFreeName()
             {
                 int nameIndex = usedNames.Count;
-                while (nameIndex < k_NameFindBreakLimit)
+                while (nameIndex < NameFindBreakLimit)
                 {
                     var candidate = nameGenerator(nameIndex++);
                     if (!usedNames.Contains(candidate))
@@ -145,7 +145,7 @@ namespace SpriteEditorTools
             fileIdProvider.SetNameFileIdPairs(pairs);
         }
 
-        static Dictionary<string, GUID> GetExistingFileIds(ISpriteEditorDataProvider spriteDataProvider)
+        private static Dictionary<string, GUID> GetExistingFileIds(ISpriteEditorDataProvider spriteDataProvider)
         {
             var result = new Dictionary<string, GUID>();
             var fileIdProvider = spriteDataProvider.GetDataProvider<ISpriteNameFileIdDataProvider>();
@@ -157,7 +157,7 @@ namespace SpriteEditorTools
             return result;
         }
 
-        static int GetExistingOverlappingSprite(SpriteRect[] spriteRects, Rect rect,
+        private static int GetExistingOverlappingSprite(SpriteRect[] spriteRects, Rect rect,
             float kOverlapTolerance, float kBestFitTolerance, bool bestFit)
         {
             var bestRect = -1;

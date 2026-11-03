@@ -1,6 +1,6 @@
 ---
 name: blender-to-unity-pipeline
-description: Sets up and audits the Blender to Unity 6 URP model pipeline - FBX/glTF export settings, ModelImporter scale and axis, rigs (Generic vs Humanoid, Avatar reuse), animation clip splitting and looping, material remapping to URP Lit, LOD and collider naming, and an AssetPostprocessor plus folder Presets that enforce import rules. Use when importing FBX/GLB/.blend models, seeing scale 100 or -89.98 rotations, broken rigs, pink or duplicated materials, or automating import settings.
+description: "Sets up and audits the Blender to Unity 6 URP model pipeline: FBX and glTF export settings, ModelImporter scale and axis, Generic vs Humanoid rigs, clip splitting and looping, URP material remapping, LOD and collider naming, and an AssetPostprocessor plus folder Presets that enforce import rules. Use when importing models from Blender. Triggers: \"import FBX from Blender\", \"model has scale 100\", \"-89.98 rotation\", \"broken rig\", \"pink or duplicated materials\". Not for CAD, point clouds or Pixyz RuleSets (asset-transformer-toolkit), texture settings (unity-texture-import) or Animator authoring (animation-authoring)."
 license: MIT
 metadata:
   category: asset-pipeline
@@ -138,6 +138,13 @@ Prefab
 - [ ] Gameplay components live on a Prefab Variant of the model, not on the model.
 - [ ] Animator uses the model's Avatar; Apply Root Motion matches the clip setup.
 
+## References
+
+- [references/blender-export.md](references/blender-export.md): read when exporting from Blender (FBX and glTF settings).
+- [references/model-importer.md](references/model-importer.md): read when checking ModelImporter tabs property by property.
+- [references/rig-and-animation.md](references/rig-and-animation.md): read when choosing Generic or Humanoid, reusing Avatars, splitting clips or setting root motion.
+- [references/materials-and-naming.md](references/materials-and-naming.md): read when extracting or remapping materials or naming objects for LODs and colliders.
+
 ## Related skills
 
 - `animation-authoring`: AnimatorController, blend trees, runtime Animator, root motion handlers.
@@ -146,3 +153,5 @@ Prefab
 - `unity-lighting`: lightmap UVs, static flags, baking.
 - `addressables-asset-loading`: shipping imported prefabs as Addressables.
 - `csharp-unity`: code style for the postprocessor.
+- `asset-transformer-toolkit`: CAD, point clouds and Pixyz RuleSets instead of DCC exports.
+- `character-controller-3d`: using imported root motion on a player.

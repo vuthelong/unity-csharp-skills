@@ -47,7 +47,7 @@ public static class SpriteSegment3x3Grid
         return $"{symbols[0]} {symbols[1]} {symbols[2]} / {symbols[3]} {symbols[4]} {symbols[5]} / {symbols[6]} {symbols[7]} {symbols[8]}";
     }
 
-    static Color32 GetMajorityColor(Color32[] pixels, int textureWidth, int startX, int startY, int width, int height)
+    private static Color32 GetMajorityColor(Color32[] pixels, int textureWidth, int startX, int startY, int width, int height)
     {
         var counts = new Dictionary<Color32, int>();
         Color32 best = default;
@@ -72,7 +72,7 @@ public static class SpriteSegment3x3Grid
         return best;
     }
 
-    static float GetColorMatchPercentage(Color32[] pixels, int textureWidth, int startX, int startY, int width, int height, Color32 target, float tolerance)
+    private static float GetColorMatchPercentage(Color32[] pixels, int textureWidth, int startX, int startY, int width, int height, Color32 target, float tolerance)
     {
         int total = 0;
         int matching = 0;
@@ -90,7 +90,7 @@ public static class SpriteSegment3x3Grid
         return total > 0 ? (float)matching / total : 0f;
     }
 
-    static bool ColorsMatch(Color a, Color b, float tolerance)
+    private static bool ColorsMatch(Color a, Color b, float tolerance)
     {
         return Mathf.Abs(a.r - b.r) < tolerance
             && Mathf.Abs(a.g - b.g) < tolerance
