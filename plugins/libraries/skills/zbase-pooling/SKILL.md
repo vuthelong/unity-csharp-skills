@@ -1,6 +1,6 @@
 ---
 name: zbase-pooling
-description: "Sets up Zitga-Tech ZBase.Foundation.Pooling for pooling C# objects, collections, GameObjects and Components, including UniTask async pools, prepooling and Addressables pools, and chooses between it and UnityEngine.Pool. Use when the project already depends on ZBase or UniTask and needs async/Addressables-backed or inspector-configured prefab pools, or when fixing ZBase pooled objects that leak, double-return or keep stale state. Default pooling with UnityEngine.Pool belongs to csharp-unity."
+description: "Sets up Zitga-Tech ZBase.Foundation.Pooling for C# objects, collections, GameObjects and Components, including UniTask async pools, prepooling and Addressables pools. Use when the project already depends on ZBase and needs async, Addressables-backed or inspector-configured prefab pools, or ZBase pooled objects leak, double-return or keep stale state. Triggers: \"ZBase pooling\", \"ComponentPool\", \"SharedPool\", \"prepool bullets\", \"pooled object has stale state\". Not for default pooling with UnityEngine.Pool (csharp-unity), Spine skeleton pooling (spine-unity)."
 license: MIT
 metadata:
   category: libraries
@@ -11,12 +11,6 @@ metadata:
 # ZBase.Foundation.Pooling
 
 Interface-driven pools: sync pools for C# objects and collections, UniTask-based async pools for Unity objects, optional Addressables pools. Verified against package.json 2.3.3 (repo HEAD, Feb 2024; same as OpenUPM latest). Runtime: `Packages/ZBase.Foundation.Pooling/ZBase.Foundation.Pooling`; Addressables module: `.../ZBase.Foundation.Pooling.Addressables`.
-
-Reference file, read when needed:
-
-- `references/types.md` - read when you need the full type catalog (pools, prefabs, behaviours, scriptable pools, Addressables variants, collection pools), constructor overloads, or the override hooks for custom pools and prefabs.
-
-Related skills: `unitask` (all Unity-object rents return `UniTask<T>`), `csharp-unity` (GC and pooling guidance), `zbase-pubsub`.
 
 ## Install
 
@@ -85,31 +79,31 @@ using ZBase.Foundation.Pooling.UnityPools;
 
 public sealed class BulletSpawner : MonoBehaviour
 {
-    [SerializeField] private ComponentPool<Bullet> _pool = new();
+    [SerializeField] private ComponentPool<Bullet> pool = new();
 
     private void Start() => PrepoolAsync().Forget();
 
     private async UniTaskVoid PrepoolAsync()
     {
-        _pool.Prefab.Parent = transform;
-        await _pool.Prepool(destroyCancellationToken);
+        this.pool.Prefab.Parent = transform;
+        await this.pool.Prepool(destroyCancellationToken);
     }
 
     public async UniTask<Bullet> SpawnAsync(Vector3 position, CancellationToken token)
     {
-        var bullet = await _pool.Rent(token);
+        var bullet = await this.pool.Rent(token);
         bullet.transform.SetPositionAndRotation(position, Quaternion.identity);
         bullet.ResetState();
         bullet.gameObject.SetActive(true);
         return bullet;
     }
 
-    public void Despawn(Bullet bullet) => _pool.Return(bullet);
+    public void Despawn(Bullet bullet) => this.pool.Return(bullet);
 
     private void OnDestroy()
     {
-        _pool.ReleaseInstances(0);
-        _pool.Dispose();
+        this.pool.ReleaseInstances(0);
+        this.pool.Dispose();
     }
 }
 ```
@@ -132,7 +126,7 @@ public sealed class BulletSpawner : MonoBehaviour
 - **Returning twice**: the queue ignores an instance that is already idle (`UniqueQueue` keyed by instance id or reference), so an immediate double return is harmless. Returning after someone else re-rented it is not: both holders now share one object. Null your reference after `Return`, or wrap rentals in `DisposableContext` so ownership ends with `using`.
 - **Rented or pooled objects outliving their scene**: pooled GameObjects parented under scene objects are destroyed on scene unload, but the pool still holds the (now destroyed) references and will hand them out from `Rent`, causing `MissingReferenceException`. Either scope the pool to the scene (behaviour in the scene, `ReleaseInstances(0)` + `Dispose` on unload), or keep the pool and its parent in `DontDestroyOnLoad`. `SharedPool.Of<T>()` and scriptable pools are global by design; do not put scene objects in them.
 - **State leaks**: nothing resets components. Reset transforms, rigidbody velocity (`linearVelocity` on Unity 6), particle systems, trails, animator state and event subscriptions in a `RentPostprocess`/`ReturnPreprocess` override or in your spawn code.
-- **Instance-ID deprecation on newer Unity 6**: `UnityPool<T, TPrefab>.Return` keys the queue with `instance.GetInstanceID()`. Newer Unity 6 releases move to `EntityId` and deprecate `GetInstanceID`; check your version's docs for whether it is a warning or an error. The package is unmaintained since 2024; if your Unity version flags it, embed it in `Packages/` and patch that line behind a version-gated `#if`.
+- **`GetInstanceID` is an error on 6000.5+**: `UnityPool<T, TPrefab>.Return` keys the queue with `instance.GetInstanceID()`, which is obsolete as an error (CS0619) on 6000.5+, so the unpatched package does not compile there. The package is unmaintained since 2024: embed it in `Packages/` and patch that line to `GetEntityId()` behind `#if UNITY_6000_5_OR_NEWER`.
 - **Name clashes**: `ListPool<T>`, `HashSetPool<T>`, `DictionaryPool<TKey, TValue>` exist in `UnityEngine.Pool`, `System.Collections.Generic.Pooling` and `ZBase.Collections.Pooled.Generic.Pooling`. Import one namespace per file or alias.
 - **Async rent races**: two concurrent `Rent()` calls on an empty pool both instantiate. That is fine, but prepool before gameplay to avoid instantiation spikes and async frame delays (Addressables instantiation is truly async).
 - **Unbounded growth**: no `maxSize`; call `ReleaseInstances(keep)` after spikes (wave end, scene transition).
@@ -150,3 +144,14 @@ public sealed class BulletSpawner : MonoBehaviour
 | Dependencies | none (engine) | UniTask, ZBase.Collections.Pooled, Unsafe |
 
 Use `UnityEngine.Pool` by default: synchronous creation, temporary collections (`ListPool<T>.Get(out var list)`), bounded pools with editor double-release checks, and no extra packages. Use ZBase pooling when the project already depends on ZBase/UniTask and you want async instantiation (Addressables), inspector-configured prefab pools with prepooling, or `SharedPool.Of<T>()` singletons. Do not mix both for the same object type.
+
+## References
+
+- [references/types.md](references/types.md): read when you need the full type catalog (pools, prefabs, behaviours, scriptable pools, Addressables variants, collection pools), constructor overloads, or the override hooks for custom pools and prefabs.
+
+## Related skills
+
+- csharp-unity: default pooling with `UnityEngine.Pool` and GC guidance.
+- unitask: all Unity-object rents return `UniTask<T>`.
+- addressables-asset-loading: Addressables handles behind the `Address*` pools.
+- zbase-pubsub: sibling ZBase package.

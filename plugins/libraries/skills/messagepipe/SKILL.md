@@ -1,6 +1,6 @@
 ---
 name: messagepipe
-description: "Sets up Cysharp MessagePipe for DI-integrated, typed pub/sub and request/response in Unity (VContainer, Zenject or built-in container): IPublisher/ISubscriber, keyed, buffered and async messages, request handlers, filters, subscription disposal. Choose it over zbase-pubsub when the project already uses a DI container and wants brokers injected per scope. Triggers: MessagePipe, RegisterMessageBroker, GlobalMessagePipe, leaked MessagePipe subscriptions, unregistered message types."
+description: "Sets up Cysharp MessagePipe for DI-integrated typed pub/sub and request/response in Unity (VContainer, Zenject or built-in container): IPublisher/ISubscriber, keyed, buffered and async messages, request handlers, filters and subscription disposal. Use when the project uses a DI container and wants brokers injected per scope. Triggers: \"MessagePipe\", \"RegisterMessageBroker\", \"GlobalMessagePipe\", \"No such registration of type IPublisher\", \"leaked MessagePipe subscriptions\". Not for projects without DI (zbase-pubsub), stream operators (r3), owner-local events (csharp-unity)."
 license: MIT
 metadata:
   category: libraries
@@ -11,13 +11,6 @@ metadata:
 # MessagePipe
 
 Typed, DI-managed pub/sub and mediator for Unity. Verified against MessagePipe 1.8.2 (`src/MessagePipe.Unity/Assets/Plugins/MessagePipe*`). The Unity build replaces every `ValueTask` in the .NET README with `UniTask`, has no open-generic auto registration (except through VContainer 1.14+, below), and needs every message type registered.
-
-Reference files, read when needed:
-
-- `references/api.md` - read when you need exact interface members, subscribe extension overloads, filter base classes, `MessagePipeOptions` defaults, or the full list of DI registration methods per container.
-- `references/recipes.md` - read when writing a concrete setup: VContainer scope, Zenject installer, no-DI bootstrap, keyed/buffered/async pub-sub, request handlers, `EventFactory`, filters, or leak hunting.
-
-Related skills: `vcontainer` (container and scopes), `unitask` (all async signatures here are UniTask), `r3` (reactive streams), `zbase-pubsub` (a DI-free alternative).
 
 ## Install
 
@@ -123,8 +116,22 @@ public sealed class ScoreView : MonoBehaviour
 - **Subscribing after scope disposal** returns an empty disposable silently (`HandlingSubscribeDisposedPolicy.Ignore`). Set `Throw` while debugging lifetime bugs.
 - **`FirstAsync` without a token** cannot be cancelled; always pass a token (`destroyCancellationToken` or a timeout via UniTask's `CancelAfterSlim`).
 
-## MessagePipe vs R3 vs UniTask
+## MessagePipe vs R3 vs UniTask vs ZBase PubSub
 
 - MessagePipe: decoupled, type-keyed broadcast between systems that do not know each other, owned by the DI container. Use for game-wide events, commands and request/response.
 - R3 (`r3`): composition of event streams (throttle, combine, switch), UI binding, `ReactiveProperty`. `ISubscriber<T>.AsObservable()` returns `System.IObservable<T>`, which R3 consumes via its `ToObservable()` conversion; use that bridge when a MessagePipe event needs operators.
+- ZBase PubSub (`zbase-pubsub`): the same broadcast role without a DI container, with ordered async handler groups; see its comparison table.
 - UniTask (`unitask`): one-shot async flow. MessagePipe's async handlers, `FirstAsync`, and `AsAsyncEnumerable` (returns `IUniTaskAsyncEnumerable<T>`) are UniTask-based, so `await foreach` style consumption uses UniTask.Linq.
+
+## References
+
+- [references/api.md](references/api.md): read when you need exact interface members, subscribe extension overloads, filter base classes, `MessagePipeOptions` defaults, or the full list of DI registration methods per container.
+- [references/recipes.md](references/recipes.md): read when writing a concrete setup: VContainer scope, Zenject installer, no-DI bootstrap, keyed/buffered/async pub-sub, request handlers, `EventFactory`, filters, or leak hunting.
+
+## Related skills
+
+- vcontainer: container and scopes.
+- unitask: all async signatures here are UniTask.
+- r3: reactive streams and operators.
+- zbase-pubsub: DI-free alternative.
+- csharp-unity: choosing an event style.

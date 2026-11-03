@@ -1,6 +1,6 @@
 ---
 name: ui-effect
-description: "Applies mob-sakai UIEffect v5 effects on uGUI Image, RawImage, Text and TextMeshProUGUI (grayscale, blur, dissolve, shiny, shadow/outline, gradation), with presets, UIEffectTweener, replicas for batching, TMP and ShaderGraph samples, and v4 migration. Use for UI visual effects or when an effect looks pink, plain or wrong only in player builds (unregistered shader variants), LoadPreset does nothing, or v4 components like UIDissolve/UIShiny need converting."
+description: "Applies mob-sakai UIEffect v5 effects on uGUI Image, RawImage, Text and TextMeshProUGUI (grayscale, blur, dissolve, shiny, shadow and outline, gradation) with presets, UIEffectTweener, replicas for batching, TMP and ShaderGraph samples, and v4 migration. Use for uGUI visual effects. Triggers: \"UIEffect\", \"dissolve this button\", \"effect is pink only in the build\", \"LoadPreset does nothing\", \"convert UIDissolve/UIShiny from v4\". Not for UI Toolkit or SpriteRenderer (ui-uitk, urp-hlsl-shaders), canvas hierarchy and layout (ui-ugui), TMP font atlases (optimize-text-mesh-pro)."
 license: MIT
 metadata:
   category: libraries
@@ -10,7 +10,7 @@ metadata:
 
 # UIEffect v5 (mob-sakai)
 
-Package id `com.coffee.ui-effect`, namespace `Coffee.UIEffects`. Grounded in v5.11.x. All effects are one component (`UIEffect`) driving one shader per base shader, with keyword-selected variants. For uGUI hierarchy work see `ui-ugui`; for TMP font/atlas/material tuning see `optimize-text-mesh-pro`.
+Package id `com.coffee.ui-effect`, namespace `Coffee.UIEffects`. Grounded in v5.11.x. All effects are one component (`UIEffect`) driving one shader per base shader, with keyword-selected variants.
 
 ## Workflow
 
@@ -29,8 +29,7 @@ Package id `com.coffee.ui-effect`, namespace `Coffee.UIEffects`. Grounded in v5.
 6. To share one look across many graphics, put `UIEffectReplica` on them pointing at a `UIEffect` or a `UIEffectPreset` asset.
 7. For TextMeshPro, import the TMP support sample (step below) before expecting effects on text.
 
-Property names, enum values, tweener and replica members: read `references/properties.md` when writing code against the API or picking filter values.
-v4 to v5 component mapping and conversion: read `references/migration-v4.md` when a project has `UIDissolve`, `UIShiny`, `UIShadow`, `UIGradient`, `UIHsvModifier`, `UITransitionEffect`, `UIFlip`, or a v4 `UIEffect`.
+Property names and the v4 to v5 component mapping are in References below.
 
 ## Code usage
 
@@ -41,29 +40,29 @@ using UnityEngine.UI;
 
 public sealed class DissolveOnHide : MonoBehaviour
 {
-    [SerializeField] private Graphic _graphic;
-    [SerializeField] private UIEffectPreset _dissolvePreset;
+    [SerializeField] private Graphic graphic;
+    [SerializeField] private UIEffectPreset dissolvePreset;
 
     private UIEffectTweener _tweener;
 
     private void Awake()
     {
-        var effect = _graphic.gameObject.AddComponent<UIEffect>();
-        effect.LoadPreset(_dissolvePreset);
+        var effect = this.graphic.gameObject.AddComponent<UIEffect>();
+        effect.LoadPreset(this.dissolvePreset);
         effect.transitionWidth = 0.1f;
         effect.transitionColor = Color.red;
 
-        _tweener = _graphic.gameObject.AddComponent<UIEffectTweener>();
-        _tweener.cullingMask = UIEffectTweener.CullingMask.Transition;
-        _tweener.wrapMode = UIEffectTweener.WrapMode.Once;
-        _tweener.updateMode = UIEffectTweener.UpdateMode.Unscaled;
-        _tweener.playOnEnable = UIEffectTweener.PlayOnEnable.None;
-        _tweener.onComplete.AddListener(OnHidden);
+        this._tweener = this.graphic.gameObject.AddComponent<UIEffectTweener>();
+        this._tweener.cullingMask = UIEffectTweener.CullingMask.Transition;
+        this._tweener.wrapMode = UIEffectTweener.WrapMode.Once;
+        this._tweener.updateMode = UIEffectTweener.UpdateMode.Unscaled;
+        this._tweener.playOnEnable = UIEffectTweener.PlayOnEnable.None;
+        this._tweener.onComplete.AddListener(OnHidden);
     }
 
-    public void Hide() => _tweener.PlayForward(true);
+    public void Hide() => this._tweener.PlayForward(true);
 
-    private void OnHidden() => _graphic.gameObject.SetActive(false);
+    private void OnHidden() => this.graphic.gameObject.SetActive(false);
 }
 ```
 
@@ -120,3 +119,14 @@ To make a custom UI shader UIEffect-aware, copy the `==== UIEFFECT START/END ===
 - The legacy prefab-based preset system is deprecated since 5.8.0; convert with `Convert All Legacy Presets` in Project Settings. `UIEffectProjectSettings.LoadRuntimePreset` is obsolete; use `UIEffectProjectSettings.LoadPreset` or `UIEffect.LoadPreset`.
 - Supported graphics are `Image`, `RawImage`, `Text` and `TextMeshProUGUI` (plus `TMP_SubMeshUI`). Not for UI Toolkit, SpriteRenderer or world-space `TextMeshPro` (non-UGUI).
 - Render pipelines: the package advertises Built-in, URP, HDRP and VR support; there is no pipeline-specific setup for uGUI canvases. ShaderGraph integration ships separate BuiltIn and URP samples only.
+
+## References
+
+- [references/properties.md](references/properties.md): read when writing code against the API or picking filter values (property names, enum values, tweener and replica members).
+- [references/migration-v4.md](references/migration-v4.md): read when a project has `UIDissolve`, `UIShiny`, `UIShadow`, `UIGradient`, `UIHsvModifier`, `UITransitionEffect`, `UIFlip`, or a v4 `UIEffect`.
+
+## Related skills
+
+- ui-ugui: Canvas hierarchy, layout and raycast setup.
+- optimize-text-mesh-pro: TMP font, atlas and material tuning.
+- animation-sequencer: sequencing effects with other UI animation.

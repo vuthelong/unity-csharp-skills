@@ -1,6 +1,6 @@
 ---
 name: r3
-description: "Writes and reviews reactive code with Cysharp R3, the UniRx successor: Observable, Subject, ReactiveProperty, operators, frame/time providers, subscription disposal, uGUI bindings, UniRx migration. Use for event streams and single reactive values; prefer observable-collections when binding a whole collection to UI. Triggers: R3, ReactiveProperty, AddTo(this), UniRx port, leaked R3 subscriptions."
+description: "Writes and reviews reactive code with Cysharp R3, the UniRx successor: Observable, Subject, ReactiveProperty, operators, frame and time providers, subscription disposal, uGUI bindings and UniRx migration. Use for composing event streams and single reactive values. Triggers: \"R3\", \"ReactiveProperty\", \"AddTo(this)\", \"port this UniRx code\", \"R3 subscription leaks\". Not for decoupled pub/sub between systems (messagepipe, zbase-pubsub), binding whole collections to UI (observable-collections), one-shot async flow (unitask)."
 license: MIT
 metadata:
   category: libraries
@@ -12,18 +12,12 @@ metadata:
 
 Verified against R3 core (`src/R3`) and R3.Unity 1.3.1 (`src/R3.Unity/Assets/R3.Unity`). R3 needs Unity 2021.3 or newer, so Unity 6 is fine.
 
-Reference files, read when needed:
-
-- `references/operators.md` - read when choosing a factory or operator, or checking an exact overload (time, frame and async variants).
-- `references/unirx-migration.md` - read when porting UniRx code or explaining how R3 differs from System.Reactive.
-
 ## NuGetForUnity setup
 
 1. Install NuGetForUnity once: Package Manager > Add package from git URL `https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity` (or from OpenUPM).
 2. **NuGet > Manage NuGet Packages**, search the package id, Install. Dependencies resolve automatically into `Assets/Packages`.
-3. Source generators / analyzers (`MemoryPack.Generator`, `MessagePackAnalyzer`, `MasterMemory.SourceGenerator`, the MagicOnion client generator): the DLL must have no platforms ticked and the `RoslynAnalyzer` asset label. NuGetForUnity normally sets this; set it by hand if generated code is missing.
-4. If Unity reports assembly version conflicts, clear **Project Settings > Player > Other Settings > Assembly Version Validation**.
-5. A UPM companion package (R3.Unity, MemoryPack.Unity, MessagePack.Unity, ZLogger.Unity) precompile-references the NuGet DLLs, so install the NuGet package first and pin the UPM tag to the same version.
+3. If Unity reports assembly version conflicts, clear **Project Settings > Player > Other Settings > Assembly Version Validation**.
+4. R3.Unity (UPM) precompile-references the NuGet `R3.dll`, so install the NuGet package first and pin the UPM tag to the same version.
 
 **System.Runtime.CompilerServices.Unsafe:** install once via NuGetForUnity (package `System.Runtime.CompilerServices.Unsafe` 6.0.0, usually pulled in as a dependency); if the project already has it from another route (a `.unitypackage` DLL, the `org.nuget.system.runtime.compilerservices.unsafe` UPM package), keep that one and don't add a second copy (duplicate-assembly errors).
 
@@ -83,14 +77,14 @@ source.Subscribe(state, static (x, s) => ...);
 public sealed class PlayerModel : IDisposable
 {
     private readonly ReactiveProperty<int> _hp = new(100);
-    public ReadOnlyReactiveProperty<int> Hp => _hp;
+    public ReadOnlyReactiveProperty<int> Hp => this._hp;
     public ReadOnlyReactiveProperty<bool> IsDead { get; }
 
-    public PlayerModel() => IsDead = _hp.Select(x => x <= 0).ToReadOnlyReactiveProperty();
+    public PlayerModel() => IsDead = this._hp.Select(x => x <= 0).ToReadOnlyReactiveProperty();
 
-    public void Damage(int amount) => _hp.Value -= amount;
+    public void Damage(int amount) => this._hp.Value -= amount;
 
-    public void Dispose() => Disposable.Dispose(_hp, IsDead);
+    public void Dispose() => Disposable.Dispose(this._hp, IsDead);
 }
 ```
 
@@ -140,7 +134,7 @@ model.Hp.SubscribeToText(hpLabel).AddTo(this);
 model.Hp.Select(x => x > 0).SubscribeToInteractable(attackButton).AddTo(this);
 slider.OnValueChangedAsObservable().Subscribe(v => volume.Value = v).AddTo(this);
 myUnityEvent.AsObservable(destroyCancellationToken).Subscribe(_ => ...);
-this.OnTriggerEnterAsObservable().Where(c => c.CompareTag("Player")).Subscribe(_ => Pickup()).AddTo(this);
+this.OnTriggerEnterAsObservable().Where(c => c.CompareTag(Tags.Player)).Subscribe(_ => Pickup()).AddTo(this);
 ```
 
 The `OnValueChangedAsObservable` methods emit the current value on subscribe and complete when the component is destroyed. Triggers (`UpdateAsObservable`, `FixedUpdateAsObservable`, `OnCollisionEnterAsObservable`, `OnEnableAsObservable`, `OnDestroyAsObservable`, `OnBecameVisibleAsObservable`, ...) add hidden trigger components. Prefer `Observable.EveryUpdate` over `UpdateAsObservable` when you don't need a per-object update.
@@ -185,8 +179,15 @@ Open **Window > Observable Tracker**. Turn on **Enable Tracking** (low cost) and
 - **WebGL.** The default Unity providers run on the PlayerLoop and work on WebGL. Avoid `ObserveOnThreadPool` and `SubscribeOnThreadPool` there.
 - **Inspector edits.** `SerializableReactiveProperty` only notifies from the inspector through its property drawer. Setting the serialized `value` field from code bypasses notification, so always set `.Value`.
 
+## References
+
+- [references/operators.md](references/operators.md): read when choosing a factory or operator, or checking an exact overload (time, frame and async variants).
+- [references/unirx-migration.md](references/unirx-migration.md): read when porting UniRx code or explaining how R3 differs from System.Reactive.
+
 ## Related skills
 
-- `unitask` for async work inside `SubscribeAwait` and for awaiting results.
-- `ui-ugui` for the Canvas and components being bound.
-- `csharp-unity` for general coding standards.
+- unitask: async work inside `SubscribeAwait` and awaiting results.
+- messagepipe, zbase-pubsub: decoupled pub/sub between systems; bridge into R3 when a message needs operators.
+- observable-collections: collections whose UI must mirror adds, removes and moves.
+- ui-ugui: the Canvas and components being bound.
+- csharp-unity: general coding standards and choosing an event style.

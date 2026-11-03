@@ -100,9 +100,16 @@ public sealed class EnemySpawner : MonoBehaviour
 {
     #region Fields
 
-    private static readonly ILogger<EnemySpawner> Logger = LogManager.GetLogger<EnemySpawner>();
     [SerializeField] private int maxEnemies = 20;
+
+    private ILogger<EnemySpawner> _logger;
     private int _alive;
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    private void Awake() => this._logger = LogManager.GetLogger<EnemySpawner>();
 
     #endregion
 
@@ -112,17 +119,19 @@ public sealed class EnemySpawner : MonoBehaviour
     {
         if (this._alive >= this.maxEnemies)
         {
-            Logger.ZLogWarning($"Spawn cap {this.maxEnemies} reached, skipping {enemyId}", this);
+            this._logger.ZLogWarning($"Spawn cap {this.maxEnemies} reached, skipping {enemyId}", this);
             return;
         }
 
         this._alive++;
-        Logger.ZLogDebug($"Spawned {enemyId:@enemyId} at {position}");
+        this._logger.ZLogDebug($"Spawned {enemyId:@enemyId} at {position}");
     }
 
     #endregion
 }
 ```
+
+The logger is fetched in `Awake`, not cached in a `static readonly` field: `LogManager` disposes its factory on `Application.quitting` (which also fires when exiting Play Mode) and rebuilds it on the next Play, so a static logger from the old factory would keep writing to disposed providers when domain reload is disabled. For plain C# classes, fetch the logger in the constructor.
 
 `ILogger` here is `Microsoft.Extensions.Logging.ILogger`; add `using ILogger = Microsoft.Extensions.Logging.ILogger;` in files that also import `UnityEngine` and use the non-generic interface, because `UnityEngine.ILogger` exists too.
 
@@ -173,9 +182,9 @@ public sealed class InventoryService
 ```csharp
 logging.AddZLoggerUnityDebug(options => options.IncludeScopes = true);
 
-using (Logger.BeginScope("{MatchId}", matchId))
+using (this._logger.BeginScope("{MatchId}", matchId))
 {
-    Logger.ZLogInformation($"Round {round} started");
+    this._logger.ZLogInformation($"Round {round} started");
 }
 ```
 
@@ -229,7 +238,7 @@ public static partial class NetworkLog
 }
 ```
 
-Call as `Logger.Connected(host, stopwatch.ElapsedMilliseconds);`. Attribute constructors: `()`, `(LogLevel level)`, `(string message)`, `(LogLevel level, string message)`, `(int eventId, LogLevel level, string message)`; properties `EventId`, `EventName`, `Level`, `Message`, `SkipEnabledCheck`. Placeholders support the same `:json` / format specifiers as `ZLog*`.
+Call as `this._logger.Connected(host, stopwatch.ElapsedMilliseconds);`. Attribute constructors: `()`, `(LogLevel level)`, `(string message)`, `(LogLevel level, string message)`, `(int eventId, LogLevel level, string message)`; properties `EventId`, `EventName`, `Level`, `Message`, `SkipEnabledCheck`. Placeholders support the same `:json` / format specifiers as `ZLog*`.
 
 ## Compiling logs out of release builds
 

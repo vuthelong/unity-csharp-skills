@@ -1,6 +1,6 @@
 ---
 name: native-memory-array
-description: "Uses Cysharp NativeMemoryArray<T> for native-memory buffers that bypass the managed heap and the 2 GB array limit, exposed as Span, Memory, IBufferWriter and ReadOnlySequence. Use for very large byte buffers, streaming big files, or feeding MemoryPack/MessagePack/ZString without GC pressure, and when deciding between it and Unity NativeArray (Jobs, Burst). Triggers: NativeMemoryArray, arrays over 2 GB, OutOfMemory on large byte[], LOH churn."
+description: "Uses Cysharp NativeMemoryArray<T> for native-memory buffers that bypass the managed heap and the 2 GB array limit, exposed as Span, Memory, IBufferWriter and ReadOnlySequence. Use for very large byte buffers, streaming big files, or feeding MemoryPack, MessagePack or ZString without GC pressure. Triggers: \"NativeMemoryArray\", \"array larger than 2 GB\", \"OutOfMemory on a large byte[]\", \"LOH churn\". Not for data passed to Jobs, Burst or engine APIs (NativeArray, csharp-unity), serializer contracts themselves (memorypack, messagepack-csharp)."
 license: MIT
 metadata:
   category: libraries
@@ -11,8 +11,6 @@ metadata:
 # NativeMemoryArray
 
 `NativeMemoryArray<T> where T : unmanaged` is a `sealed class` that owns a block of native memory (`Marshal.AllocHGlobal` in Unity, `NativeMemory.Alloc` on .NET 6+) with a `long` length. It is for C#-side data processing and IO, not for the engine or the job system. Verified against the repository at UPM package 1.2.2 (`src/NativeMemoryArray.Unity/Assets/Plugins/NativeMemoryArray`) and the NuGet source (`src/NativeMemoryArray`).
-
-Read `references/api.md` for the full member table and the differences between the UPM source and the NuGet DLL.
 
 ## Install
 
@@ -45,7 +43,7 @@ using Cysharp.Collections;
 
 public static class NativeFileIO
 {
-    #region Public API
+    #region File IO
 
     public static async Task<NativeMemoryArray<byte>> ReadAllAsync(string path, CancellationToken cancellationToken)
     {
@@ -118,8 +116,13 @@ Use `NativeArray<T>` whenever data goes into Jobs, Burst or engine APIs. Use `Na
 - **Thread safety.** None. Concurrent writers to overlapping ranges race; parallel work on disjoint `AsSpan(start, count)` slices is fine. `Dispose` while another thread reads is a use-after-free.
 - **No `CopyFrom` / `CopyTo` methods** exist; copy with spans: `source.AsSpan().CopyTo(array.AsSpan(offset, source.Length))`.
 
+## References
+
+- [references/api.md](references/api.md): read for the full member table and the differences between the UPM source and the NuGet DLL.
+
 ## Related skills
 
-- `memorypack`, `messagepack-csharp` for serializers writing into the buffer.
-- `zstring` for the shared Unsafe DLL rule; `unitask` for async file IO in Unity.
-- `csharp-unity` for house style.
+- memorypack, messagepack-csharp: serializers writing into the buffer.
+- zstring: the shared Unsafe DLL rule and UTF-8 output.
+- unitask: async file IO in Unity.
+- csharp-unity: house style.

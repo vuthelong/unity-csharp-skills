@@ -1,6 +1,6 @@
 ---
 name: animation-sequencer
-description: "Authors and drives DOTween-based UI/object animation sequences with brunomikoski Animation Sequencer (AnimationSequencerController, steps, DOTween actions, custom steps). Use when building inspector-authored UI transitions or show/hide timelines, playing them from code (Play, PlayBackwards, PlayAsync), or debugging setup issues such as the missing DOTWEEN_ENABLED define, 'No DOTween found, animation sequencer will be disabled', or CS1929 DOFade errors."
+description: "Authors and drives DOTween-based UI and object sequences with brunomikoski Animation Sequencer (controller, steps, DOTween actions, custom steps). Use when building inspector-authored UI transitions or show/hide sequences and playing them from code. Triggers: \"Animation Sequencer\", \"show/hide popup animation\", \"DOTWEEN_ENABLED missing\", \"No DOTween found, animation sequencer will be disabled\", \"CS1929 DOFade\". Not for Timeline cutscenes (timeline-sequencing), Animator clips and state machines (animation-authoring), shader-based UI effects (ui-effect)."
 license: MIT
 metadata:
   category: libraries
@@ -108,12 +108,12 @@ public sealed class PopupView : MonoBehaviour
     public IEnumerator Show()
     {
         gameObject.SetActive(true);
-        yield return showSequence.PlayEnumerator();
+        yield return this.showSequence.PlayEnumerator();
     }
 
     public IEnumerator Hide()
     {
-        yield return hideSequence.PlayEnumerator();
+        yield return this.hideSequence.PlayEnumerator();
         gameObject.SetActive(false);
     }
 }
@@ -130,8 +130,7 @@ Built-in step types (`AnimationStepBase` subclasses, each with `delay` and `flow
 
 Each DOTween action has `direction` (`To` / `From`), `ease` (`CustomEase`: any DOTween `Ease` or an `AnimationCurve`), and `isRelative`.
 
-Read `references/steps-and-actions.md` when you need the full step/action table with serialized fields and target component requirements.
-Read `references/custom-steps.md` when writing a custom `AnimationStepBase` or `DOTweenActionBase` (the README samples are out of date and do not compile).
+Full step/action table and custom step authoring: see References below (the README samples are out of date and do not compile).
 
 ## Rules
 
@@ -163,8 +162,14 @@ Read `references/custom-steps.md` when writing a custom `AnimationStepBase` or `
 - Raise DOTween capacity (`DOTween.SetTweensCapacity`) if the console warns about it during big UI transitions.
 - Animating layout-driven RectTransforms (inside Layout Groups) fights the layout system and rebuilds the canvas; animate a child or use a CanvasGroup instead (see `ui-ugui`).
 
+## References
+
+- [references/steps-and-actions.md](references/steps-and-actions.md): read when you need the full step/action table with serialized fields and target component requirements.
+- [references/custom-steps.md](references/custom-steps.md): read when writing a custom `AnimationStepBase` or `DOTweenActionBase`.
+
 ## Related skills
 
-- `ui-ugui` for Canvas, RectTransform and CanvasGroup setup the steps animate.
-- `ui-effect` for shader-based UI transitions (dissolve, shiny, blur) that can be driven alongside or from sequences.
-- `unitask` for `PlayAsync`, cancellation and awaiting DOTween tweens.
+- ui-ugui: Canvas, RectTransform and CanvasGroup setup the steps animate.
+- ui-effect: shader-based UI transitions (dissolve, shiny, blur) driven alongside or from sequences.
+- unitask: `PlayAsync`, cancellation and awaiting DOTween tweens.
+- timeline-sequencing, animation-authoring: Timeline cutscenes and Animator-based animation.

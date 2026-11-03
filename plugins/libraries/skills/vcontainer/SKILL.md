@@ -1,6 +1,6 @@
 ---
 name: vcontainer
-description: "Sets up and reviews hadashiA VContainer dependency injection in Unity: LifetimeScope hierarchies, lifetimes, interface and keyed registration, factories, component registration, entry points (IStartable, ITickable, IAsyncStartable), scene and prefab scopes, IL2CPP stripping. Use when composing game services with DI or debugging 'No such registration of type', 'Circular dependency detected', null [Inject] fields in Awake, or parent scope not found when loading scenes."
+description: "Sets up and reviews hadashiA VContainer dependency injection in Unity: LifetimeScope hierarchies, lifetimes, registration, factories, entry points (IStartable, ITickable, IAsyncStartable), scene and prefab scopes and IL2CPP stripping. Use when composing game services with DI. Triggers: \"set up VContainer\", \"No such registration of type\", \"Circular dependency detected\", \"[Inject] field is null in Awake\", \"parent scope not found\". Not for projects without a DI container (csharp-unity singleton or service locator patterns), pub/sub on top of DI (messagepipe)."
 license: MIT
 metadata:
   category: libraries
@@ -11,13 +11,6 @@ metadata:
 # VContainer
 
 Constructor-injection DI container with Unity scene/prefab scopes and PlayerLoop entry points. Verified against VContainer 1.19.0 (`VContainer/Assets/VContainer`) and the docs in `website/docs`.
-
-Reference files, read when needed:
-
-- `references/registration.md` - read when you need an exact `Register*` overload, component registration options, factories, keys, parameters, open generics, collections, or injection rules.
-- `references/scopes-entry-points.md` - read when wiring parent/child scopes, additive scenes, runtime child scopes, entry point timing, async startup, exception handlers, integrations (UniTask, MessagePipe, ECS), diagnostics, source generator, or tests.
-
-Related skills: `messagepipe` (pub/sub on top of VContainer), `unitask` (`IAsyncStartable` returns UniTask when installed), `r3` (dispose subscriptions in entry points), `zlogger` (register `ILoggerFactory` / `ILogger<T>`), `csharp-unity` (general architecture and code standards).
 
 ## Install
 
@@ -40,15 +33,15 @@ using VContainer.Unity;
 
 public sealed class GameLifetimeScope : LifetimeScope
 {
-    [SerializeField] private GameSettings _settings;
-    [SerializeField] private HudView _hud;
+    [SerializeField] private GameSettings settings;
+    [SerializeField] private HudView hud;
 
     protected override void Configure(IContainerBuilder builder)
     {
-        builder.RegisterInstance(_settings);
+        builder.RegisterInstance(this.settings);
         builder.Register<ScoreService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
         builder.Register<IEnemyFactory, EnemyFactory>(Lifetime.Scoped);
-        builder.RegisterComponent(_hud);
+        builder.RegisterComponent(this.hud);
         builder.RegisterComponentInHierarchy<PlayerController>();
         builder.RegisterEntryPoint<GameLoop>();
     }
@@ -69,11 +62,11 @@ public sealed class GameLoop : IStartable, ITickable, IDisposable
 
     public GameLoop(ScoreService score, HudView hud)
     {
-        _score = score;
-        _hud = hud;
+        this._score = score;
+        this._hud = hud;
     }
 
-    public void Start() => _hud.Show(_score.Current);
+    public void Start() => this._hud.Show(this._score.Current);
     public void Tick() { }
     public void Dispose() { }
 }
@@ -83,7 +76,7 @@ public sealed class PlayerController : UnityEngine.MonoBehaviour
     private ScoreService _score;
 
     [Inject]
-    private void Construct(ScoreService score) => _score = score;
+    private void Construct(ScoreService score) => this._score = score;
 }
 ```
 
@@ -121,5 +114,18 @@ public sealed class PlayerController : UnityEngine.MonoBehaviour
 - **Scene loading order**: a scene scope whose parent lives in another scene must load after the parent is built. Wrap the load in `using (LifetimeScope.EnqueueParent(parentScope)) { await SceneManager.LoadSceneAsync(...); }`, or set the parent type in the inspector (`parentReference`). An inspector parent type takes priority over `EnqueueParent`; if the type is not found when the scene finishes loading, VContainer throws (`VContainerParentTypeReferenceNotFound`). Use `LifetimeScope.Enqueue(builder => ...)` (there is no `EnqueueExtraInstaller`) to add registrations to the next scope built inside the `using` block.
 - **Disposing scopes**: `scope.Dispose()` disposes the container (calls `IDisposable` on Singleton/Scoped instances it created) and destroys the scope's GameObject. Children created with `CreateChild` are parented under the scope transform and go with it. Scoped MonoBehaviours elsewhere in the scene are not destroyed; parent them under the scope or dispose them yourself.
 - **IL2CPP stripping**: reflection-only constructors can be stripped. `[Inject]` derives from `PreserveAttribute`, so marking the constructor `[Inject]` keeps it; otherwise use `link.xml`. The source generator also preserves generated types.
-- **Unity 6 notes**: VContainer 1.19 already uses `FindAnyObjectByType` (2022.1+) and switches its diagnostics scope name to `GetEntityId()` behind its own `#if UNITY_6000_4_OR_NEWER` gate (newer Unity 6 releases move to `EntityId` and deprecate `GetInstanceID`; check your version's docs), and `IAsyncStartable` returns `UnityEngine.Awaitable` on 2023.1+ when UniTask is not installed.
+- **Unity 6 notes**: VContainer 1.19 already uses `FindAnyObjectByType` (2022.1+) and switches its diagnostics scope name to `GetEntityId()` behind its own `#if UNITY_6000_4_OR_NEWER` gate (`GetInstanceID` is obsolete as an error, CS0619, on 6000.5+), and `IAsyncStartable` returns `UnityEngine.Awaitable` on 2023.1+ when UniTask is not installed.
 - **Diagnostics left on**: `VContainerSettings.EnableDiagnostics` adds heavy GC allocation; keep it off in builds.
+
+## References
+
+- [references/registration.md](references/registration.md): read when you need an exact `Register*` overload, component registration options, factories, keys, parameters, open generics, collections, or injection rules.
+- [references/scopes-entry-points.md](references/scopes-entry-points.md): read when wiring parent/child scopes, additive scenes, runtime child scopes, entry point timing, async startup, exception handlers, integrations (UniTask, MessagePipe, ECS), diagnostics, source generator, or tests.
+
+## Related skills
+
+- messagepipe: pub/sub on top of VContainer.
+- unitask: `IAsyncStartable` returns UniTask when installed.
+- r3: dispose subscriptions in entry points.
+- zlogger: register `ILoggerFactory` / `ILogger<T>`.
+- csharp-unity: general architecture, code standards, and the no-DI singleton/service locator patterns.

@@ -1,6 +1,6 @@
 ---
 name: magiconion
-description: "Builds real-time client-server networking between Unity and an ASP.NET Core server with Cysharp MagicOnion (gRPC + MessagePack over HTTP/2): shared interface project, Unary services, StreamingHub rooms and groups, YetAnotherHttpHandler transport, auth, reconnect. Use when the user mentions MagicOnion, StreamingHub, UnaryResult, gRPC in Unity, or a hub/client that works in the Editor but fails on IL2CPP ('formatter not found', missing [MagicOnionClientGeneration])."
+description: "Builds real-time client-server networking between Unity and an ASP.NET Core server with Cysharp MagicOnion (gRPC + MessagePack over HTTP/2): shared interface project, Unary services, StreamingHub rooms and groups, transport, auth and reconnect. Use when the game talks to a custom C# server. Triggers: \"MagicOnion\", \"StreamingHub\", \"UnaryResult\", \"gRPC in Unity\", \"works in Editor but formatter not found on IL2CPP\". Not for Unity Netcode multiplayer (netcode-for-gameobjects), Lobby, Relay or Sessions (setup-multiplayer-services), MessagePack contracts themselves (messagepack-csharp)."
 license: MIT
 metadata:
   category: libraries
@@ -11,12 +11,6 @@ metadata:
 # MagicOnion
 
 Code-first RPC for Unity and .NET: define C# interfaces once, implement them on an ASP.NET Core gRPC server, call them from Unity through generated proxies. Verified against MagicOnion 7.11.0 (`src/`, `docs/docs/`). Server needs .NET 8+; Unity client needs 2022.3+ (Unity 6: 6000.0.34f1+, earlier 6000.0 builds have source generator issues).
-
-Reference files, read when needed:
-
-- `references/server-setup.md` - read when creating the solution, the shared project, `Program.cs`, Kestrel HTTP/2/TLS, auth, filters, options, or Redis/NATS group backplanes.
-- `references/hub-recipes.md` - read when writing StreamingHub interfaces, server hubs, groups, heartbeat, disconnect handling, or the Unity reconnecting client.
-- `references/transport-platforms.md` - read when picking the transport/serializer per platform (Editor, Mono, IL2CPP, iOS, Android, WebGL, consoles) or comparing against Netcode for GameObjects / Multiplayer Services.
 
 ## Architecture
 
@@ -156,10 +150,17 @@ Rules, with a full reconnecting component in `references/hub-recipes.md`:
 - **h2c vs TLS mismatch**: `http://` + no `Http2Only` gives HTTP/1.1 and a protocol error; Kestrel must expose an `Http2` endpoint for cleartext. See `references/server-setup.md`.
 - **Group race**: removing the last member and adding a new one concurrently can destroy and recreate a named hub group; hold your own lock or use application-managed groups (`IMulticastGroupProvider`) for authoritative room state.
 
+## References
+
+- [references/server-setup.md](references/server-setup.md): read when creating the solution, the shared project, `Program.cs`, Kestrel HTTP/2/TLS, auth, filters, options, or Redis/NATS group backplanes.
+- [references/hub-recipes.md](references/hub-recipes.md): read when writing StreamingHub interfaces, server hubs, groups, heartbeat, disconnect handling, or the Unity reconnecting client.
+- [references/transport-platforms.md](references/transport-platforms.md): read when picking the transport/serializer per platform (Editor, Mono, IL2CPP, iOS, Android, WebGL, consoles) or comparing against Netcode for GameObjects / Multiplayer Services.
+
 ## Related skills
 
-- `unitask` - async entry points, cancellation, `Forget()`.
-- `messagepack-csharp` / `memorypack` - DTO contracts and AOT resolvers.
-- `messagepipe` - fan receiver callbacks out to game systems.
-- `vcontainer` - composition root for channels and connection services.
-- `setup-multiplayer-services` - Unity Sessions/Relay/Lobby; compare in `references/transport-platforms.md`.
+- unitask: async entry points, cancellation, `Forget()`.
+- messagepack-csharp, memorypack: DTO contracts and AOT resolvers.
+- messagepipe: fan receiver callbacks out to game systems.
+- vcontainer: composition root for channels and connection services.
+- netcode-for-gameobjects: Unity netcode for host/client games.
+- setup-multiplayer-services: Unity Sessions/Relay/Lobby; compare in `references/transport-platforms.md`.

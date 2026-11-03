@@ -1,6 +1,6 @@
 ---
 name: zstring
-description: "Builds strings without GC garbage in Unity using Cysharp ZString: Concat, Format, Join, UTF-16/UTF-8 value builders, prepared formats, TextMeshPro SetTextFormat/SetText, custom formatters. Use for per-frame UI text (score, timer, FPS), hot-path logging or network text, and when the Profiler shows GC Alloc from string.Format, interpolation or TMP SetText, or on NestedStringBuilderCreationException. Not for structured logging (see zlogger)."
+description: "Builds strings without GC garbage in Unity with Cysharp ZString: Concat, Format, Join, UTF-16 and UTF-8 value builders, prepared formats, TextMeshPro SetTextFormat/SetText and custom formatters. Use for per-frame UI text, hot-path string building or network text when the Profiler shows GC Alloc from strings. Triggers: \"score text allocates every frame\", \"GC Alloc from string.Format\", \"zero-allocation TMP text\", \"NestedStringBuilderCreationException\". Not for structured or file logging (zlogger), TMP rendering and layout cost (optimize-text-mesh-pro)."
 license: MIT
 metadata:
   category: libraries
@@ -12,14 +12,11 @@ metadata:
 
 Struct-based string builders that rent buffers from a thread-static scratch array or `ArrayPool<T>`, format primitives directly into the buffer, and allocate only the final `string` (or nothing, when the consumer accepts a `char[]` / span). Verified against ZString 2.6.0 (`src/ZString.Unity/Assets/Scripts/ZString`).
 
-Read `references/api.md` when you need full member lists, the Utf8 format-string rules, or prepared-format and custom-formatter details.
-
 ## Workflow
 
 1. Install:
    - Package Manager > Add package from git URL: `https://github.com/Cysharp/ZString.git?path=src/ZString.Unity/Assets/Scripts/ZString#2.6.0` (release tags are plain `x.y.z`), or import `ZString.Unity.*.unitypackage` from the GitHub releases.
-   - The code calls `System.Runtime.CompilerServices.Unsafe`. The unitypackage ships `Assets/Plugins/System.Runtime.CompilerServices.Unsafe.dll` (6.0.0); the git package does NOT. Two copies cause "Multiple precompiled assemblies with the same name".
-   - **System.Runtime.CompilerServices.Unsafe:** install once via NuGetForUnity (package `System.Runtime.CompilerServices.Unsafe` 6.0.0, usually pulled in as a dependency); if the project already has it from another route (a `.unitypackage` DLL, the `org.nuget.system.runtime.compilerservices.unsafe` UPM package), keep that one and don't add a second copy (duplicate-assembly errors).
+   - **System.Runtime.CompilerServices.Unsafe:** the code needs it. The ZString unitypackage ships `Assets/Plugins/System.Runtime.CompilerServices.Unsafe.dll` (6.0.0); the git package does NOT. If the project already has a copy (unitypackage DLL, NuGetForUnity package, or the `org.nuget.system.runtime.compilerservices.unsafe` UPM package), keep that one; otherwise install it once via NuGetForUnity (6.0.0). Two copies cause "Multiple precompiled assemblies with the same name".
 2. Your asmdef references `ZString` (it is `autoReferenced`, so `Assembly-CSharp` sees it without changes).
 3. `using Cysharp.Text;`.
 4. Replace hot-path string building (per frame, per tick, per log line) with the patterns below. Leave one-off strings alone.
@@ -71,15 +68,16 @@ using UnityEngine;
 
 public sealed class TimerLabel : MonoBehaviour
 {
-    [SerializeField] private TMP_Text _label;
+    [SerializeField] private TMP_Text label;
+
     private float _elapsed;
 
     private void Update()
     {
-        _elapsed += Time.deltaTime;
-        var minutes = (int)(_elapsed / 60f);
-        var seconds = _elapsed % 60f;
-        _label.SetTextFormat("{0:00}:{1:00.0}", minutes, seconds);
+        this._elapsed += Time.deltaTime;
+        var minutes = (int)(this._elapsed / 60f);
+        var seconds = this._elapsed % 60f;
+        this.label.SetTextFormat("{0:00}:{1:00.0}", minutes, seconds);
     }
 }
 ```
@@ -94,7 +92,7 @@ TMP's own `TMP_Text.SetText(string, float, ...)` overloads also avoid allocation
 | `a + b + c` | one `ToString()` per non-string arg, often an array, final string | cold paths |
 | `System.Text.StringBuilder` | builder + chunks, boxed `AppendFormat` args, final string | cold paths; cache-and-`Clear()` if you must |
 | ZString `Concat` / `Format` / builder | final string only (zero with TMP / span consumers) | hot paths, per-frame UI, logging |
-| `DefaultInterpolatedStringHandler` / custom interpolated handlers | n/a | needs C# 10; Unity 6 compiles C# 9 by default, but an asmdef can opt in with a `csc.rsp` containing `-langVersion:10` (as `zlogger` does). use it for your own handlers; ZString's `Format` / builder APIs do not need it |
+| `DefaultInterpolatedStringHandler` / custom interpolated handlers | n/a | needs C# 10: Unity 6 compiles C# 9 by default, but an assembly can opt in with a `csc.rsp` containing `-langVersion:10` (as `zlogger` does). Use it for your own handlers; ZString's `Format` / builder APIs do not need it |
 
 The README benchmarks show ZString ahead of `+`, `string.Format` and `StringBuilder` for a mixed `int` / `string` concat; exact numbers depend on runtime and are not published as a table. Measure in your own Profiler.
 
@@ -108,9 +106,14 @@ The README benchmarks show ZString ahead of `+`, `string.Format` and `StringBuil
 - IL2CPP: no reflection-based code paths beyond enum name caching; the `System.Runtime.CompilerServices.Unsafe` DLL must be included for player builds (keep its import settings enabled for all platforms). `RegisterTryFormat<T>` overwrites `FormatterCache<T>.TryFormatDelegate`; register at startup (for example in `RuntimeInitializeOnLoadMethod`) so every call site uses the same formatter.
 - `SetTextFormat` with more than 16 args does not exist; use a builder and `SetText(sb)`.
 
+## References
+
+- [references/api.md](references/api.md): read when you need full member lists, the Utf8 format-string rules, or prepared-format and custom-formatter details.
+
 ## Related skills
 
-- `csharp-unity` for general allocation and GC rules.
-- `optimize-text-mesh-pro` for TMP rendering and layout costs.
-- `unitask` and `r3` (Cysharp siblings) often pair with ZString for UI binding.
-- `native-memory-array` for UTF-8 output larger than 2 GB or kept off the managed heap (`CreateBufferWriter()` as the `IBufferWriter<byte>` target).
+- csharp-unity: general allocation and GC rules.
+- zlogger: structured and file logging.
+- optimize-text-mesh-pro: TMP rendering and layout costs.
+- unitask, r3: Cysharp siblings that often pair with ZString for UI binding.
+- native-memory-array: UTF-8 output larger than 2 GB or kept off the managed heap (`CreateBufferWriter()` as the `IBufferWriter<byte>` target).

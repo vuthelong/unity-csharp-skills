@@ -1,6 +1,6 @@
 ---
 name: observable-collections
-description: "Builds data-driven UI on Cysharp ObservableCollections: observable list/dictionary/queue/ring-buffer with struct change events, synchronized views that map items to row views with sort and filter, IList binding for UI Toolkit, and R3 Observe* streams. Choose it over plain r3 when the model is a collection and the UI must mirror adds, removes, moves and resets; use r3 alone for single values and event streams. Triggers: ObservableList, CreateView, ISynchronizedView."
+description: "Builds data-driven UI on Cysharp ObservableCollections: observable list, dictionary, queue and ring buffer with struct change events, synchronized views that map items to row views with sort and filter, IList binding for UI Toolkit, and R3 Observe* streams. Use when the model is a collection and the UI must mirror adds, removes, moves and resets. Triggers: \"ObservableList\", \"CreateView\", \"ISynchronizedView\", \"inventory list UI out of sync\", \"bind a list to ListView\". Not for single values and event streams (r3), the row UI itself (ui-ugui, ui-uitk)."
 license: MIT
 metadata:
   category: libraries
@@ -11,8 +11,6 @@ metadata:
 # ObservableCollections
 
 Observable collections whose change events are generic `readonly ref struct`s (`NotifyCollectionChangedEventArgs<T>` with `ReadOnlySpan<T>` ranges), plus synchronized views that map each item to a view object once and keep it in sync, including sort, reverse and filters. Namespace `ObservableCollections`. Verified against the repository source (`src/ObservableCollections`, `src/ObservableCollections.R3`).
-
-Read `references/api.md` for full member lists of every collection, the view interfaces, event payloads and R3 event structs.
 
 ## Workflow
 
@@ -102,7 +100,22 @@ public sealed class InventoryPanel : MonoBehaviour
 
     #endregion
 
-    #region Public API
+    #region Unity Lifecycle
+
+    private void OnDestroy()
+    {
+        if (this._view != null)
+        {
+            this._view.ViewChanged -= this.OnViewChanged;
+            this._view.Dispose();
+        }
+
+        this._rowPool?.Dispose();
+    }
+
+    #endregion
+
+    #region Row Binding
 
     public void Bind(ObservableList<ItemStack> items)
     {
@@ -121,25 +134,6 @@ public sealed class InventoryPanel : MonoBehaviour
         foreach (var pair in this._view.Unfiltered) this._rowPool.Release(pair.View);
         this._items.Clear();
     }
-
-    #endregion
-
-    #region Unity Lifecycle
-
-    private void OnDestroy()
-    {
-        if (this._view != null)
-        {
-            this._view.ViewChanged -= this.OnViewChanged;
-            this._view.Dispose();
-        }
-
-        this._rowPool?.Dispose();
-    }
-
-    #endregion
-
-    #region View Sync
 
     private InventoryRow CreateRow(ItemStack item)
     {
@@ -222,8 +216,13 @@ this._items.ObserveCountChanged(notifyCurrentCount: true)
 - **No LINQ in hot paths.** `CreateView` already projects; iterate `foreach` over `Filtered` / `Unfiltered` / the collection, and index `ReadOnlySpan` ranges with `for`. Enumerating an `ObservableList` holds `SyncRoot` for the whole `foreach` (no snapshot); mutating it mid-loop throws, and other threads block until the loop ends.
 - **vs R3 `ReactiveProperty<List<T>>`.** A reactive property only fires when the reference is replaced (or `ForceNotify` is called), with no information about what changed, so every subscriber rebuilds everything. ObservableCollections reports item-level Add / Remove / Replace / Move / Reset with indices, and views keep per-item objects. Use `ReactiveProperty` for scalar state, ObservableCollections for lists the UI renders row by row.
 
+## References
+
+- [references/api.md](references/api.md): read for full member lists of every collection, the view interfaces, event payloads and R3 event structs.
+
 ## Related skills
 
-- `r3` for subscriptions, `AddTo`, and main-thread scheduling.
-- `ui-ugui` and `ui-uitk` for the row UI itself; `zbase-pooling` for pooling row GameObjects.
-- `csharp-unity` for house style.
+- r3: subscriptions, `AddTo`, and main-thread scheduling; single values and event streams.
+- ui-ugui, ui-uitk: the row UI itself.
+- zbase-pooling: pooling row GameObjects when the project already uses ZBase.
+- csharp-unity: house style and default `UnityEngine.Pool` pooling.

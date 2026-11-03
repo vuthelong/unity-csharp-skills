@@ -1,6 +1,6 @@
 ---
 name: messagepack-csharp
-description: "Writes and reviews MessagePack-CSharp v3 binary serialization in Unity and .NET: [MessagePackObject]/[Key] contracts, source-generated resolvers, the single IL2CPP resolver bootstrap shared with MasterMemory and MagicOnion, security options, LZ4, Unity types, v2 to v3 migration. Choose it over memorypack for cross-language peers, a documented wire format, or MagicOnion. Triggers: MessagePack, msgpack, FormatterNotRegisteredException or 'formatter not found' on IL2CPP."
+description: "Writes and reviews MessagePack-CSharp v3 binary serialization in Unity and .NET: [MessagePackObject]/[Key] contracts, source-generated resolvers, the single IL2CPP resolver bootstrap shared with MasterMemory and MagicOnion, security options, LZ4, Unity types and v2 to v3 migration. Use for cross-language peers, a documented wire format, or MagicOnion. Triggers: \"MessagePack\", \"msgpack\", \"FormatterNotRegisteredException\", \"formatter not found on IL2CPP\", \"migrate from mpc\". Not for C#-only fastest payloads (memorypack), save architecture such as slots and migrations (save-system)."
 license: MIT
 metadata:
   category: libraries
@@ -11,11 +11,6 @@ metadata:
 # MessagePack-CSharp
 
 Fast MessagePack (msgpack.org) serializer for C#. Verified against MessagePack-CSharp v3.1.11 (`src/MessagePack`, `src/MessagePack.Annotations`, `src/MessagePack.UnityClient`, `README.md`, `doc/migrating_v2-v3.md`). Unity minimum 2022.3.12f1.
-
-Reference files, read when needed:
-
-- `references/attributes-and-resolvers.md` - read for the full attribute table, built-in resolver table, options/security members, and the Unity type list.
-- `references/recipes-and-migration.md` - read when writing a Unity bootstrap, a custom formatter, a composite resolver, Union hierarchies, streaming, save files, or migrating from v2 (mpc) to v3.
 
 ## Workflow
 
@@ -214,10 +209,16 @@ Choose MessagePack when any peer is not C#, when you need a documented wire form
 - **Generic `init` properties**: avoid `init` setters on generic types with public-only resolvers (CLR bug, see analyzer MsgPack017 for initializers).
 - **Unity serialization overlap**: `[SerializeField] private` fields are not serialized by MessagePack unless keyed and accessible (`partial` type or `AllowPrivate`). Keep save DTOs separate from MonoBehaviours.
 
+## References
+
+- [references/attributes-and-resolvers.md](references/attributes-and-resolvers.md): read for the full attribute table, built-in resolver table, options/security members, and the Unity type list.
+- [references/recipes-and-migration.md](references/recipes-and-migration.md): read when writing a Unity bootstrap, a custom formatter, a composite resolver, Union hierarchies, streaming, save files, or migrating from v2 (mpc) to v3.
+
 ## Related skills
 
-- `magiconion` - MessagePack is its default wire format.
-- `memorypack` - C#-only alternative.
-- `mastermemory` - read-only master-data database stored as MessagePack; its resolver goes in the bootstrap above.
-- `unitask` - awaiting `DeserializeAsync` / file IO without blocking the main thread.
-- `csharp-unity` - house style for DTOs and bootstrap code.
+- magiconion: MessagePack is its default wire format.
+- memorypack: C#-only alternative.
+- mastermemory: read-only master-data database stored as MessagePack; its resolver goes in the bootstrap above.
+- save-system: save slots, atomic writes and migrations around the payload.
+- unitask: awaiting `DeserializeAsync` / file IO without blocking the main thread.
+- csharp-unity: house style for DTOs and bootstrap code.

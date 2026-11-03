@@ -1,6 +1,6 @@
 ---
 name: memorypack
-description: "Serializes C# objects with Cysharp MemoryPack, the fastest C#-only binary format (source-generated, IL2CPP-safe): [MemoryPackable] types, version tolerance, unions, Unity type formatters, save games and network payloads. Choose it over messagepack-csharp when every reader is C# and raw speed matters; pick MessagePack for non-C# peers, a documented wire format or MagicOnion defaults. Triggers: MemoryPack, MEMPACK diagnostics, 'is not registered in this provider'."
+description: "Serializes C# objects with Cysharp MemoryPack, the fastest C#-only binary format (source-generated, IL2CPP-safe): [MemoryPackable] types, version tolerance, unions, Unity type formatters, save payloads and network payloads. Use when every reader is C# and raw speed matters. Triggers: \"MemoryPack\", \"MEMPACK diagnostics\", \"is not registered in this provider\", \"fast binary save format\". Not for non-C# peers, a documented wire format or MagicOnion defaults (messagepack-csharp), save architecture such as slots, atomic writes and migrations (save-system)."
 license: MIT
 metadata:
   category: libraries
@@ -12,11 +12,6 @@ metadata:
 
 Zero-encoding binary serializer: a Roslyn source generator writes the formatter for every `[MemoryPackable]` type, so there is no reflection or IL emit at runtime. The format carries no member names and no type info; the C# type is the schema. Verified against MemoryPack 1.21.4 (`src/MemoryPack.Core`, `src/MemoryPack.Generator`, `src/MemoryPack.Unity`).
 
-Reference files, read when needed:
-
-- `references/attributes.md` - read for the full attribute table, GenerateType / SerializeLayout semantics, constructor rules, callbacks, and the version-tolerance matrix.
-- `references/recipes.md` - read for save-game, network payload, binary game-data, custom formatter, union, overwrite, and compression code.
-
 ## Workflow
 
 1. Install NuGet `MemoryPack` with NuGetForUnity (Unity 2022.3.12f1+ / Unity 6; add NuGetForUnity once from git URL `https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity`, then **NuGet > Manage NuGet Packages**; analyzer DLLs need no platforms ticked and the `RoslynAnalyzer` label; on assembly version conflicts clear **Player > Assembly Version Validation**). It pulls `MemoryPack.Core`, `MemoryPack.Generator`, `System.Runtime.CompilerServices.Unsafe` and `System.Collections.Immutable`.
@@ -26,6 +21,8 @@ Reference files, read when needed:
 4. Serialize with `MemoryPackSerializer.Serialize(value)` and read back with `MemoryPackSerializer.Deserialize<T>(bytes)`.
 5. Decide schema evolution up front: `GenerateType.Object` (default, append-only) or `GenerateType.VersionTolerant` (explicit `[MemoryPackOrder]`, can delete). Save files and shipped data need one of these rules followed forever.
 6. Test round-trips in an IL2CPP player build on each target platform before shipping.
+
+Save architecture (slots, atomic writes, migrations, cloud sync) belongs to `save-system`; this skill covers the payload format only.
 
 ## Unity C# 9 limits
 
@@ -95,15 +92,22 @@ README benchmark claim: in Unity, MemoryPack is x3 to x10 faster than `JsonUtili
 - **Untrusted input** (downloaded saves, network packets): there is no type-name polymorphism, so a payload cannot instantiate arbitrary types, but a malformed length header can still allocate large arrays or throw. Cap payload size before deserializing, catch `MemoryPackSerializationException`, and authenticate or checksum data you did not produce.
 - **Unity callbacks vs MemoryPack callbacks**: `ISerializationCallbackReceiver.OnBeforeSerialize` / `OnAfterDeserialize` are never called by MemoryPack. Use `[MemoryPackOnSerializing]`, `[MemoryPackOnSerialized]`, `[MemoryPackOnDeserializing]`, `[MemoryPackOnDeserialized]`. Instance `OnDeserializing` only runs when deserializing into an existing instance via `ref`.
 - **No static constructor** on `[MemoryPackable]` types (the generator uses it). Write `static partial void StaticConstructor()` instead.
-- **Duplicate `System.Runtime.CompilerServices.Unsafe.dll`** when another package (for example a ZString git install, see `zstring`) also ships it: keep exactly one copy.
+- **Duplicate `System.Runtime.CompilerServices.Unsafe.dll`** when another package (for example the ZString unitypackage, see `zstring`) also ships it: keep exactly one copy.
 - **Async APIs are not streaming**: `SerializeAsync` / `DeserializeAsync` buffer the whole payload. For large saves on the main thread, serialize to a pooled `IBufferWriter<byte>` and write the file on a worker thread (see `unitask` for thread switching; WebGL has no threads).
 - **WebGL**: core serialization works (generated code, no threads or JIT needed). `Application.persistentDataPath` is IndexedDB-backed there, so verify that save files persist across reloads on your Unity version; Brotli availability on WebGL is unverified.
 
+## References
+
+- [references/attributes.md](references/attributes.md): read for the full attribute table, GenerateType / SerializeLayout semantics, constructor rules, callbacks, and the version-tolerance matrix.
+- [references/recipes.md](references/recipes.md): read for save-game, network payload, binary game-data, custom formatter, union, overwrite, and compression code.
+
 ## Related skills
 
-- `csharp-unity` for house style used in the recipes.
-- `unitask` for async file IO and thread hopping around serialization.
-- `zstring` for zero-allocation text output alongside binary data.
-- `mastermemory` for indexed, read-only master data (MessagePack-based) instead of a raw MemoryPack blob.
-- `native-memory-array` for serializing into or out of buffers larger than 2 GB or kept off the managed heap.
-- `game-data-pipeline` for where binary baked data fits next to ScriptableObjects and CSV imports.
+- messagepack-csharp: cross-language or documented wire format, MagicOnion defaults.
+- save-system: save architecture: slots, atomic writes, migrations.
+- csharp-unity: house style used in the recipes.
+- unitask: async file IO and thread hopping around serialization.
+- zstring: zero-allocation text output alongside binary data.
+- mastermemory: indexed, read-only master data (MessagePack-based) instead of a raw MemoryPack blob.
+- native-memory-array: serializing into or out of buffers larger than 2 GB or kept off the managed heap.
+- game-data-pipeline: where binary baked data fits next to ScriptableObjects and CSV imports.

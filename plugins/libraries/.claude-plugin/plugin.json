@@ -1,7 +1,7 @@
 {
   "name": "unity-libraries",
   "description": "Third-party Unity 6 libraries (17 skills): async and reactive (UniTask, R3, ObservableCollections), DI and messaging (VContainer, MessagePipe, ZBase PubSub), serialization and data (MessagePack-CSharp, MemoryPack, MasterMemory, ZBase CSV Reader with Google Sheets download), networking (MagicOnion), memory and strings (NativeMemoryArray, ZString, ZBase Pooling), logging (ZLogger), and UI/animation (UIEffect v5, Animation Sequencer DOTween timelines).",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "vuthelong"
   },

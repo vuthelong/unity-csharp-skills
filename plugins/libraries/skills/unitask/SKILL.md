@@ -1,6 +1,6 @@
 ---
 name: unitask
-description: "Writes and reviews allocation-free async/await in Unity with Cysharp UniTask: UniTask/UniTaskVoid return types, PlayerLoop timing, cancellation tied to object lifetime, WhenAll/WhenAny, awaiting Addressables, UnityWebRequest and DOTween, async LINQ and channels, UniTask Tracker. Use when the project already references com.cysharp.unitask or the user asks for UniTask: replacing coroutines or Task, or fixing leaked/pending UniTasks, OperationCanceledException noise, async void, or exceptions from awaiting the same UniTask twice."
+description: "Writes and reviews allocation-free async/await in Unity with Cysharp UniTask: return types, PlayerLoop timing, lifetime cancellation, WhenAll/WhenAny, awaiting Addressables, UnityWebRequest and DOTween, async LINQ, channels and the UniTask Tracker. Use when the project references com.cysharp.unitask or the user asks for UniTask. Triggers: \"convert this coroutine to UniTask\", \"UniTask never completes\", \"OperationCanceledException spam\", \"awaiting the same UniTask twice\". Not for projects without UniTask (csharp-unity, built-in Awaitable), reactive streams (r3)."
 license: MIT
 metadata:
   category: libraries
@@ -11,12 +11,6 @@ metadata:
 # UniTask
 
 Struct-based, pooled async/await for Unity that runs on the PlayerLoop (no threads unless you ask). Verified against UniTask 2.5.11 (`src/UniTask/Assets/Plugins/UniTask`).
-
-Reference files, read when needed:
-
-- `references/api-tables.md` - read when you need exact signatures: factory methods, awaiting Unity types, combinators, conversions, Task-to-UniTask mapping.
-- `references/cancellation-recipes.md` - read when wiring lifetimes, timeouts, linked tokens, completion sources, exception handling, or tests.
-- `references/streams-and-events.md` - read when using async LINQ, `await foreach`, uGUI/MonoBehaviour async events, `AsyncReactiveProperty`, or `Channel`.
 
 ## Workflow
 
@@ -36,7 +30,7 @@ Reference files, read when needed:
 | `UniTask` | awaitable work with no result | struct; replaces `Task` / `ValueTask` |
 | `UniTask<T>` | awaitable work with a result | struct; `AsUniTask()` drops the result for free |
 | `UniTaskVoid` | fire-and-forget entry points (`async UniTaskVoid Start()`, button handlers) | not awaitable; exceptions go straight to `UniTaskScheduler.UnobservedTaskException`; call `.Forget()` at the call site to silence the warning |
-| `async void` | never | runs on the .NET task system, not UniTask; use `UniTask.Action` / `UniTask.UnityAction` / `UniTask.Void` for event lambdas |
+| `async void` | only a UI event handler with a fixed `void` signature, body wrapped in `try/catch` | runs on the .NET task system, not UniTask; prefer `UniTask.Action` / `UniTask.UnityAction` / `UniTask.Void` for event lambdas |
 
 `async UniTaskVoid Foo()` + `Foo().Forget()` is cheaper than `async UniTask Foo()` + `Foo().Forget()` when nobody ever awaits it. Use `Forget()` on a `UniTask` when the method is sometimes awaited and sometimes not. `Forget(Action<Exception> exceptionHandler, bool handleExceptionOnMainThread = true)` routes errors to your handler instead of the global one.
 
@@ -97,8 +91,10 @@ Coroutine equivalents:
 
 | Project | Choose |
 |---|---|
-| References `com.cysharp.unitask` | UniTask everywhere, including coroutine-level waits; do not mix in `Awaitable` |
+| References `com.cysharp.unitask`, or a required package depends on it | UniTask everywhere, including coroutine-level waits; do not mix in `Awaitable` |
 | No UniTask | Built-in `Awaitable`; follow `csharp-unity` and ask before adding UniTask |
+
+An `async Awaitable` method can `await` a `UniTask` directly, so an Awaitable-based interface can wrap UniTask services without an adapter type.
 
 Both are pooled and both must be awaited only once. When a third-party API hands you an `Awaitable`, convert it at the call site with `awaitable.AsUniTask()` (compiled under `UNITY_2023_1_OR_NEWER`). In files that use both, keep `using UnityEngine;` so `await SceneManager.LoadSceneAsync(...)` and similar resolve without ambiguity between Unity's `AsyncOperation` awaiter and UniTask's.
 
@@ -119,8 +115,15 @@ Both are pooled and both must be awaited only once. When a third-party API hands
 - Edit Mode: all timings run on `EditorApplication.update`; `Delay` with `DeltaTime` switches to `Realtime`. `-batchmode -quit` exits before tasks finish; quit with `EditorApplication.Exit(0)` instead.
 - Tests: `[UnityTest] public IEnumerator T() => UniTask.ToCoroutine(async () => { ... });`.
 
+## References
+
+- [references/api-tables.md](references/api-tables.md): read when you need exact signatures: factory methods, awaiting Unity types, combinators, conversions, Task-to-UniTask mapping.
+- [references/cancellation-recipes.md](references/cancellation-recipes.md): read when wiring lifetimes, timeouts, linked tokens, completion sources, exception handling, or tests.
+- [references/streams-and-events.md](references/streams-and-events.md): read when using async LINQ, `await foreach`, uGUI/MonoBehaviour async events, `AsyncReactiveProperty`, or `Channel`.
+
 ## Related skills
 
-- `csharp-unity` for general C# and MonoBehaviour standards.
-- `review-unity-csharp` for leak-focused review of async code.
-- `animation-sequencer` and `zbase-csv-reader` for libraries that are often awaited with UniTask.
+- csharp-unity: general C# and MonoBehaviour standards, and the built-in `Awaitable` path.
+- review-unity-csharp: leak-focused review of async code.
+- r3: event streams; `SubscribeAwait` bodies can await UniTask.
+- animation-sequencer, zbase-csv-reader: libraries that are often awaited with UniTask.

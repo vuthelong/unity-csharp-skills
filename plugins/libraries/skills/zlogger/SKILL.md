@@ -1,6 +1,6 @@
 ---
 name: zlogger
-description: "Sets up Cysharp ZLogger v2, a zero-allocation Microsoft.Extensions.Logging provider for Unity: NuGet + UPM install, the csc.rsp -langVersion:10 opt-in, Unity console, file, rolling-file and in-memory providers, JSON/structured logs, filters, LogManager or VContainer wiring, release stripping. Use when replacing Debug.Log with structured or file logging, or fixing 'cannot convert from string to ref ZLogger...InterpolatedStringHandler', lost file logs, or IL2CPP MissingMethodException."
+description: "Sets up Cysharp ZLogger v2, a zero-allocation Microsoft.Extensions.Logging provider for Unity: install, the csc.rsp C# 10 opt-in, console, file, rolling-file and in-memory providers, JSON logs, filters, LogManager or VContainer wiring and release stripping. Use when replacing Debug.Log with structured or file logging. Triggers: \"replace Debug.Log with ZLogger\", \"log to a file\", \"cannot convert from string to ref ZLogger InterpolatedStringHandler\", \"file logs are lost\", \"MissingMethodException in LoggerFactory.Create\". Not for building non-log strings (zstring), DI setup itself (vcontainer)."
 license: MIT
 metadata:
   category: libraries
@@ -11,8 +11,6 @@ metadata:
 # ZLogger
 
 ZLogger v2 is a `Microsoft.Extensions.Logging` (MEL) provider. `ZLog*` extension methods take an interpolated string handler that writes the template and arguments straight to UTF-8 buffers without boxing or building a `string`. Verified against ZLogger 2.5.10 (`src/ZLogger`, `src/ZLogger.Unity`).
-
-Read `references/recipes.md` for the bootstrap/LogManager, VContainer registration, file logging, formatter, scope, filter, source-generator and release-stripping code.
 
 ## Install (Unity 6)
 
@@ -30,8 +28,8 @@ Plain MEL calls (`logger.LogInformation("...")`) and `logger.Log(...)` work unde
 ## Workflow
 
 1. Create one `ILoggerFactory` at startup with `LoggerFactory.Create(logging => { ... })`, store it in a static `LogManager` (or register it in VContainer, see `vcontainer`).
-2. Per class: `private static readonly ILogger<Player> Logger = LogManager.GetLogger<Player>();`. The category is the type's full name.
-3. Log with `Logger.ZLogInformation($"Spawned {enemyId} at {position}");` and pass a `UnityEngine.Object` as `context` to make the Console entry ping it: `Logger.ZLogWarning($"Missing clip {clipName}", this);`.
+2. Per class: fetch `LogManager.GetLogger<Player>()` into an instance field in `Awake` (MonoBehaviours) or the constructor (plain C#). Do not cache it in a `static readonly` field: the factory is rebuilt each Play session, and with domain reload disabled a static logger keeps pointing at the disposed one. The category is the type's full name.
+3. Log with `this._logger.ZLogInformation($"Spawned {enemyId} at {position}");` and pass a `UnityEngine.Object` as `context` to make the Console entry ping it: `this._logger.ZLogWarning($"Missing clip {clipName}", this);`.
 4. Dispose the factory on `Application.quitting` so file providers flush.
 
 ## Providers
@@ -87,15 +85,21 @@ The biggest per-call cost of `Debug.Log` in players is stack-trace capture: set 
 
 ## Pitfalls
 
-- **Not disposing the factory loses file logs.** File, RollingFile and Stream providers queue entries to a background writer; `loggerFactory.Dispose()` drains and flushes. Dispose on `Application.quitting` (and in Editor when exiting Play Mode). Crashes still lose the tail; log critical errors to UnityDebug too.
-- **Hot paths.** Even zero-allocation logging costs formatting and I/O. Gate per-frame logs with `if (Logger.IsEnabled(LogLevel.Trace))` or keep them at Trace and raise the minimum level.
+- **Not disposing the factory loses file logs.** File, RollingFile and Stream providers queue entries to a background writer; `loggerFactory.Dispose()` drains and flushes. Dispose on `Application.quitting`, which in the Editor also fires when exiting Play Mode, so one hook covers both. Crashes still lose the tail; log critical errors to UnityDebug too.
+- **Hot paths.** Even zero-allocation logging costs formatting and I/O. Gate per-frame logs with `if (this._logger.IsEnabled(LogLevel.Trace))` or keep them at Trace and raise the minimum level.
 - **WebGL.** File, RollingFile and Stream providers start their writer with `Task.Run`; WebGL has no threads, and its file system is IndexedDB-backed. Use UnityDebug or InMemory on WebGL.
 - **Threads.** UnityDebug runs synchronously on the logging thread. `Debug.Log` is callable from worker threads, but the `context` object and any Unity API you touch while building the message are main-thread only. InMemory `MessageReceived` handlers also run on the logging thread; marshal to the main thread before touching UI (see `unitask`).
 - **C# 9 call sites.** Forgetting `csc.rsp` in an asmdef folder produces "cannot convert from string to ref ZLogger...InterpolatedStringHandler". Add the file next to that asmdef.
-- **Domain reload disabled.** A static factory survives Play Mode exits when Enter Play Mode Options skip domain reload. Reset it in `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]`.
+- **Domain reload disabled.** A static factory survives Play Mode exits when Enter Play Mode Options skip domain reload. Reset it in `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]`, and never cache loggers in `static readonly` fields, which are not re-initialized and keep the disposed factory's loggers.
 - **Rolling size units.** `rollSizeKB` / `RollingSizeKB` is in kilobytes (default `512 * 1024`, 512 MB); pass `1024` for 1 MB.
+
+## References
+
+- [references/recipes.md](references/recipes.md): read for the bootstrap/LogManager, VContainer registration, file logging, formatter, scope, filter, source-generator and release-stripping code.
 
 ## Related skills
 
-- `zstring` for building non-log strings without garbage.
-- `csharp-unity` for house style; `vcontainer` for DI registration; `unitask` for main-thread marshaling.
+- zstring: building non-log strings without garbage.
+- csharp-unity: house style and the C# version / `csc.rsp` rule.
+- vcontainer: DI registration of `ILoggerFactory` / `ILogger<T>`.
+- unitask: main-thread marshaling.

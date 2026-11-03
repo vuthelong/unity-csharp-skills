@@ -1,6 +1,6 @@
 ---
 name: zbase-pubsub
-description: "Sets up Zitga-Tech ZBase.Foundation.PubSub, a DI-free, UniTask-based messenger: Messenger object, typed publishers/subscribers, global and object-bound scopes, sync and async handlers, ordering, CachedPublisher. Choose it over messagepipe when the project has no DI container or wants a plain object it owns; choose messagepipe for container-injected brokers. Triggers: ZBase PubSub, Messenger, UnityScope, IMessage constraint errors, leaked ZBase PubSub subscriptions."
+description: "Sets up Zitga-Tech ZBase.Foundation.PubSub, a DI-free UniTask-based messenger: Messenger object, typed publishers and subscribers, global and object-bound scopes, sync and async handlers, ordering and CachedPublisher. Use when the project has no DI container or wants a plain messenger object it owns. Triggers: \"ZBase PubSub\", \"Messenger\", \"UnityScope\", \"IMessage constraint error\", \"leaked ZBase subscriptions\". Not for container-injected brokers (messagepipe), stream operators (r3), owner-local events (csharp-unity)."
 license: MIT
 metadata:
   category: libraries
@@ -11,12 +11,6 @@ metadata:
 # ZBase.Foundation.PubSub
 
 A plain-object messenger: create a `Messenger`, publish typed messages into scopes, subscribe sync or UniTask handlers. No DI container is involved. Verified against the repo HEAD (package.json 1.5.1, June 2024; OpenUPM serves 1.5.2), runtime under `Packages/ZBase.Foundation.PubSub/ZBase.Foundation.PubSub`, samples under `Samples~`.
-
-Reference file, read when needed:
-
-- `references/api.md` - read when you need every `Subscribe` overload (stateless, stateful, contextual), the publisher method list, `CachedPublisher`, or the scripting define symbols.
-
-Related skills: `messagepipe` (DI-first alternative, compared below), `unitask` (handler and publish signatures are UniTask), `r3` (stream operators), `vcontainer` (to share a `Messenger` instance through DI).
 
 ## Install
 
@@ -71,7 +65,7 @@ public struct EnemyKilled : IMessage
 
 public sealed class ScoreBoard : MonoBehaviour
 {
-    [SerializeField] private int _score;
+    [SerializeField] private int score;
 
     private void Start()
     {
@@ -80,7 +74,7 @@ public sealed class ScoreBoard : MonoBehaviour
         subscriber.Subscribe<EnemyKilled>(PlayKillFxAsync, destroyCancellationToken, order: 10);
     }
 
-    private void OnEnemyKilled(EnemyKilled message) => _score += message.Score;
+    private void OnEnemyKilled(EnemyKilled message) => this.score += message.Score;
 
     private async UniTask PlayKillFxAsync(EnemyKilled message, CancellationToken token)
     {
@@ -90,7 +84,14 @@ public sealed class ScoreBoard : MonoBehaviour
 
 public static class GameMessenger
 {
-    public static readonly Messenger Instance = new();
+    public static Messenger Instance { get; private set; } = new();
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetInstance()
+    {
+        Instance?.Dispose();
+        Instance = new Messenger();
+    }
 }
 ```
 
@@ -120,11 +121,11 @@ public static class GameMessenger
 
 ## Pitfalls
 
-- **Instance-ID deprecation on newer Unity 6**: `UnityObjectRef<T>` calls `Object.GetInstanceID()` and `Resources.InstanceIDToObject`. Newer Unity 6 releases move to `EntityId` and deprecate `GetInstanceID`; check your version's docs for whether it is a warning or an error. The package has no fix at HEAD; if your Unity version flags it, embed the package (copy into `Packages/`) and patch `UnityObjectRef<T>` with a version-gated `#if` branch, or avoid `UnityScope` and use your own scope struct.
+- **`GetInstanceID` is an error on 6000.5+**: `UnityObjectRef<T>` calls `Object.GetInstanceID()` and `Resources.InstanceIDToObject`; `GetInstanceID` is obsolete as an error (CS0619) on 6000.5+, so the unpatched package does not compile there. The package has no fix at HEAD: embed it (copy into `Packages/`) and patch `UnityObjectRef<T>` to use `GetEntityId()` behind `#if UNITY_6000_5_OR_NEWER`, or avoid `UnityScope` and use your own scope struct.
 - **Samples do not compile as-is**: `BasicUsage` refers to `PublishContext` (the type is `PublishingContext`), uses `Input.GetKeyUp` (fails when only the Input System is enabled), and `TMPro`. Treat samples as reading material.
 - **"must be retrieved via MessageSubscriber.Scope API"**: a `default(Subscriber<T>)` struct was used. Always obtain views from `messenger.MessageSubscriber` / `MessagePublisher`.
 - **Constraint errors (CS0315/CS0311)**: the message type lacks `IMessage`, or `Publish<T>()` without argument is used on a type without a parameterless constructor.
-- **Domain reload disabled**: static `Messenger` fields survive Enter Play Mode; reset them with `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]` or dispose them on exit.
+- **Domain reload disabled**: static `Messenger` fields survive Enter Play Mode; keep them as settable properties (not `static readonly`) and reset them with `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]`, as in the sample above.
 - **Thread safety**: brokers lock internally, but handlers touching Unity APIs must still run on the main thread.
 
 ## ZBase PubSub vs MessagePipe
@@ -140,3 +141,15 @@ public static class GameMessenger
 | Errors | logged per handler in editor/DEBUG, unguarded in release | propagate to publisher unless a filter catches them |
 
 Pick ZBase PubSub for small projects or modules without a DI container that want ordered async handlers. Pick MessagePipe when the project already uses VContainer/Zenject, needs request/response, filters, or the leak diagnostics window.
+
+## References
+
+- [references/api.md](references/api.md): read when you need every `Subscribe` overload (stateless, stateful, contextual), the publisher method list, `CachedPublisher`, or the scripting define symbols.
+
+## Related skills
+
+- messagepipe: DI-first alternative, compared above.
+- unitask: handler and publish signatures are UniTask.
+- r3: stream operators.
+- vcontainer: to share a `Messenger` instance through DI.
+- csharp-unity: choosing an event style.

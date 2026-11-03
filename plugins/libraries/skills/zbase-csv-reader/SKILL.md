@@ -1,6 +1,6 @@
 ---
 name: zbase-csv-reader
-description: "Bakes CSV files into strongly typed ScriptableObjects at edit time with ZBase.Csv-Reader (Zitga-Tech), with optional Google Sheets download: Csv-Reader window, reader config assets, column attributes, converters, nested arrays, auto-import. Requires Odin Inspector (paid asset). Use only when the project uses ZBase.Csv-Reader, or as its Sheets/CSV front end for mastermemory; generic CSV to ScriptableObject baking belongs to game-data-pipeline. Triggers: Csv-Reader, CsvColumn, Google Sheets import, CSV columns not mapping or arrays parsed wrong."
+description: "Bakes CSV files into strongly typed ScriptableObjects at edit time with Zitga-Tech ZBase.Csv-Reader (requires Odin Inspector), with optional Google Sheets download: reader configs, column attributes, converters, nested arrays and auto-import. Use only when the project uses ZBase.Csv-Reader, or as the Sheets/CSV front end for MasterMemory. Triggers: \"Csv-Reader\", \"CsvColumn\", \"import Google Sheets with Csv-Reader\", \"CSV columns not mapping\", \"arrays parsed wrong\". Not for the ScriptableObject + Addressables pipeline without ZBase.Csv-Reader and Odin (game-data-pipeline), indexed binary master data (mastermemory)."
 license: MIT
 metadata:
   category: libraries
@@ -101,13 +101,14 @@ Use a convert method to build shapes the reader cannot fill directly (`Dictionar
 public class HeroLevelReward : Sirenix.OdinInspector.SerializedScriptableObject
 {
     private HeroLevelRewardItem[] _rows;
-    public Dictionary<int, Resource[]> byLevel;
+    public Dictionary<int, Resource[]> ByLevel;
 
     public void BuildLookup()
     {
-        if (_rows == null) return;
-        byLevel = new Dictionary<int, Resource[]>();
-        foreach (var row in _rows) byLevel.Add(row.level, row.resources);
+        if (this._rows == null) return;
+
+        this.ByLevel = new Dictionary<int, Resource[]>();
+        foreach (var row in this._rows) this.ByLevel.Add(row.level, row.resources);
     }
 }
 ```
@@ -151,3 +152,15 @@ Downloads every tab of a spreadsheet into `csvPath/<subFolder>/<tab>.csv`, which
 ## Tests
 
 Upstream ships EditMode tests in `Packages/ZBase.CsvReader/Tests/Editor` (assembly `ZBase.CsvReader.Editor.Tests`, constrained to `UNITY_INCLUDE_TESTS` and `ODIN_INSPECTOR`). To run package tests, add `"testables": ["com.zbase.csv-reader"]` to `manifest.json`, then use Window > General > Test Runner.
+
+## References
+
+- [references/data-mapping.md](references/data-mapping.md): read before you write any data class or CSV: column naming, supported types, nested arrays, attributes and converters.
+- [references/google-sheets.md](references/google-sheets.md): read before enabling the Google Sheets download: setup, sheet naming rules and credential handling.
+
+## Related skills
+
+- game-data-pipeline: ScriptableObject + Addressables data pipeline without ZBase.Csv-Reader.
+- mastermemory: feed the downloaded CSV files to the MasterMemory builder instead of baking ScriptableObjects.
+- unitask: required by the package; awaiting Addressables loads.
+- addressables-asset-loading: loading the generated assets.

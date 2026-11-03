@@ -1,6 +1,6 @@
 ---
 name: mastermemory
-description: "Builds read-only, indexed master-data databases with Cysharp MasterMemory v3 (source-generated tables over MessagePack): [MemoryTable] schemas, primary/secondary/composite keys, CSV to .bytes at edit time, validation, runtime loading and hot reload. Use for large static game-data tables needing fast zero-GC lookups or sharing with a .NET server, or when seeing KeyNotFoundException from FindBy, empty tables after a rename, or a missing MemoryDatabase type."
+description: "Builds read-only, indexed master-data databases with Cysharp MasterMemory v3 (source-generated tables over MessagePack): [MemoryTable] schemas, keys, CSV to .bytes, validation, loading and hot reload. Use for large static game-data tables that need fast zero-GC lookups or sharing with a .NET server. Triggers: \"MasterMemory\", \"MemoryTable\", \"KeyNotFoundException from FindBy\", \"table empty after rename\", \"MemoryDatabase type missing\". Not for ScriptableObject data tables (game-data-pipeline), the MessagePack resolver bootstrap itself (messagepack-csharp)."
 license: MIT
 metadata:
   category: libraries
@@ -11,12 +11,6 @@ metadata:
 # MasterMemory
 
 Embedded, typed, read-only in-memory database for master data (write once at build time, read many times at runtime). A Roslyn source generator turns every `[MemoryTable]` class into a table type with binary-search lookups. Data is stored as LZ4-compressed MessagePack. Verified against MasterMemory 3.0.4 (`src/MasterMemory`, `src/MasterMemory.Annotations`, `src/MasterMemory.SourceGenerator`, `src/MasterMemory.Unity`, `README.md`). MasterMemory 3.0.x references MessagePack 3.1.3 as a minimum; the project-wide pin is 3.1.11 (see `messagepack-csharp`), with the MessagePack.Unity UPM tag matching the NuGet `MessagePack` version.
-
-Reference files, read when needed:
-
-- `references/api-reference.md` - read for the attribute table, the full list of generated members (tables, `MemoryDatabase`, `DatabaseBuilder`, `ImmutableBuilder`, `RangeView<T>`), generator options, validator API and metadata API.
-- `references/build-pipeline.md` - read when wiring CSV / JSON / Google Sheets to a `.bytes` file, loading through Addressables or VContainer, or setting up Editor hot reload.
-- `scripts/MasterMemoryCsvBuilder.cs` - drop-in Editor script: CSV folder to validated `master.bytes`, auto-rebuild on CSV import, and Play Mode hot reload.
 
 ## Workflow
 
@@ -32,7 +26,7 @@ Reference files, read when needed:
 
    namespace System.Runtime.CompilerServices
    {
-       internal sealed class IsExternalInit { }
+       internal static class IsExternalInit { }
    }
    ```
 
@@ -113,6 +107,7 @@ using System;
 using MessagePack;
 using MessagePack.Resolvers;
 using MyGame.MasterData;
+using UnityEngine;
 
 public static class MasterDataService
 {
@@ -135,6 +130,13 @@ public static class MasterDataService
     {
         Database = new MemoryDatabase(bytes, internString: true, formatterResolver: Resolver);
         Reloaded?.Invoke(Database);
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics()
+    {
+        Database = null;
+        Reloaded = null;
     }
 
     #endregion
@@ -231,14 +233,20 @@ Choose MasterMemory for large tables, many secondary or range lookups, zero-GC q
 - **String comparison culture.** Data is sorted at build time on your machine and searched on the player. Use only `Ordinal` (default) or `OrdinalIgnoreCase` for string keys. `CurrentCulture*` sorts by the Editor's culture and searches by the device's. Composite keys containing `string` use `Comparer<string>.Default`, which is culture-sensitive, so prefer `int` / `enum` components or a single ordinal string key.
 - **Generated namespace collides.** Two asmdefs with tables each generate `MemoryDatabase`, `DatabaseBuilder` and `MasterMemoryResolver`. Give each assembly its own `Namespace` or `PrefixClassName`.
 - **`ValidateAll`, `MasterMemory.Generator`, `-usingNamespace`** come from older blog posts or v2. In v3 they are `Validate()`, the source generator, and `MasterMemoryGeneratorOptions.Namespace`.
-- **Domain reload disabled.** `MasterDataService.Database` survives Play sessions. Reload it in a `RuntimeInitializeLoadType.SubsystemRegistration` reset if the bytes may have changed.
+- **Domain reload disabled.** `MasterDataService.Database` and the static `Reloaded` event survive Play sessions. Clear both in a `RuntimeInitializeLoadType.SubsystemRegistration` reset (as in the sample) and load again at startup.
+
+## References
+
+- [references/api-reference.md](references/api-reference.md): read for the attribute table, the full list of generated members (tables, `MemoryDatabase`, `DatabaseBuilder`, `ImmutableBuilder`, `RangeView<T>`), generator options, validator API and metadata API.
+- [references/build-pipeline.md](references/build-pipeline.md): read when wiring CSV / JSON / Google Sheets to a `.bytes` file, loading through Addressables or VContainer, or setting up Editor hot reload.
+- [scripts/MasterMemoryCsvBuilder.cs](scripts/MasterMemoryCsvBuilder.cs): drop-in Editor script: CSV folder to validated `master.bytes`, auto-rebuild on CSV import, and Play Mode hot reload.
 
 ## Related skills
 
-- `messagepack-csharp` - serializer underneath, resolver composition, MessagePack.Unity types.
-- `memorypack` - alternative binary format if you only need fast deserialization without indexes.
-- `game-data-pipeline` - ScriptableObject + Addressables alternative and data-layout guidance.
-- `zbase-csv-reader` - CSV / Google Sheets download that can feed the MasterMemory builder.
-- `addressables-asset-loading` - shipping and remotely updating `master.bytes`.
-- `vcontainer` - registering `MemoryDatabase` or a reloadable provider as a singleton.
-- `csharp-unity` - house style used in the samples.
+- messagepack-csharp: serializer underneath, resolver composition, MessagePack.Unity types.
+- game-data-pipeline: ScriptableObject + Addressables tables when designers edit in the Inspector.
+- zbase-csv-reader: CSV / Google Sheets download that can feed the MasterMemory builder.
+- memorypack: alternative binary format if you only need fast deserialization without indexes.
+- addressables-asset-loading: shipping and remotely updating `master.bytes`.
+- vcontainer: registering `MemoryDatabase` or a reloadable provider as a singleton.
+- csharp-unity: house style used in the samples.
