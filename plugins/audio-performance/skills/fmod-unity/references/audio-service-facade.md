@@ -257,7 +257,7 @@ Design notes:
 - There is no voice budget in code. Set Max Instances, stealing and Cooldown on the event in Studio, and set Real Channel Count per platform in FMOD Settings.
 - Following is done manually so a destroyed target is handled the same way as in the built-in service. `RuntimeManager.AttachInstanceToGameObject` is the alternative when you do not need that.
 - `SetPaused` pauses everything, like `AudioListener.pause`. For a pause menu that keeps UI and menu music running, pause a gameplay bus instead: `RuntimeManager.GetBus("bus:/SFX").setPaused(true)`.
-- Volume settings: keep a separate settings store that writes VCAs (`RuntimeManager.GetVCA("vca:/Music").setVolume(linear)`). It is the FMOD counterpart of `AudioSettingsStore`.
+- Volume settings: read the linear values from the settings model (`pc-settings-menu` `GameSettings`) and write them to VCAs (`RuntimeManager.GetVCA("vca:/Music").setVolume(linear)`) after banks load. This applier is the FMOD counterpart of `AudioSettingsStore`; do not keep a second store.
 - Music: the built-in `MusicPlayer` has no counterpart on the interface. Use `MusicDirector` from [adaptive-music.md](adaptive-music.md), because FMOD Studio handles crossfades, intros and loops.
 
 ## Loading banks before audio is used

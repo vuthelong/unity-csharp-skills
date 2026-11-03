@@ -10,6 +10,7 @@ public sealed class GameSettings
 
     public const int CurrentVersion = 1;
     public const string FileName = "settings.json";
+    public const float DefaultVolume = 0.8f;
 
     private static readonly UTF8Encoding Utf8NoBom = new(false);
 
@@ -27,6 +28,14 @@ public sealed class GameSettings
     public float renderScale = 1f;
 
     public string bindingOverridesJson = string.Empty;
+
+    public float masterVolume = DefaultVolume;
+    public float musicVolume = DefaultVolume;
+    public float sfxVolume = DefaultVolume;
+    public float voiceVolume = DefaultVolume;
+    public bool audioMuted;
+
+    public string localeCode = string.Empty;
 
     #endregion
 
@@ -55,7 +64,13 @@ public sealed class GameSettings
             qualityLevel = QualitySettings.GetQualityLevel(),
             vSyncCount = 1,
             targetFrameRate = -1,
-            renderScale = 1f
+            renderScale = 1f,
+            masterVolume = DefaultVolume,
+            musicVolume = DefaultVolume,
+            sfxVolume = DefaultVolume,
+            voiceVolume = DefaultVolume,
+            audioMuted = false,
+            localeCode = string.Empty
         };
     }
 
@@ -149,6 +164,11 @@ public sealed class GameSettings
         if (this.targetFrameRate == 0 || this.targetFrameRate < -1) this.targetFrameRate = -1;
         this.renderScale = Mathf.Clamp(this.renderScale, 0.1f, 2f);
         this.bindingOverridesJson ??= string.Empty;
+        this.masterVolume = Mathf.Clamp01(this.masterVolume);
+        this.musicVolume = Mathf.Clamp01(this.musicVolume);
+        this.sfxVolume = Mathf.Clamp01(this.sfxVolume);
+        this.voiceVolume = Mathf.Clamp01(this.voiceVolume);
+        this.localeCode ??= string.Empty;
         this.version = CurrentVersion;
     }
 

@@ -64,7 +64,7 @@ public sealed class RebindRow : MonoBehaviour
 
     #endregion
 
-    #region Public API
+    #region Row Commands
 
     public void Refresh()
     {

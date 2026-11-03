@@ -99,7 +99,7 @@ public sealed class SubtitleView : MonoBehaviour
 
     #endregion
 
-    #region Public API
+    #region Subtitle Queue API
 
     public void Show(in SubtitleCue cue)
     {

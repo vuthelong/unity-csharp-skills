@@ -1,6 +1,6 @@
 ---
 name: localization
-description: Sets up and drives Unity Localization (com.unity.localization) - Locales, String and Asset Tables, Smart Strings, LocalizeStringEvent wiring, runtime locale switching, per-locale font swapping through Asset Tables, completeness checks and batch-binding existing scene text. Use when adding languages, building a language menu, extracting hard-coded strings, or fixing "No translation found" text or a CJK locale showing tofu because its font is not swapped. Font atlas tuning belongs to optimize-text-mesh-pro.
+description: "Sets up and drives Unity Localization (com.unity.localization) - Locales, String and Asset Tables, Smart Strings, LocalizeStringEvent wiring, runtime locale switching, per-locale font swapping, completeness checks and batch-binding existing scene text. Use when adding languages, building a language menu or extracting hard-coded strings. Triggers: \"add Japanese\", \"No translation found\", \"CJK text shows boxes\", \"localize this scene\". Not for font atlas tuning and fallback chains (optimize-text-mesh-pro) or where the chosen language is saved (pc-settings-menu)."
 license: Unity Companion License
 metadata:
   category: ui
@@ -11,15 +11,6 @@ metadata:
 # Unity Localization
 
 Localize UI text and assets with the Localization package. TMP font quality and fallback chains are covered by `optimize-text-mesh-pro`; Canvas layout by `ui-ugui`.
-
-## References
-
-| File | Read when |
-|---|---|
-| [references/setup-and-tables.md](references/setup-and-tables.md) | Installing the package, creating settings/locales/collections, editing tables from code, Addressables, namespace conflicts |
-| [references/cjk-fonts.md](references/cjk-fonts.md) | Supporting Chinese, Japanese, or Korean; creating TMP font assets from code; tofu |
-| [references/editor-wiring.md](references/editor-wiring.md) | Attaching `LocalizeStringEvent` from code, verifying bindings, running the table completeness check |
-| [references/translation-workflow.md](references/translation-workflow.md) | Localizing an existing project: finding all strings, batch processing scenes, translation QA |
 
 Scripts (copy into the project, inside an `Editor` folder for `L10nBatchProcessor`):
 - [scripts/L10nBatchProcessor.cs](scripts/L10nBatchProcessor.cs) — wires `LocalizeStringEvent` on every `Text`/`TMP_Text` in every scene, with confirmation safeguards; returns unmatched labels.
@@ -37,7 +28,7 @@ Scripts (copy into the project, inside an `Editor` folder for `L10nBatchProcesso
 ## Locale switching
 
 - **Runtime:** set `LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale("de");`. Everything bound through `LocalizeStringEvent`/`LocalizedString` updates. Wait for `LocalizationSettings.InitializationOperation` before reading locales at startup.
-- **Startup locale:** configure Startup Locale Selectors on the settings asset (command line, `PlayerPrefs`, system language, `SpecificLocaleSelector`). Persist the player's choice with the PlayerPrefs selector.
+- **Startup locale:** configure Startup Locale Selectors on the settings asset (command line, system language, `SpecificLocaleSelector`) for the first launch. Persist the player's choice in the project's settings model: with `pc-settings-menu`, store `Locale.Identifier.Code` in `GameSettings.localeCode` and, after `InitializationOperation` completes, set `SelectedLocale = AvailableLocales.GetLocale(code)` when the code is non-empty and found. Use the `PlayerPrefs` selector only when the project has no settings model.
 - **Authoring preview:** **Window > Asset Management > Localization Scene Controls** (Editor only).
 - **Never hand-roll locale state.** A language menu is expected, but it must set `SelectedLocale`; a dropdown that keeps its own "current language" or swaps strings itself diverges from everything else.
 
@@ -70,3 +61,18 @@ Scripts (copy into the project, inside an `Editor` folder for `L10nBatchProcesso
 - Every found text site (components and code-composed strings) is either bound or listed as intentionally skipped.
 - Each target locale previewed in the Editor: no tofu, no "No translation found" text, no overflow.
 - Addressables content rebuilt (`AddressableAssetSettings.BuildPlayerContent()`) if Asset Tables changed.
+
+## References
+
+- [references/setup-and-tables.md](references/setup-and-tables.md): read when installing the package, creating settings/locales/collections, editing tables from code, Addressables, or namespace conflicts.
+- [references/cjk-fonts.md](references/cjk-fonts.md): read when supporting Chinese, Japanese or Korean, creating TMP font assets from code, or fixing tofu.
+- [references/editor-wiring.md](references/editor-wiring.md): read when attaching `LocalizeStringEvent` from code, verifying bindings, or running the table completeness check.
+- [references/translation-workflow.md](references/translation-workflow.md): read when localizing an existing project: finding all strings, batch processing scenes, translation QA.
+
+## Related skills
+
+- optimize-text-mesh-pro: atlas sizing, fallback chains and TMP font performance.
+- pc-settings-menu: storing and applying the chosen `localeCode`.
+- ui-ugui, ui-uitk: layout for variable-length text.
+- accessibility: translated subtitles and speaker names.
+- addressables-asset-loading: Asset Table entries and content builds.

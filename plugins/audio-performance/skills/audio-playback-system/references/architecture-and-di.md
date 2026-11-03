@@ -10,7 +10,7 @@ AudioService (plain C#, IDisposable)          one per app, DontDestroyOnLoad roo
 ├── one-shot AudioSource per AudioMixerGroup   2D UI clicks, PlayOneShot
 ├── MusicPlayer                                2 decks x (intro + body) AudioSource
 └── Tick(unscaledDeltaTime)                    follow targets, fades, finish detection, music
-AudioSettingsStore (plain C#)                  PlayerPrefs <-> exposed mixer parameters
+AudioSettingsStore (plain C#)                  settings-model volumes -> exposed mixer parameters
 AudioOcclusion (MonoBehaviour)                 on long-lived scene emitters only
 AudioCue (ScriptableObject)                    authored data, one asset per sound event
 ```
@@ -68,7 +68,7 @@ public sealed class AudioDriver : IStartable, ILateTickable
 
     public void Start()
     {
-        this._settings.Load();
+        this._settings.LoadFromPlayerPrefs();
         this._settings.ApplyAll();
     }
 
@@ -80,6 +80,7 @@ public sealed class AudioDriver : IStartable, ILateTickable
 
 - `AudioService(null, ...)` creates its own `DontDestroyOnLoad` root and destroys it in `Dispose`; the container calls `Dispose` when the scope is disposed.
 - Tick in `LateTick` so follow targets have already moved this frame.
+- Both snippets use the PlayerPrefs fallback so they compile without a settings model. With `pc-settings-menu`, replace `LoadFromPlayerPrefs()` with `Load(s.masterVolume, s.musicVolume, s.sfxVolume, s.voiceVolume, s.audioMuted)` where `s = SettingsApplier.Current`; `GameSettings` then owns persistence and `SaveToPlayerPrefs()` is a no-op.
 - `IStartable.Start` runs after `Awake`, which satisfies the "apply mixer values after Awake" rule from `audio-setup-mixers`.
 - Inject `AudioService` into consumers by constructor (plain C#) or `[Inject]` method (MonoBehaviours).
 
@@ -123,7 +124,7 @@ public sealed class AudioServiceHost : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         Service = new AudioService(transform, this.musicGroup, this.maxVoices);
         Settings = new AudioSettingsStore(this.mixer);
-        Settings.Load();
+        Settings.LoadFromPlayerPrefs();
     }
 
     private void Start()

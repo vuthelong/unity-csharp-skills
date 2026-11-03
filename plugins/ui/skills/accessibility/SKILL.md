@@ -1,6 +1,6 @@
 ---
 name: accessibility
-description: Adds player-facing accessibility options to a Unity 6 PC/Steam game - subtitles and sound captions with speaker names, size, background opacity and reading-speed timing (TextMeshPro), UI and text scaling with minimum sizes for UI Toolkit (PanelSettings.scale) and uGUI (CanvasScaler, TMP), color-independent signals and colorblind palettes, camera comfort (shake, head bob, motion blur, FOV), hold-vs-toggle inputs, difficulty and survival assists, screen reader menus with UnityEngine.Accessibility (AccessibilityHierarchy, AssistiveSupport; Windows/macOS from 6000.3) and Steam's accessibility feature wizard. Use for "add subtitles", "text too small on Steam Deck", "colorblind mode", "disable camera shake", "toggle sprint", "menus with Narrator", or Steam accessibility tags. Not for rebinding or the settings file (pc-settings-menu, input-system-actions), translations (localization), Volume overrides (urp-postprocessing) or Deck controller support (steam-deck-controller).
+description: "Adds player-facing accessibility options to a Unity 6 PC/Steam game - subtitles and sound captions, UI and text scaling for UI Toolkit and uGUI, colorblind-safe signals, camera comfort, hold-vs-toggle inputs, difficulty and survival assists and screen reader menus, plus Steam accessibility tags. Use when adding accessibility options. Triggers: \"add subtitles\", \"text too small on Steam Deck\", \"colorblind mode\", \"disable camera shake\", \"toggle sprint\". Not for the settings file and rebinding (pc-settings-menu), translations (localization) or Volume overrides (urp-postprocessing)."
 license: MIT
 metadata:
   category: ui
@@ -18,7 +18,7 @@ Accessibility here means options in the settings model plus systems that respect
    - [scripts/AccessibilityOptions.cs](scripts/AccessibilityOptions.cs): read when adding an option. Serializable model, `Sanitize()` clamps, static `Current` + `Changed`, `ResolveHold` for hold/toggle.
    - [scripts/SubtitleView.cs](scripts/SubtitleView.cs): read when wiring dialogue or sound captions. TextMeshPro (`TextMeshProUGUI`) + uGUI `Image` background, fixed-size queue, reading-speed timing, no per-frame allocation.
    - [scripts/TextScaler.cs](scripts/TextScaler.cs): read when scaling uGUI/TMP text. Per-text base size, minimum size, auto-size aware.
-2. **Persist inside the settings file.** Add `public AccessibilityOptions accessibility = new();` to `GameSettings` from `pc-settings-menu` and call `AccessibilityOptions.Apply(settings.accessibility)` from its apply path at startup and on Apply. Do not create a second settings file.
+2. **Persist inside the settings file.** Add `public AccessibilityOptions accessibility = new();` to `GameSettings` from `pc-settings-menu` (its "Settings blocks" section), make `GameSettings.Clone()` deep-copy it with `AccessibilityOptions.Clone()`, and call `AccessibilityOptions.Apply(settings.accessibility)` from its apply path at startup and on Apply. Do not create a second settings file or use `PlayerPrefs`.
 3. **Name collision.** The class is `AccessibilityOptions`, not `AccessibilitySettings`, because `UnityEngine.Accessibility.AccessibilitySettings` exists (system font scale, bold text, closed captions; Android and iOS only per the 6000.0 and 6000.3 docs). Files that import `UnityEngine.Accessibility` would otherwise need an alias.
 4. **Subtitles first.** Default subtitles on, sound captions off, speaker names on. Route every voiced line and story-critical sound through `SubtitleView.Show`. Read [references/text-and-subtitles.md](references/text-and-subtitles.md).
 5. **Text and UI scale.** Offer separate UI scale, text scale and subtitle size. Check the largest setting at 1280x800 (Steam Deck) and 1920x1080.
@@ -92,12 +92,12 @@ Reading `AccessibilityOptions.Current` per frame is free (a static field). Subsc
 
 ## Related skills
 
-- `pc-settings-menu`: settings file, Apply/Revert, rebinding UI.
-- `input-system-actions`: actions behind hold/toggle and remapping.
-- `localization`: translated subtitles and speaker names; per-locale fonts.
-- `optimize-text-mesh-pro`: font atlases that stay sharp at large sizes.
-- `ui-uitk`, `ui-ugui`: building the option pages.
-- `urp-postprocessing`: Motion Blur, Depth of Field and grading overrides.
-- `cinemachine-cameras`: impulse/shake, noise and FOV on the camera rig.
-- `steam-deck-controller`: Deck legibility, gamepad navigation, glyphs.
-- `audio-setup-mixers`: separate volume sliders (Steam Custom Volume Controls).
+- pc-settings-menu: settings file, Apply/Revert, rebinding UI.
+- input-system-actions: actions behind hold/toggle and remapping.
+- localization: translated subtitles and speaker names; per-locale fonts.
+- optimize-text-mesh-pro: font atlases that stay sharp at large sizes.
+- ui-uitk, ui-ugui: building the option pages.
+- urp-postprocessing: Motion Blur, Depth of Field and grading overrides.
+- cinemachine-cameras: impulse/shake, noise and FOV on the camera rig.
+- steam-deck-controller: Deck legibility, gamepad navigation, glyphs.
+- audio-playback-system, audio-setup-mixers: separate Master/Music/SFX/Voice volume sliders (Steam Custom Volume Controls), stored in `GameSettings`.

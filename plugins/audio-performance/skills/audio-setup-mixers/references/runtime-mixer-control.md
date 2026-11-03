@@ -18,7 +18,7 @@ return ok ? $"MusicVolume exposed, {db} dB" : "MusicVolume is not exposed";
 
 Perceived loudness is logarithmic. Map linear 0..1 to decibels with `20 * log10(v)` and clamp to -80 dB (the mixer floor).
 
-Persistence scheme (shared with `audio-playback-system`): save the linear 0..1 value in `PlayerPrefs` under `audio.<channel>` keys (`audio.master`, `audio.music`, `audio.sfx`, mute in `audio.muted`), never under the mixer parameter name, so renaming an exposed parameter does not reset player settings. If the project uses `audio-playback-system`, call its `AudioSettingsStore` (`scripts/AudioSettingsStore.cs`) instead of this component; it already implements this scheme. The component below is the standalone single-slider equivalent with the same keys.
+Persistence: the linear 0..1 value is stored in the project's settings model, never under the mixer parameter name, so renaming an exposed parameter does not reset player settings. With `pc-settings-menu`, `GameSettings` holds `masterVolume`, `musicVolume`, `sfxVolume`, `voiceVolume` and `audioMuted`, and `AudioSettingsStore` (`audio-playback-system`) applies them to the mixer; use it instead of this component. Only a project with no settings model falls back to `PlayerPrefs` keys `audio.master`, `audio.music`, `audio.sfx`, `audio.voice`, `audio.muted` (`AudioSettingsStore.LoadFromPlayerPrefs`). The component below only applies one slider value; the caller persists it.
 
 ```csharp
 using UnityEngine;
@@ -26,37 +26,33 @@ using UnityEngine.Audio;
 
 public sealed class MixerVolume : MonoBehaviour
 {
-    [SerializeField] private AudioMixer _mixer;
-    [SerializeField] private string _parameter = "MusicVolume";
-    [SerializeField] private string _prefKey = "audio.music";
-    [SerializeField, Range(0f, 1f)] private float _default = 0.8f;
+    #region Fields
 
     private const float MinDb = -80f;
+    private const float MinLinear = 0.0001f;
 
-    private void Start()
-    {
-        Apply(PlayerPrefs.GetFloat(_prefKey, _default));
-    }
+    [SerializeField] private AudioMixer mixer;
+    [SerializeField] private string parameter = "MusicVolume";
+
+    #endregion
+
+    #region Volume
 
     public void Apply(float linear)
     {
-        float db = linear <= 0.0001f ? MinDb : Mathf.Max(MinDb, 20f * Mathf.Log10(linear));
-        if (!_mixer.SetFloat(_parameter, db))
-        {
-            Debug.LogError($"Exposed parameter '{_parameter}' not found on {_mixer.name}", this);
-            return;
-        }
-        PlayerPrefs.SetFloat(_prefKey, linear);
+        var db = linear <= MinLinear ? MinDb : Mathf.Max(MinDb, 20f * Mathf.Log10(linear));
+        if (this.mixer.SetFloat(this.parameter, db)) return;
+
+        Debug.LogError($"Exposed parameter '{this.parameter}' not found on {this.mixer.name}", this);
     }
 
-    public float Read()
-    {
-        return _mixer.GetFloat(_parameter, out float db) ? Mathf.Pow(10f, db / 20f) : 0f;
-    }
+    public float Read() => this.mixer.GetFloat(this.parameter, out var db) ? Mathf.Pow(10f, db / 20f) : 0f;
+
+    #endregion
 }
 ```
 
-Hook `Apply` to `Slider.onValueChanged` (uGUI) or a `Slider` `RegisterValueChangedCallback` (UI Toolkit). Write `PlayerPrefs.Save()` on menu close, not per slider tick.
+Hook `Apply` to `Slider.onValueChanged` (uGUI) or a `Slider` `RegisterValueChangedCallback` (UI Toolkit), write the value into the settings model's working copy, and save the model when the menu applies, not per slider tick. Apply saved values in `Start` or later.
 
 ## Rules
 

@@ -1,6 +1,6 @@
 ---
 name: audio-playback-system
-description: Builds the runtime playback layer for Unity built-in audio - a pooled AudioService with AudioCue ScriptableObjects, voice limits and stealing, a crossfading MusicPlayer with sample-accurate intro-to-loop, code-side music ducking, occlusion, Addressables clip loading, and persisting volume levels via the settings model (pc-settings-menu). Use when writing a sound manager, SFX pooling, music crossfades or seamless loops, audio pause handling, or WebGL audio unlock. Not for FMOD (fmod-unity), import settings (optimize-audio), or mixer routing, exposed parameters, dB volume sliders and snapshot ducking (audio-setup-mixers).
+description: "Builds the runtime playback layer for Unity built-in audio - a pooled AudioService with AudioCue assets, voice limits and stealing, a crossfading MusicPlayer with sample-accurate intro-to-loop, Addressables clip loading, and AudioSettingsStore, which applies the settings model's volumes to the mixer. Use when writing a sound manager, SFX pooling, music crossfades or seamless loops, or audio pause handling. Triggers: \"sound manager\", \"music crossfade\", \"sounds cut out in big fights\", \"no audio on WebGL until click\". Not for FMOD (fmod-unity), import settings (optimize-audio) or mixer routing and snapshots (audio-setup-mixers)."
 license: MIT
 metadata:
   category: audio-performance
@@ -30,7 +30,7 @@ Runtime playback for Unity's built-in audio: who owns AudioSources, how sounds s
 | [scripts/AudioService.cs](scripts/AudioService.cs) | Plain C# `IDisposable`: `ObjectPool<Voice>`, `Play(cue, position)`, `Play(cue, transform)`, `Play2D`, `PlayOneShot`, `Stop(handle, fade)`, `StopCue`, `SetPaused`, `Tick`; `AudioHandle` struct |
 | [scripts/MusicPlayer.cs](scripts/MusicPlayer.cs) | Two decks (intro + body each), equal-power crossfade, `PlayWithIntro`, `PlayPlaylist`, `Duck`, `Pause`/`Resume` with rescheduling |
 | [scripts/AudioOcclusion.cs](scripts/AudioOcclusion.cs) | MonoBehaviour: staggered raycast listener→emitter, low-pass cutoff and volume, smoothed |
-| [scripts/AudioSettingsStore.cs](scripts/AudioSettingsStore.cs) | PlayerPrefs ↔ exposed mixer parameters, linear 0–1 to dB, mute |
+| [scripts/AudioSettingsStore.cs](scripts/AudioSettingsStore.cs) | Settings-model volumes (Master, Music, Sfx, Voice) → exposed mixer parameters, linear 0–1 to dB, mute; PlayerPrefs fallback only without a settings model |
 
 `AudioService.Tick(Time.unscaledDeltaTime)` must be called once per frame from `LateUpdate` (or VContainer `ILateTickable`). It follows moving targets, runs fades, returns finished voices to the pool and ticks the music player.
 
@@ -82,9 +82,10 @@ Details: [references/loading.md](references/loading.md). Import settings: `optim
 
 ## Settings
 
-- `AudioSettingsStore` stores linear 0–1 per channel (Master, Music, SFX) in PlayerPrefs and writes `20·log10(v)` dB, floored at -80 dB, to exposed mixer parameters. Conversion and exposing parameters: `audio-setup-mixers` (runtime mixer control).
-- Call `Load()` early and `ApplyAll()` in `Start` or later; `SetFloat` in `Awake` can be overwritten.
-- Mute forces Master to -80 dB but keeps the stored slider value. Call `Save()` when the settings menu closes, not per slider tick.
+- Volumes live in the project's settings model, not in this skill. With `pc-settings-menu`, `GameSettings` stores `masterVolume`, `musicVolume`, `sfxVolume`, `voiceVolume` (linear 0–1) and `audioMuted`; call `AudioSettingsStore.Load(...)` with those values, then `ApplyAll()`. The store writes `20·log10(v)` dB, floored at -80 dB, to the exposed mixer parameters. Exposing parameters: `audio-setup-mixers`.
+- Only a project with no settings model uses `LoadFromPlayerPrefs()` / `SaveToPlayerPrefs()` (keys `audio.master`, `audio.music`, `audio.sfx`, `audio.voice`, `audio.muted`).
+- Call `ApplyAll()` in `Start` or later; `SetFloat` in `Awake` can be overwritten.
+- Mute forces Master to -80 dB but keeps the stored slider value. Persist when the settings menu applies, not per slider tick.
 - Sliders move the mixer; fades and ducking move `AudioSource.volume`. Keeping them on separate stages stops them overwriting each other.
 
 ## Platform notes
@@ -113,19 +114,20 @@ Details: [references/platform-notes.md](references/platform-notes.md).
 
 ## References
 
-- [references/architecture-and-di.md](references/architecture-and-di.md) - read when wiring the service into VContainer or a singleton host, swapping in zbase-pooling, or writing gameplay calls.
-- [references/sfx-recipes.md](references/sfx-recipes.md) - read when choosing PlayOneShot vs pooled, tuning voice limits, randomization, follow targets, release timing or slow motion.
-- [references/music-recipes.md](references/music-recipes.md) - read when implementing crossfades, intro→loop, playlists, ducking or music pause.
-- [references/spatial-audio.md](references/spatial-audio.md) - read when tuning 3D settings, reverb zones, listener placement or occlusion.
-- [references/loading.md](references/loading.md) - read when loading clips through Addressables, building per-scene banks or using LoadAudioData.
-- [references/platform-notes.md](references/platform-notes.md) - read when targeting Web or mobile, handling device changes, or choosing DSP buffer size.
+- [references/architecture-and-di.md](references/architecture-and-di.md): read when wiring the service into VContainer or a singleton host, swapping in zbase-pooling, or writing gameplay calls.
+- [references/sfx-recipes.md](references/sfx-recipes.md): read when choosing PlayOneShot vs pooled, tuning voice limits, randomization, follow targets, release timing or slow motion.
+- [references/music-recipes.md](references/music-recipes.md): read when implementing crossfades, intro→loop, playlists, ducking or music pause.
+- [references/spatial-audio.md](references/spatial-audio.md): read when tuning 3D settings, reverb zones, listener placement or occlusion.
+- [references/loading.md](references/loading.md): read when loading clips through Addressables, building per-scene banks or using LoadAudioData.
+- [references/platform-notes.md](references/platform-notes.md): read when targeting Web or mobile, handling device changes, or choosing DSP buffer size.
 
-## See also
+## Related skills
 
-- `optimize-audio` - import settings, Load Type, mixer CPU, DSP buffer audit.
-- `audio-setup-mixers` - routing groups, exposed parameters, dB sliders, snapshots, Duck Volume.
-- `unitask` - awaiting Addressables handles, cancellation, unscaled delays.
-- `vcontainer` - root scopes, entry points, disposal.
-- `zbase-pooling` - alternative pool implementation.
-- `addressables-asset-loading` - labels, handles, release rules, duplicate dependencies.
-- `csharp-unity` - house style, `ObjectPool<T>`, statics with domain reload off.
+- pc-settings-menu: the settings model that stores volumes and applies them at startup.
+- audio-setup-mixers: routing groups, exposed parameters, dB curve, snapshots, Duck Volume.
+- optimize-audio: import settings, Load Type, mixer CPU, DSP buffer audit.
+- fmod-unity: FMOD backend of the same `IAudioService` facade.
+- unitask: awaiting Addressables handles, cancellation, unscaled delays.
+- vcontainer: root scopes, entry points, disposal.
+- addressables-asset-loading: labels, handles, release rules, duplicate dependencies.
+- csharp-unity: house style, `ObjectPool<T>`, statics with domain reload off.

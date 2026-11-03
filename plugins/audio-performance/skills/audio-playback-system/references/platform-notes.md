@@ -17,7 +17,7 @@ Build-size and codec choices: `optimize-web`.
 
 Phone calls, alarms, Siri/Assistant, other apps taking audio focus, and backgrounding usually reach Unity as `OnApplicationPause` or `OnApplicationFocus`; which one depends on the OS and the interruption, so handle both:
 
-- Handle `OnApplicationPause(true)` by setting `AudioListener.pause = true` (the host in [architecture-and-di.md](architecture-and-di.md) does) and save volume settings with `PlayerPrefs.Save()`.
+- Handle `OnApplicationPause(true)` by setting `AudioListener.pause = true` (the host in [architecture-and-di.md](architecture-and-di.md) does) and make sure volume settings are persisted: with `pc-settings-menu` they were already saved on Apply; without a settings model call `AudioSettingsStore.SaveToPlayerPrefs()`.
 - On `OnApplicationPause(false)`, unpause and then verify state: if music should be playing and neither deck's `isPlaying` is true, restart the current track. Do not assume the platform resumed every source.
 - iOS Player Settings that affect the audio session: **Mute Other Audio Sources** (off lets the user's own music keep playing; pair it with a "game music" toggle), **Prepare iOS for Recording** and **Force iOS Speakers when Recording** (only for microphone apps; they change routing and latency).
 - Headphones unplugged / Bluetooth connected raise `AudioSettings.OnAudioConfigurationChanged` (below).

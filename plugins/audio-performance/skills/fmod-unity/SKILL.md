@@ -1,6 +1,6 @@
 ---
 name: fmod-unity
-description: Integrates FMOD Studio into Unity 6 with the FMOD for Unity plugin - setup and Studio version matching, settings and banks, EventInstance lifecycle, EventReference, 3D attributes, parameters, buses, VCAs and snapshots, bank loading with Addressables, timeline/beat callbacks under IL2CPP, and adaptive music. Use when the project uses FMOD, on EventNotFoundException or bank load errors, Live Update issues, or when choosing Unity audio vs FMOD vs Wwise. For Unity built-in audio use audio-playback-system.
+description: "Integrates FMOD Studio into Unity 6 with the FMOD for Unity plugin - setup and version matching, banks, EventInstance lifecycle, EventReference, 3D attributes, parameters, buses, VCAs, snapshots, IL2CPP callbacks and adaptive music. Use when the project uses FMOD or when choosing Unity audio vs FMOD vs Wwise. Triggers: \"EventNotFoundException\", \"bank failed to load\", \"Live Update won't connect\", \"should I use FMOD\". Not for Unity built-in audio playback (audio-playback-system) or AudioMixer routing (audio-setup-mixers)."
 license: MIT
 metadata:
   category: audio-performance
@@ -101,18 +101,19 @@ Gameplay depends on `IAudioService<TCue>`, which has the same surface as `audio-
 
 ## References
 
-- [references/setup.md](references/setup.md) - read when installing, upgrading, running the Setup Wizard, configuring FMOD Settings or writing `.gitignore`.
-- [references/api-reference.md](references/api-reference.md) - read when you need exact RuntimeManager, EventInstance, bus/VCA/bank, component or EventReference signatures.
-- [references/callbacks.md](references/callbacks.md) - read when handling timeline markers or beats, IL2CPP callbacks, main-thread hand-off or programmer sounds.
-- [references/adaptive-music.md](references/adaptive-music.md) - read when building intensity-driven music or beat-synced gameplay.
-- [references/audio-service-facade.md](references/audio-service-facade.md) - read when wiring FMOD behind `IAudioService`, loading banks with UniTask/Addressables, or registering in VContainer.
+- [references/setup.md](references/setup.md): read when installing, upgrading, running the Setup Wizard, configuring FMOD Settings or writing `.gitignore`.
+- [references/api-reference.md](references/api-reference.md): read when you need exact RuntimeManager, EventInstance, bus/VCA/bank, component or EventReference signatures.
+- [references/callbacks.md](references/callbacks.md): read when handling timeline markers or beats, IL2CPP callbacks, main-thread hand-off or programmer sounds.
+- [references/adaptive-music.md](references/adaptive-music.md): read when building intensity-driven music or beat-synced gameplay.
+- [references/audio-service-facade.md](references/audio-service-facade.md): read when wiring FMOD behind `IAudioService`, loading banks with UniTask/Addressables, or registering in VContainer.
 
-## See also
+## Related skills
 
-- `audio-playback-system` - built-in backend of the same facade, `AudioHandle`, host pattern.
-- `audio-setup-mixers` - linear and dB slider math, mixer concepts (Unity side).
-- `optimize-audio` - Unity import settings, relevant when both engines coexist or for video audio.
-- `addressables-asset-loading` - groups, labels, remote catalogs for bank stubs.
-- `unitask` - awaiting bank loads, cancellation.
-- `vcontainer` - root scope, entry points, disposal.
-- `csharp-unity` - house style, statics with Enter Play Mode Options.
+- audio-playback-system: built-in backend of the same facade, `AudioHandle`, host pattern.
+- audio-setup-mixers: linear and dB slider math, mixer concepts (Unity side).
+- pc-settings-menu: the settings model that stores the volume values written to VCAs.
+- optimize-audio: Unity import settings, relevant when both engines coexist or for video audio.
+- addressables-asset-loading: groups, labels, remote catalogs for bank stubs.
+- unitask: awaiting bank loads, cancellation.
+- vcontainer: root scope, entry points, disposal.
+- csharp-unity: house style, statics with Enter Play Mode Options.

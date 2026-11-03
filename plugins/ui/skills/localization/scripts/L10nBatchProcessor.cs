@@ -108,7 +108,7 @@ public static class L10nBatchProcessor
     /// Wires the open scene. Returns "scene :: object :: text" for every label that was found
     /// but matched no mapping entry, so partial coverage is reported rather than silent.
     /// </summary>
-    static List<string> LocalizeHierarchy(
+    private static List<string> LocalizeHierarchy(
         Dictionary<string, string> mapping, string table, string scenePath, out bool changed)
     {
         var unmatched = new List<string>();

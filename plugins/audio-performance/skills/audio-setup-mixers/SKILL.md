@@ -1,11 +1,11 @@
 ---
 name: audio-setup-mixers
-description: Routes scene AudioSources into the right AudioMixerGroup (Music, SFX, Foley, Voice, UI, Ambience) by classifying what each plays, and covers runtime mixer control - exposed parameters, snapshots, ducking, and dB-correct volume sliders. Use when cleaning up or setting outputAudioMixerGroup, deciding which group a sound belongs in, or wiring a settings slider to AudioMixer.SetFloat. Mixer and group creation stay manual (no public API).
+description: "Routes scene AudioSources into the right AudioMixerGroup (Music, SFX, Foley, Voice, UI, Ambience) by classifying what each plays, and covers runtime mixer control - exposed parameters, snapshots, ducking and the dB volume curve. Use when cleaning up outputAudioMixerGroup assignments or exposing mixer parameters for volume sliders. Triggers: \"route my audio sources\", \"which mixer group\", \"volume slider is too quiet\", \"duck music under dialogue\". Not for playback code and volume persistence (audio-playback-system, pc-settings-menu) or import and DSP cost (optimize-audio)."
 license: Unity Companion License
 metadata:
   category: audio-performance
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/audio-setup-mixers, https://github.com/AlexeyPerov/Unity-Open-MCP/tree/master/skills/extensions/audio"
-  unity: "6000.0+ (live eval path needs com.unity.pipeline)"
+  unity: "6000.0+"
 ---
 
 # Audio Mixer Setup
@@ -23,7 +23,7 @@ Handed back to the user: creating a mixer, creating or re-parenting groups, addi
 
 ## Step 0: Execution path
 
-Preferred: a live Editor with `unity command eval`. Eval syntax and prerequisites: see the `unity-cli` skill (unity-editor-tooling plugin) → Eval syntax. Every snippet in [references/api.md](references/api.md) is already in eval form.
+Preferred: a live Editor with `unity command eval` (needs `com.unity.pipeline`). Eval syntax and prerequisites: see the `unity-cli` skill (unity-editor-tooling plugin) → Eval syntax. Every snippet in [references/api.md](references/api.md) is already in eval form.
 
 When `eval` is unavailable, continue without it:
 
@@ -72,6 +72,7 @@ Volume sliders, mute toggles, snapshot switches, and ducking are runtime code, n
 - A parameter must be exposed in the Audio Mixer window first (right-click a field > Expose); `SetFloat` on an unexposed name returns `false`.
 - Convert linear slider values to decibels with `20 * log10(v)`, clamped to -80 dB. A linear 0..1 → -80..0 dB map makes most of the slider inaudible.
 - `SetFloat` in `Awake` is ignored on some versions; apply saved volumes in `Start` or later.
+- Persist slider values in the settings model (`pc-settings-menu` `GameSettings`), applied through `AudioSettingsStore` (`audio-playback-system`); never under the mixer parameter name.
 - Once `SetFloat` drives a parameter, snapshots stop controlling it until `ClearFloat`.
 
 ## Pitfalls
@@ -82,10 +83,13 @@ Volume sliders, mute toggles, snapshot switches, and ducking are runtime code, n
 
 ## References
 
-- [references/api.md](references/api.md) — read before running inventory, routing-read, or assign snippets.
-- [references/runtime-mixer-control.md](references/runtime-mixer-control.md) — read when writing volume sliders, mute, snapshots, or ducking code.
+- [references/api.md](references/api.md): read before running inventory, routing-read, or assign snippets.
+- [references/runtime-mixer-control.md](references/runtime-mixer-control.md): read when writing volume sliders, mute, snapshots, or ducking code.
 
-## See also
+## Related skills
 
-- `optimize-audio` — import settings, mixer CPU audit, DSP buffer.
-- `unity-cli` (unity-editor-tooling plugin) — connecting to the Editor, `eval` syntax and prerequisites.
+- audio-playback-system: pooled playback, `AudioSettingsStore` that applies saved volumes to exposed parameters.
+- pc-settings-menu: the settings model that stores volume levels.
+- optimize-audio: import settings, mixer CPU audit, DSP buffer.
+- fmod-unity: FMOD buses and VCAs instead of an AudioMixer.
+- unity-cli: connecting to the Editor, `eval` syntax and prerequisites.
