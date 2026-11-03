@@ -1,6 +1,6 @@
 ---
 name: combat-damage-system
-description: 'Builds health and damage for Unity 6 3D games - Health with a DamageInfo pipeline (amount, type, source, team, hit point), resistances, invulnerability frames, death, downed-and-revive and respawn for co-op, friendly-fire rules, hitbox/hurtbox layers, melee hit detection with OverlapCapsuleNonAlloc sweeps or arc queries, hitscan raycasts and swept projectiles, and damage events decoupled from UI, audio and VFX via C# events or ScriptableObject channels. Covers Netcode for GameObjects co-op: attack intent RPCs, server-side hit detection, networked Health (damage-authority rules), hit feedback RPCs and lag tolerance. Use for "add health and damage", "melee hits twice or misses", "damage numbers", "players hurt each other", "revive a downed teammate", or clients and host disagreeing about hits. Not for enemy decision logic (enemy-ai-behavior), collider or query debugging (physics-3d-collision), attack animation authoring (animation-authoring) or general NGO setup (netcode-for-gameobjects).'
+description: "Builds health and damage for Unity 6 3D games: Health with a DamageInfo pipeline, resistances, i-frames, death, downed-and-revive and respawn, friendly fire, hurtboxes, melee sweeps, hitscan and projectiles, decoupled damage events and server-authoritative hits for NGO co-op. Use when adding combat or fixing hit detection. Triggers: \"add health and damage\", \"melee hits twice or misses\", \"damage numbers\", \"players hurt each other\", \"revive a downed teammate\". Not for enemy decision logic (enemy-ai-behavior), collider or query debugging (physics-3d-collision) or interaction prompts (interaction-system)."
 license: MIT
 metadata:
   category: gameplay-systems
@@ -25,7 +25,7 @@ Target: melee-first or mixed combat in a slow to medium paced 3D game, 2-4 playe
 3. **Character setup:** `Health` on the root (team, rules, channel), one or more `Hurtbox` children (capsule for body, sphere for head with multiplier 1.5-2) on the `Hurtbox` layer, `MeleeHitDetector` on the weapon or root with `hurtboxMask = Hurtbox`.
 4. **Attack timing:** call `BeginSwing` at the animation's active frames and `EndSwing` after, or call `StrikeArc` once at the impact moment. For enemies, drive it from `EnemyBrain.AttackStrike` (see `enemy-ai-behavior`). Detection details: [references/hit-detection.md](references/hit-detection.md).
 5. **Feedback:** UI, audio and VFX subscribe to `Health` events or the `DamageEventChannel`; combat code never references them. See [references/events-and-feedback.md](references/events-and-feedback.md).
-6. **Co-op death flow:** players `canBeDowned`, revive and respawn rules: [references/downed-revive-respawn.md](references/downed-revive-respawn.md).
+6. **Co-op death flow:** players `canBeDowned`, revive and respawn rules: [references/downed-revive-respawn.md](references/downed-revive-respawn.md). With `interaction-system`, the revive prompt is a `ReviveInteractable` on the downed player that starts `ReviveNetwork`'s server-timed revive (see "Revive through interaction-system" in [references/coop-networking.md](references/coop-networking.md)).
 7. **Networking:** hit detection and `ApplyDamage` on the server only; read [references/coop-networking.md](references/coop-networking.md).
 
 ## Damage pipeline
@@ -61,15 +61,8 @@ var applied = hurtbox.ApplyHit(info);
 - **One hit per target per swing:** dedupe by `Health`, not by collider, or multi-hurtbox characters take damage per collider.
 - **i-frames are time stamps** (`SetInvulnerable(seconds)`), checked against `Time.time`; use them for dodge rolls, post-hit grace (`invulnerabilityAfterHit`, 0.2-0.5 s for players, 0 for enemies hit by groups) and revive protection.
 - **Friendly fire** is a `CombatRules` asset decision, not a per-weapon check. `Neutral` team damages and is damaged by everyone (traps, explosive barrels).
-- **Events carry data, listeners decide.** No `FindObjectOfType`, no UI calls inside `Health`. Unsubscribe in `OnDisable`.
+- **Events carry data, listeners decide.** No `FindObjectOfType`, no UI calls inside `Health`. Unsubscribe in `OnDisable`. `Health` events are owner-local C# events and `DamageEventChannel` is the designer-wired channel; see "Choosing an event style" in `csharp-unity` (`references/patterns.md`) before adding a different bus.
 - **Pooling:** call `Health.ResetHealth()` when taking a character or destructible from a pool; it clears i-frames, bleed-out and state.
-
-## References
-
-- [references/hit-detection.md](references/hit-detection.md): read when choosing melee sweeps vs arcs vs triggers, writing hitscan or projectile hits, setting up hurtbox layers, or debugging missed and double hits.
-- [references/events-and-feedback.md](references/events-and-feedback.md): read when wiring health bars, damage numbers, hit sounds, hit stop, camera shake or VFX to damage events.
-- [references/downed-revive-respawn.md](references/downed-revive-respawn.md): read when designing death, downed and revive, bleed-out, team wipes, checkpoints and respawn.
-- [references/coop-networking.md](references/coop-networking.md): read when the game uses Netcode for GameObjects: attack intent RPCs, server hit detection, `NetworkHealth`, hit feedback RPCs, revive requests and latency tolerance.
 
 ## Pitfalls
 
@@ -84,12 +77,19 @@ var applied = hurtbox.ApplyHit(info);
 | Dodge did not save the client | Server sees the client slightly late; extend dodge i-frames by about one round trip and lengthen enemy windups |
 | Hits follow last frame's pose | Physics sees transforms as of the last sync; see `Physics.SyncTransforms` notes in `physics-3d-collision` |
 
+## References
+
+- [references/hit-detection.md](references/hit-detection.md): read when choosing melee sweeps vs arcs vs triggers, writing hitscan or projectile hits, setting up hurtbox layers, or debugging missed and double hits.
+- [references/events-and-feedback.md](references/events-and-feedback.md): read when wiring health bars, damage numbers, hit sounds, hit stop, camera shake or VFX to damage events.
+- [references/downed-revive-respawn.md](references/downed-revive-respawn.md): read when designing death, downed and revive, bleed-out, team wipes, checkpoints and respawn.
+- [references/coop-networking.md](references/coop-networking.md): read when the game uses Netcode for GameObjects: attack intent RPCs, server hit detection, `NetworkHealth`, hit feedback RPCs, revive requests and latency tolerance.
+
 ## Related skills
 
 - `enemy-ai-behavior`: when enemies attack (`AttackStrike`), threat from damage, death handling for AI.
 - `physics-3d-collision`: layers, collision matrix, query misses, SyncTransforms.
 - `animation-authoring`: attack clips, animation events for active frames, hit reactions.
 - `netcode-for-gameobjects`: authority, RPC and NetworkVariable rules used by the wrappers.
-- `interaction-system`: hold-to-interact prompts that start and cancel revives.
+- `interaction-system`: the revive prompt (`ReviveInteractable`, a `NetworkInteractable`) that starts the server-timed revive.
 - `audio-playback-system`, `unity-particle-system`, `cinemachine-cameras`: hit sounds, impact VFX, camera shake listeners.
-- `csharp-unity`: `ObjectPool<T>` for projectiles and damage numbers.
+- `csharp-unity`: `ObjectPool<T>` (`UnityEngine.Pool`) for projectiles and damage numbers; event style choice.

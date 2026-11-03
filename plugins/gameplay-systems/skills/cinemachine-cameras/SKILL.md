@@ -1,6 +1,6 @@
 ---
 name: cinemachine-cameras
-description: Builds and scripts gameplay and cutscene cameras with Cinemachine 3.x in Unity 6 - CinemachineBrain, CinemachineCamera priority and blends, follow, orbit, third-person and top-down rigs, composers, noise and impulse shake, Deoccluder and Confiner, input axis control, and migration from Cinemachine 2. Use for follow or orbit cameras, camera shake, camera switching, keeping the camera out of walls, or Cinemachine 2 API compile errors and jittery follow.
+description: "Builds and scripts gameplay and cutscene cameras with Cinemachine 3.x in Unity 6: CinemachineBrain, CinemachineCamera priority and blends, follow, orbit, third-person and top-down rigs, composers, noise and impulse shake, Deoccluder and Confiner, input axis control and migration from Cinemachine 2. Use for gameplay camera rigs and camera switching. Triggers: \"follow camera\", \"orbit camera\", \"camera shake\", \"camera goes through walls\", \"Cinemachine 2 API compile errors\", \"jittery follow\". Not for player movement (character-controller-3d), cutscene sequencing (timeline-sequencing) or pixel-perfect 2D cameras (2d-pixel-perfect)."
 license: MIT
 metadata:
   category: gameplay-systems
@@ -40,35 +40,35 @@ Component catalogue with key fields: [references/components.md](references/compo
 using Unity.Cinemachine;
 using UnityEngine;
 
-public class CameraDirector : MonoBehaviour
+public sealed class CameraDirector : MonoBehaviour
 {
-    [SerializeField] CinemachineCamera explorationCam;
-    [SerializeField] CinemachineCamera aimCam;
-    [SerializeField] CinemachineImpulseSource impulse;
+    [SerializeField] private CinemachineCamera explorationCam;
+    [SerializeField] private CinemachineCamera aimCam;
+    [SerializeField] private CinemachineImpulseSource impulse;
 
     public void SetAiming(bool aiming)
     {
-        aimCam.Priority = aiming ? 20 : 0;
+        this.aimCam.Priority = aiming ? 20 : 0;
     }
 
     public void Retarget(Transform player)
     {
-        explorationCam.Follow = player;
-        explorationCam.LookAt = player;
+        this.explorationCam.Follow = player;
+        this.explorationCam.LookAt = player;
     }
 
     public void OnPlayerTeleported(Transform player, Vector3 delta)
     {
-        explorationCam.OnTargetObjectWarped(player, delta);
+        this.explorationCam.OnTargetObjectWarped(player, delta);
     }
 
-    public void Shake(float force) => impulse.GenerateImpulseWithForce(force);
+    public void Shake(float force) => this.impulse.GenerateImpulseWithForce(force);
 
     public void SetFov(float fov)
     {
-        var lens = explorationCam.Lens;
+        var lens = this.explorationCam.Lens;
         lens.FieldOfView = fov;
-        explorationCam.Lens = lens;
+        this.explorationCam.Lens = lens;
     }
 }
 ```
@@ -89,9 +89,16 @@ public class CameraDirector : MonoBehaviour
 - **Input**: `CinemachineInputAxisController` reads Input System actions per axis (assign an `InputActionReference`, e.g. Look). Cinemachine axes are not driven by legacy `Input` when Active Input Handling is the new Input System only.
 - **Time scale**: set Brain `IgnoreTimeScale` for cameras that must move during pause menus.
 
+## References
+
+- [references/components.md](references/components.md): read when choosing or tuning a position/rotation component or extension.
+- [references/cm2-to-cm3-migration.md](references/cm2-to-cm3-migration.md): read when any Cinemachine 2 type name shows up.
+
 ## Related skills
 
 - `timeline-sequencing`: Cinemachine Track and Shot clips for cutscenes.
 - `splines-paths`: SplineContainer setup for `CinemachineSplineDolly` and `CinemachineSplineCart`.
 - `input-system-actions`: Look / Zoom actions consumed by `CinemachineInputAxisController`.
 - `physics-3d-collision`: Rigidbody interpolation and layer masks for the deoccluder.
+- `character-controller-3d`: camera-relative movement and controller-side jitter fixes.
+- `2d-pixel-perfect`: the `CinemachinePixelPerfect` extension for pixel-art cameras.

@@ -54,7 +54,7 @@ public class PlayerLifeGlue : MonoBehaviour
 - Reviver stands within 2 m of the downed player and holds Interact for 3-5 s. Cancel on moving away, taking damage (optional) or the reviver going down.
 - Show progress on both players' HUDs.
 - On completion: `health.Revive()` (uses `reviveHealthFraction`, grants `invulnerabilityAfterRevive`).
-- In co-op the server owns the timer; clients only send start and stop requests. See `coop-networking.md`.
+- In co-op the server owns the timer; clients only send start and stop requests. With `interaction-system`, the start request is the Interact press on a `ReviveInteractable`. See `coop-networking.md` ("Revive through interaction-system").
 
 ## Team wipe and respawn
 

@@ -1,6 +1,6 @@
 ---
 name: timeline-sequencing
-description: Builds, binds and controls Unity Timeline sequences in Unity 6 - TimelineAsset creation by script, Animation, Activation, Audio, Signal and Control tracks, markers and SignalReceivers, PlayableDirector bindings and playback, wrap and time update modes, Cinemachine tracks and custom playable clips. Use for cutscenes, intro cinematics, skippable or music-timed sequences, or when bindings are lost after duplicating a timeline, a character freezes after a cutscene or signals do not fire.
+description: "Builds, binds and controls Unity Timeline sequences in Unity 6: TimelineAsset creation by script, Animation, Activation, Audio, Signal and Control tracks, markers and SignalReceivers, PlayableDirector bindings and playback, wrap and time update modes, Cinemachine tracks and custom playable clips. Use for cutscenes, intro cinematics and music-timed sequences. Triggers: \"make a cutscene\", \"skippable cinematic\", \"bindings lost after duplicating a timeline\", \"character freezes after a cutscene\", \"signals do not fire\". Not for Animator state machines (animation-authoring) or gameplay camera rigs (cinemachine-cameras)."
 license: MIT
 metadata:
   category: gameplay-systems
@@ -58,8 +58,13 @@ Code for every step, custom clips and the Cinemachine track: [references/timelin
 - **Changes vanish**: tracks created before the asset existed on disk are not saved; create the asset first.
 - **Preview modifies the scene**: Timeline preview reverts on exit; avoid writing scene changes from scripts while the Timeline window is previewing.
 
+## References
+
+- [references/timeline-api.md](references/timeline-api.md): read before writing any Timeline script (code for every step, custom clips, the Cinemachine track).
+
 ## Related skills
 
 - `cinemachine-cameras`: Cinemachine track, shot blending, impulse during cutscenes.
 - `animation-authoring`: clips used on Animation tracks; Animator state after the cutscene.
 - `input-system-actions`: disabling gameplay action maps during cutscenes and a Skip action.
+- `animation-sequencer`: DOTween-based UI and tween sequences instead of Animator clips or Timeline.

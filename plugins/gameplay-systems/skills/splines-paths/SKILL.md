@@ -1,6 +1,6 @@
 ---
 name: splines-paths
-description: Creates, edits and samples Unity Splines 2.x in Unity 6 - SplineContainer and knots, world vs local evaluation, arc-length and nearest-point queries, NativeSpline for jobs, and the SplineAnimate, SplineExtrude and SplineInstantiate components. Use for paths, rails, roads, rivers or patrol routes, constant-speed movement along a curve, placing or extruding objects along a path, or when objects drift off the spline after the container moves or travel at uneven speed.
+description: "Creates, edits and samples Unity Splines 2.x in Unity 6: SplineContainer and knots, world vs local evaluation, arc-length and nearest-point queries, NativeSpline for jobs, and the SplineAnimate, SplineExtrude and SplineInstantiate components. Use for paths, rails, roads, rivers or routes defined as curves. Triggers: \"move along a path at constant speed\", \"place objects along a curve\", \"extrude a road mesh\", \"objects drift off the spline\", \"uneven speed along a spline\". Not for carving terrain under a spline (level-geometry-authoring), NavMesh movement (initialize-ai-navigation) or dolly camera rigs (cinemachine-cameras)."
 license: MIT
 metadata:
   category: gameplay-systems
@@ -55,8 +55,12 @@ Code for every step, constant-speed movement, nearest point, and jobs: [referenc
 - `SplineAnimate` writes the transform every frame; do not also move that object with physics or another script. For physics bodies, sample positions and call `Rigidbody.MovePosition` in `FixedUpdate`.
 - For hundreds of evaluations per frame, convert to `NativeSpline` and evaluate in a Burst job; managed `Spline` evaluation allocates nothing but is not cache-friendly.
 
+## References
+
+- [references/splines-api.md](references/splines-api.md): read before writing spline code (building, constant-speed movement, nearest point, jobs).
+
 ## Related skills
 
 - `cinemachine-cameras`: `CinemachineSplineDolly` / `CinemachineSplineCart` use a SplineContainer.
 - `initialize-ai-navigation`: spline-defined patrol routes sampled into NavMeshAgent destinations.
-- `level-geometry-authoring`: roads and rivers carved into terrain along a spline.
+- `level-geometry-authoring`: flattening and carving terrain under a spline (owned there; this skill only samples the spline).

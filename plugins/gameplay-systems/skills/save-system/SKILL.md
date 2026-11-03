@@ -1,6 +1,6 @@
 ---
 name: save-system
-description: Builds a crash-safe save game system for Unity 6 - plain C# save DTOs serialized with Newtonsoft Json.NET (com.unity.nuget.newtonsoft-json), a version envelope with a tested migration chain, atomic writes (.tmp then File.Replace with a .bak fallback), capture on the main thread and file IO on a background thread with Awaitable, save slots and rotating autosaves under Application.persistentDataPath, and host-owned world saves for online co-op. Use for "add save/load", "save file corrupted after a crash", "old saves break after an update", autosave hitches, save slots, or deciding who saves in co-op. Not for static design data tables (game-data-pipeline), binary MemoryPack formats (memorypack), player settings or key bindings (pc-settings-menu), Steam Cloud setup (steamworks-integration) or network replication (netcode-for-gameobjects).
+description: "Builds a crash-safe save game system for Unity 6: Json.NET save DTOs, a version envelope with tested migrations, atomic writes with a .bak fallback, background-thread IO with Awaitable, save slots and rotating autosaves under Application.persistentDataPath, and host-owned co-op saves. Use when adding save/load, slots or autosave. Triggers: \"add save/load\", \"save file corrupted after a crash\", \"old saves break after an update\", \"autosave hitches\", \"who saves in co-op\". Not for static design data (game-data-pipeline), MemoryPack binary formats (memorypack) or settings and key bindings (pc-settings-menu)."
 license: MIT
 metadata:
   category: gameplay-systems
@@ -19,7 +19,7 @@ metadata:
    - [scripts/SaveMigrator.cs](scripts/SaveMigrator.cs): read when changing a DTO shape; `JObject` migration steps chained by version.
 4. **Capture on the main thread, write off it.** Build a fresh snapshot DTO from live state (transforms, components, inventories) on the main thread, then hand it to `SaveAsync`. Serialization and IO run on a thread-pool thread.
 5. **Load before spawning.** Load the slot, then build the world from the DTO. Treat `SaveLoadSource.Backup` as a warning to show the player ("restored from backup").
-6. **Slots and autosave.** Manual slots `slot_1..slot_n`, rotating autosaves `auto_0..auto_2` (write the oldest), plus one quick save. Name slots with letters, digits, `_` and `-` only.
+6. **Slots and autosave.** Manual slots `slot_1..slot_n`, rotating autosaves `auto_0..auto_2` (`NextAutosaveSlot` picks a missing or the oldest one), plus one quick save. Name slots with letters, digits, `_` and `-` only.
 7. **Test the migration chain** in Edit Mode tests with checked-in fixture files from every shipped version.
 8. **Co-op:** only the host writes the world save; read [references/coop-and-cloud.md](references/coop-and-cloud.md).
 
@@ -39,15 +39,29 @@ public sealed class GameSave
 public struct SavedVector3
 {
     public float X, Y, Z;
-    public SavedVector3(Vector3 v) { X = v.x; Y = v.y; Z = v.z; }
-    public Vector3 ToVector3() => new(X, Y, Z);
+
+    public SavedVector3(Vector3 v)
+    {
+        this.X = v.x;
+        this.Y = v.y;
+        this.Z = v.z;
+    }
+
+    public Vector3 ToVector3() => new(this.X, this.Y, this.Z);
 }
 ```
 
 ```csharp
 public sealed class SaveController : MonoBehaviour
 {
+    private const int AutosaveSlotCount = 3;
+    private const string AutosavePrefix = "auto_";
+
     private SaveService _saves;
+    private IReadOnlyList<SaveSlotInfo> _slots = Array.Empty<SaveSlotInfo>();
+    private bool _dirty;
+
+    public IReadOnlyList<SaveSlotInfo> Slots => this._slots;
 
     private void Awake()
     {
@@ -56,26 +70,64 @@ public sealed class SaveController : MonoBehaviour
             new SaveMigration(1, data => data["PlayTimeSeconds"] = 0.0),
             new SaveMigration(2, data => data["Players"] = new JArray(data["Player"] ?? new JObject())),
         });
-        _saves = new SaveService(migrator);
+        this._saves = new SaveService(migrator);
+    }
+
+    public void MarkDirty() => this._dirty = true;
+
+    public async Awaitable LoadSlotListAsync(CancellationToken cancellationToken)
+    {
+        await Awaitable.BackgroundThreadAsync();
+        var slots = this._saves.ListSlots();
+        await Awaitable.MainThreadAsync();
+        cancellationToken.ThrowIfCancellationRequested();
+        this._slots = slots;
+    }
+
+    public async Awaitable SaveNowAsync(CancellationToken cancellationToken)
+    {
+        if (!this._dirty) return;
+
+        var snapshot = this.CaptureSnapshot();
+        await this._saves.SaveAsync(this.NextAutosaveSlot(), snapshot, cancellationToken);
+        this._dirty = false;
     }
 
     public async Awaitable AutosaveAsync()
     {
-        var snapshot = CaptureSnapshot();
         try
         {
-            await _saves.SaveAsync("auto_0", snapshot, destroyCancellationToken);
+            await this.SaveNowAsync(destroyCancellationToken);
         }
         catch (OperationCanceledException)
         {
         }
     }
 
-    private void OnApplicationQuit() => _saves.Save("auto_0", CaptureSnapshot());
+    public string NextAutosaveSlot()
+    {
+        var oldest = AutosavePrefix + 0;
+        var oldestTime = DateTime.MaxValue;
+        for (var i = 0; i < AutosaveSlotCount; i++)
+        {
+            var slot = AutosavePrefix + i;
+            if (!this._saves.Exists(slot)) return slot;
+
+            var written = File.GetLastWriteTimeUtc(this._saves.GetSlotPath(slot));
+            if (written >= oldestTime) continue;
+
+            oldest = slot;
+            oldestTime = written;
+        }
+
+        return oldest;
+    }
 
     private GameSave CaptureSnapshot() => new GameSave();
 }
 ```
+
+Quit has one path: `SaveNowAsync` is registered as a quit handler with `game-bootstrap-flow` (`GameBootstrap.Current.RegisterQuitHandler(saves.SaveNowAsync)`), which holds the quit through `Application.wantsToQuit` until the save finishes. Without that bootstrap, subscribe to `Application.wantsToQuit` the same way. There is no `OnApplicationQuit` save.
 
 The file on disk is an envelope: `{"version":3,"savedAtUtc":"...","data":{...}}`. The service stamps `version` from `SaveMigrator.CurrentVersion`; DTOs do not carry their own version field.
 
@@ -90,7 +142,7 @@ The file on disk is an envelope: `{"version":3,"savedAtUtc":"...","data":{...}}`
 - **Json.NET settings:** `TypeNameHandling.None` (polymorphic type names in user-editable files are a known deserialization risk), `ObjectCreationHandling.Replace` (the default reuses collections created by field initializers and appends to them).
 - **Unity structs:** `Vector3`, `Quaternion` and `Color` expose computed properties such as `normalized` that Json.NET can try to serialize, which can produce self-referencing loop errors or bloated files. Use small DTO structs like `SavedVector3`.
 - **IL2CPP stripping:** DTO types created only through reflection can lose constructors or members with a high Managed Stripping Level. Add `[UnityEngine.Scripting.Preserve]` or a `link.xml` entry and test a player build.
-- **Quit saves are synchronous.** An `Awaitable` save started in `OnApplicationQuit` is not guaranteed to finish. Use `Save`, or cancel quit with `Application.wantsToQuit` until an async save completes.
+- **Quit saves go through `wantsToQuit`.** An `Awaitable` save started in `OnApplicationQuit` is not guaranteed to finish, so the quit handler cancels the quit until `SaveNowAsync` completes. `wantsToQuit` is ignored when exiting Play Mode and on iOS; on mobile, also save with the synchronous `Save` from `OnApplicationPause(true)`.
 - **Never block** the main thread on `SaveAsync` (`.GetAwaiter().GetResult()`). See `csharp-unity` (references/async.md).
 
 ## Pitfalls
@@ -114,8 +166,9 @@ The file on disk is an envelope: `{"version":3,"savedAtUtc":"...","data":{...}}`
 ## Related skills
 
 - `game-data-pipeline`: static design data the save references by id.
-- `memorypack`: binary alternative serializer.
+- `memorypack`, `messagepack-csharp`: binary save formats when size or speed has been measured as a problem.
 - `pc-settings-menu`: settings and key bindings are stored separately from saves.
 - `steamworks-integration`: Steam Auto-Cloud configuration for the save folder.
 - `netcode-for-gameobjects`: replicating loaded world state to clients.
+- `game-bootstrap-flow`: registers `SaveNowAsync` as a quit handler and loads the slot list during service init.
 - `csharp-unity`: async and house style for the scripts.

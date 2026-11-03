@@ -1,6 +1,6 @@
 ---
 name: character-controller-3d
-description: Builds and debugs 3D player movement in Unity 6 with CharacterController or a kinematic or dynamic Rigidbody - ground probes, gravity, slopes and steps, jump buffering and coyote time, moving platforms, camera-relative input with Cinemachine 3 and the Input System, and root motion. Use for first- or third-person controllers, or when a character cannot jump, flickers between grounded and falling, bounces down slopes, sticks to walls, ignores teleports or jitters with the camera. Cinemachine rig setup belongs to cinemachine-cameras; clip and Animator Controller authoring belongs to animation-authoring.
+description: "Builds and debugs 3D player movement in Unity 6 with CharacterController or a kinematic or dynamic Rigidbody: ground probes, gravity, slopes and steps, jump buffering and coyote time, moving platforms, camera-relative input and root-motion movement. Use for first- or third-person player controllers. Triggers: \"character cannot jump\", \"flickers between grounded and falling\", \"bounces down slopes\", \"sticks to walls\", \"teleport snaps back\", \"character jitters with the camera\". Not for camera rig setup (cinemachine-cameras), clip and Animator Controller authoring (animation-authoring) or collision callback debugging (physics-3d-collision)."
 license: MIT
 metadata:
   category: gameplay-systems
@@ -52,12 +52,6 @@ metadata:
 - Camera-relative input uses the output Camera's flattened forward/right, not the `CinemachineCamera` transform. OrbitalFollow binding mode World Space or Lazy Follow.
 - Root motion: `OnAnimatorMove` on the Animator's GameObject, route `deltaPosition` through `Move` (or Rigidbody velocity) together with your gravity; never write the transform directly. Take yaw from one source only: with root motion on, the clips turn the character and input rotation is skipped.
 
-## References
-
-- [references/charactercontroller-reference.md](references/charactercontroller-reference.md): read when tuning CharacterController properties, grounding, slopes, steps, pushing, platforms or teleporting.
-- [references/rigidbody-controllers.md](references/rigidbody-controllers.md): read when building a dynamic or kinematic Rigidbody character, choosing a collision detection mode, or using root motion with a Rigidbody.
-- [references/camera-input-root-motion.md](references/camera-input-root-motion.md): read when setting up Cinemachine 3 orbit cameras, Input System actions, camera jitter, or root motion.
-
 ## Pitfalls
 
 | Symptom | Fix |
@@ -74,6 +68,12 @@ metadata:
 | Root motion character floats or ignores gravity | Gravity not added in `OnAnimatorMove`, or Animator culled off-screen |
 | `OnCollisionEnter` never fires with a CharacterController | Expected; use `OnControllerColliderHit` (see `physics-3d-collision`) |
 
+## References
+
+- [references/charactercontroller-reference.md](references/charactercontroller-reference.md): read when tuning CharacterController properties, grounding, slopes, steps, pushing, platforms or teleporting.
+- [references/rigidbody-controllers.md](references/rigidbody-controllers.md): read when building a dynamic or kinematic Rigidbody character, choosing a collision detection mode, or using root motion with a Rigidbody.
+- [references/camera-input-root-motion.md](references/camera-input-root-motion.md): read when setting up Cinemachine 3 orbit cameras, Input System actions, camera jitter, or root motion.
+
 ## Related skills
 
 - `physics-3d-collision`: layers, collision matrix, triggers, tunnelling, query misses.
@@ -81,4 +81,5 @@ metadata:
 - `cinemachine-cameras`: CinemachineCamera, OrbitalFollow, Deoccluder, InputAxisController, blends.
 - `animation-authoring`: locomotion blend trees, Animator parameters, root motion clips.
 - `blender-to-unity-pipeline`: rig export, scale, root bone and root motion import settings.
+- `timeline-sequencing`: handing the character back after a cutscene.
 - `csharp-unity`: house style for the reference scripts.

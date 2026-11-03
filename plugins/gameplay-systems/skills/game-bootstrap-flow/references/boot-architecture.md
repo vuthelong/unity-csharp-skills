@@ -21,6 +21,7 @@ Default for this kind of game: the prefab. It keeps every Play-from-scene sessio
 2. Root: `GameBootstrap`. Children, in init order:
    - `Settings` (applies the saved settings, see `pc-settings-menu`)
    - `Platform` (Steam init, see `steamworks-integration`; it already handles its own `DontDestroyOnLoad` if used standalone, so put only one copy in the project)
+   - `GameData` (loads static data tables, see `game-data-pipeline`; before `Saves` because saves store game-data ids)
    - `Saves`, `Audio`, `Input`
    - `SceneLoader` with its loading screen `Canvas` (Screen Space Overlay, sort order above every game canvas)
    - `PauseService`

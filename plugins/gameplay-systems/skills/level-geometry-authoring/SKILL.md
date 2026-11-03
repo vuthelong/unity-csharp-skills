@@ -1,6 +1,6 @@
 ---
 name: level-geometry-authoring
-description: Generates and edits level geometry by script in Unity 6 - Terrain heightmaps, splat painting, tree and detail placement, holes and multi-tile stitching, ProBuilder greybox meshes, and LODGroup setup. Use for procedural or scripted terrain, slope-based texturing, tree scattering, blockout platforms, ramps and stairs, or LOD levels, regenerating a whole procedural world (erosion, splat rules, foliage scatter, roads, additive scene streaming) and proving it with captures and a profiling tour, or when terrain tiles show seams, the TerrainCollider mismatches the visual, terrain renders pink in URP, ProBuilder edits do not show, LODs or foliage pop, or the world hitches or runs slow at its worst viewpoint.
+description: "Generates and edits level geometry by script in Unity 6: Terrain heightmaps, splat painting, tree and detail placement, holes, multi-tile stitching, terrain flattening under roads, ProBuilder greybox meshes, LODGroup setup and procedural world generation. Use for scripted terrain, blockout geometry or procedural worlds. Triggers: \"generate terrain\", \"slope-based texturing\", \"scatter trees\", \"blockout ramps and stairs\", \"terrain tiles show seams\", \"TerrainCollider mismatches the visual\". Not for frame-cost tuning (optimize-3d-rendering), pink materials after a pipeline switch (migrate-birp-to-urp) or spline sampling (splines-paths)."
 license: MIT
 metadata:
   category: gameplay-systems
@@ -54,10 +54,18 @@ Code and coordinate details: [references/terrain-api.md](references/terrain-api.
 - Cross-fade needs shader support (URP Lit supports it; enable **LOD Cross Fade** on the URP asset).
 - Unity 6.2+ can also generate per-mesh LODs at import (Mesh LOD), which needs no LODGroup for single meshes.
 
+## References
+
+- [references/terrain-api.md](references/terrain-api.md): read before any Terrain script, including flattening terrain under a spline or building.
+- [references/probuilder-and-lod.md](references/probuilder-and-lod.md): read before ProBuilder or LODGroup scripts.
+- [references/world-building.md](references/world-building.md): read before generating a whole world, scattering foliage, streaming scenes, or judging a world done.
+
 ## Related skills
 
 - `initialize-ai-navigation`: bake NavMesh on terrain and ProBuilder geometry; NavMeshModifier for areas.
 - `physics-3d-collision`: TerrainCollider, MeshCollider convexity and queries against level geometry.
-- `splines-paths`: roads and rivers along splines, flattening terrain under a spline.
+- `splines-paths`: sampling the road or river spline; the terrain flattening itself is in [references/terrain-api.md](references/terrain-api.md).
 - `urp-hlsl-shaders`: terrain, grass and foliage shaders (wind, color variation, passes that agree).
-- `cpu-performance-profiling`, `optimize-3d-rendering`: the profiling tour and draw-call levers.
+- `cpu-performance-profiling`, `optimize-3d-rendering`: frame-cost tuning, LOD culling budgets and draw-call levers.
+- `migrate-birp-to-urp`: pink materials across a whole project after a pipeline switch.
+- `blender-to-unity-pipeline`: `_LODn` naming and Mesh LOD import.

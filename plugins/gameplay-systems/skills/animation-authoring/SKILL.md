@@ -1,6 +1,6 @@
 ---
 name: animation-authoring
-description: Authors and drives Mecanim animation in Unity 6 - AnimationClip curves and events, AnimatorController state machines, blend trees and layers built from editor scripts, runtime Animator control with hashed parameters, root motion, override controllers and runtime constraints. Use when creating .anim or .controller assets by code, wiring locomotion blend trees, adding footstep animation events, attaching props to bones, or debugging transitions that never fire, clips that do not loop or root motion fighting physics.
+description: "Authors and drives Mecanim animation in Unity 6: AnimationClip curves and events, AnimatorController state machines, blend trees and layers built from editor scripts, runtime Animator control with hashed parameters, override controllers and runtime constraints. Use when creating .anim or .controller assets by code or wiring Animator logic. Triggers: \"create a blend tree by script\", \"add footstep animation events\", \"attach a prop to a bone\", \"transition never fires\", \"clip does not loop\". Not for character movement and root-motion motors (character-controller-3d), cutscenes (timeline-sequencing) or Spine skeletons (spine-unity)."
 license: MIT
 metadata:
   category: gameplay-systems
@@ -60,9 +60,19 @@ API listings and full examples: [references/clip-and-controller-api.md](referenc
 - `ParentConstraint` follows a bone without reparenting (props, weapons, carried items).
 - For IK, multi-aim on bones or two-bone limbs, use the Animation Rigging package (`com.unity.animation.rigging`), not these components.
 
+## References
+
+- [references/clip-and-controller-api.md](references/clip-and-controller-api.md): read when generating clips, controllers or blend trees by code.
+- [references/constraints.md](references/constraints.md): read when adding any constraint component by script.
+
 ## Related skills
 
 - `initialize-ai-navigation`: NavMeshAgent-driven locomotion and the agent/animation coupling recipe.
 - `timeline-sequencing`: Animation tracks, track offsets and cutscene control of Animators.
 - `physics-3d-collision`: root motion vs Rigidbody contacts.
 - `input-system-actions`: feeding input to animator parameters.
+- `character-controller-3d`: applying root motion to a CharacterController or Rigidbody motor.
+- `spine-unity`: Spine skeletons, including SkeletonMecanim controllers.
+- `blender-to-unity-pipeline`: clip splitting, loop flags and rig import settings.
+- `build-gtk`: custom node-based editors (Graph Toolkit); Animator controllers stay here.
+- `animation-sequencer`: DOTween-based UI and tween sequences instead of Animator clips or Timeline.

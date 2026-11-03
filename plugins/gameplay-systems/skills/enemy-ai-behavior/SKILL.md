@@ -1,6 +1,6 @@
 ---
 name: enemy-ai-behavior
-description: Builds enemy and NPC combat AI for Unity 6 3D games - choosing a finite state machine, Unity Behavior graphs (com.unity.behavior) or utility AI, perception (vision cone with Physics.Raycast line of sight, hearing through noise events, last-known-position memory, non-alloc queries on staggered ticks), threat/aggro targeting across co-op players with retarget hysteresis, NavMeshAgent chase, attack windows and leashing, AI tick budgets and LOD, and server-only AI for Netcode for GameObjects co-op. Use for "make an enemy that patrols, chases and attacks", aggro tables, enemies hearing footsteps or gunshots, enemies that cannot see the player or retarget every frame, AI eating CPU, or AI behaving differently on host and clients. Not for NavMesh baking, agent types or links (initialize-ai-navigation), collider and query debugging (physics-3d-collision), Animator controller authoring (animation-authoring), damage and health (combat-damage-system) or general NGO setup (netcode-for-gameobjects).
+description: "Builds enemy and NPC combat AI for Unity 6 3D games: an FSM, Unity Behavior graph or utility AI, sight and hearing perception with memory, threat-based targeting across co-op players, NavMeshAgent chase, attack windows, leashing, AI tick budgets and server-only AI for Netcode for GameObjects. Use when building enemies that patrol, chase and attack. Triggers: \"make an enemy that patrols, chases and attacks\", \"aggro table\", \"enemies hear footsteps\", \"enemy cannot see the player\", \"AI eats CPU\". Not for NavMesh baking or agent setup (initialize-ai-navigation), damage and health (combat-damage-system) or Animator authoring (animation-authoring)."
 license: MIT
 metadata:
   category: gameplay-systems
@@ -42,7 +42,7 @@ Decide in [references/architecture-choice.md](references/architecture-choice.md)
 ## Glue with combat-damage-system
 
 ```csharp
-public class EnemyCombatGlue : MonoBehaviour
+public sealed class EnemyCombatGlue : MonoBehaviour
 {
     [SerializeField] private EnemyBrain brain;
     [SerializeField] private Health health;
@@ -93,13 +93,6 @@ public class EnemyCombatGlue : MonoBehaviour
 - **Server-time timers.** Do not drive hit timing from animation events on the server when the Animator may be culled (`AnimatorCullingMode.CullCompletely` stops animation off-screen, and a host's screen is not the enemy's). `EnemyBrain` uses timers; animation follows the `Attacking` parameter.
 - **Statics reset** with `[RuntimeInitializeOnLoadMethod(SubsystemRegistration)]` so the scripts work with domain reload disabled.
 
-## References
-
-- [references/architecture-choice.md](references/architecture-choice.md): read when choosing FSM vs Unity Behavior vs utility AI, installing `com.unity.behavior`, writing a custom action node, or sketching a utility scorer.
-- [references/perception-and-targeting.md](references/perception-and-targeting.md): read when tuning sight, hearing, stealth, memory or threat values, or designing aggro rules for co-op (tanking, healing threat, downed players).
-- [references/performance.md](references/performance.md): read when AI shows in the Profiler, when scaling enemy counts, adding AI LOD or pooling enemies.
-- [references/coop-networking.md](references/coop-networking.md): read when the game uses Netcode for GameObjects: server-only AI, the driver component, spawning, despawning and pooling enemies.
-
 ## Pitfalls
 
 | Symptom | Fix |
@@ -113,6 +106,13 @@ public class EnemyCombatGlue : MonoBehaviour
 | AI runs on clients, enemies jitter | AI not gated to the server; agent enabled on clients fights `NetworkTransform` |
 | Enemy is kited forever | Leash radius too large, or threat added while returning |
 
+## References
+
+- [references/architecture-choice.md](references/architecture-choice.md): read when choosing FSM vs Unity Behavior vs utility AI, installing `com.unity.behavior`, writing a custom action node, or sketching a utility scorer.
+- [references/perception-and-targeting.md](references/perception-and-targeting.md): read when tuning sight, hearing, stealth, memory or threat values, or designing aggro rules for co-op (tanking, healing threat, downed players).
+- [references/performance.md](references/performance.md): read when AI shows in the Profiler, when scaling enemy counts, adding AI LOD or pooling enemies.
+- [references/coop-networking.md](references/coop-networking.md): read when the game uses Netcode for GameObjects: server-only AI, the driver component, spawning, despawning and pooling enemies.
+
 ## Related skills
 
 - `initialize-ai-navigation`: NavMesh baking, agent types, links, areas, agent-animation coupling.
@@ -120,4 +120,4 @@ public class EnemyCombatGlue : MonoBehaviour
 - `physics-3d-collision`: layer matrix and why a query misses.
 - `animation-authoring`: the locomotion blend tree and attack states driven by `Speed` and `Attacking`.
 - `netcode-for-gameobjects`: NetworkObject, NetworkTransform and NetworkAnimator authority setup.
-- `csharp-unity`: `ObjectPool<T>` and house style.
+- `csharp-unity`: `ObjectPool<T>` (`UnityEngine.Pool`), house style, and "Choosing an event style" (`references/patterns.md`) for `NoiseEvents`, a static bus that resets in `SubsystemRegistration`.

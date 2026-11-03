@@ -165,15 +165,24 @@ public class ReviveNetwork : NetworkBehaviour
 
     public float Progress => this._progress.Value;
 
+    public bool IsDowned => this.health.State == HealthState.Downed;
+
     [Rpc(SendTo.Server)]
     public void BeginReviveRpc(RpcParams rpcParams = default)
     {
-        if (this.health.State != HealthState.Downed || this._reviver != null) return;
         if (!NetworkManager.ConnectedClients.TryGetValue(rpcParams.Receive.SenderClientId, out var client)) return;
         if (client.PlayerObject == null || !client.PlayerObject.TryGetComponent<Health>(out var reviver)) return;
-        if (!CanRevive(reviver)) return;
+
+        TryBeginRevive(reviver);
+    }
+
+    public bool TryBeginRevive(Health reviver)
+    {
+        if (!IsServer || !IsDowned || this._reviver != null) return false;
+        if (!CanRevive(reviver)) return false;
 
         this._reviver = reviver;
+        return true;
     }
 
     [Rpc(SendTo.Server)]
@@ -211,6 +220,29 @@ public class ReviveNetwork : NetworkBehaviour
 ```
 
 The reviver calls `BeginReviveRpc` on the downed player's object, which it does not own, so the RPC keeps the default `InvokePermission` (Everyone) and the server validates the sender instead. The progress `NetworkVariable` drives both HUDs and late joiners.
+
+### Revive through interaction-system
+
+When the project uses `interaction-system`, start the revive from its prompt instead of a separate input path. Put a `ReviveInteractable` on the downed player's root next to `ReviveNetwork`, on the `Interactable` layer, with `holdDuration` 0: the interact press is the start request, the server owns the timer, and walking out of `maxDistance` (checked every server frame by `CanRevive`) cancels it. Call `CancelReviveRpc` from the reviver's input when the Interact action is released if releasing should also cancel.
+
+```csharp
+using UnityEngine;
+
+public sealed class ReviveInteractable : NetworkInteractable
+{
+    [SerializeField] private ReviveNetwork revive;
+
+    public override bool CanInteract(in InteractionRequest request) =>
+        base.CanInteract(request) && this.revive.IsDowned;
+
+    protected override bool OnInteractServer(in InteractionRequest request) =>
+        request.Instigator != null
+        && request.Instigator.TryGetComponent<Health>(out var reviver)
+        && this.revive.TryBeginRevive(reviver);
+}
+```
+
+`NetworkInteractor` has already validated the sender, spawn state and distance before `OnInteractServer` runs (see `interaction-system`).
 
 ## Latency tolerance for slow-paced co-op
 

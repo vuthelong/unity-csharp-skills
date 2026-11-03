@@ -1,6 +1,6 @@
 ---
 name: input-system-actions
-description: Sets up, scripts and tests the Unity Input System 1.x in Unity 6 - Active Input Handling, project-wide actions, .inputactions assets, bindings and composites, control schemes, interactions and processors, generated C# wrappers, PlayerInput, rebinding and simulated input in tests. Use for movement, look, jump or fire actions, key rebinding, local multiplayer join or input tests, or when the legacy Input class throws, actions never fire, presses are missed in FixedUpdate or UI ignores clicks. Not for a player-facing rebind screen or saving overrides (pc-settings-menu).
+description: "Sets up, scripts and tests the Unity Input System 1.x in Unity 6: Active Input Handling, project-wide actions, .inputactions assets, bindings and composites, control schemes, interactions and processors, generated wrappers, PlayerInput, rebinding APIs and simulated input in tests. Use for movement, look, jump or fire actions, local multiplayer join or input tests. Triggers: \"legacy Input class throws\", \"actions never fire\", \"presses missed in FixedUpdate\", \"UI ignores clicks\", \"add a rebind API\". Not for a player-facing rebind screen or saved overrides (pc-settings-menu), or Steam Input and Steam Deck glyphs (steam-deck-controller)."
 license: MIT
 metadata:
   category: gameplay-systems
@@ -27,34 +27,34 @@ Asset structure, binding paths, composites, interactions, PlayerInput behaviours
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerInputReader : MonoBehaviour
+public sealed class PlayerInputReader : MonoBehaviour
 {
-    InputAction move;
-    InputAction look;
-    InputAction jump;
-    bool jumpQueued;
+    private InputAction _move;
+    private InputAction _look;
+    private InputAction _jump;
+    private bool _jumpQueued;
 
     public Vector2 Move { get; private set; }
     public Vector2 LookDelta { get; private set; }
 
-    void Awake()
+    private void Awake()
     {
-        move = InputSystem.actions.FindAction("Player/Move", throwIfNotFound: true);
-        look = InputSystem.actions.FindAction("Player/Look", throwIfNotFound: true);
-        jump = InputSystem.actions.FindAction("Player/Jump", throwIfNotFound: true);
+        this._move = InputSystem.actions.FindAction("Player/Move", throwIfNotFound: true);
+        this._look = InputSystem.actions.FindAction("Player/Look", throwIfNotFound: true);
+        this._jump = InputSystem.actions.FindAction("Player/Jump", throwIfNotFound: true);
     }
 
-    void Update()
+    private void Update()
     {
-        Move = move.ReadValue<Vector2>();
-        LookDelta = look.ReadValue<Vector2>();
-        if (jump.WasPressedThisFrame()) jumpQueued = true;
+        Move = this._move.ReadValue<Vector2>();
+        LookDelta = this._look.ReadValue<Vector2>();
+        if (this._jump.WasPressedThisFrame()) this._jumpQueued = true;
     }
 
     public bool ConsumeJump()
     {
-        bool queued = jumpQueued;
-        jumpQueued = false;
+        var queued = this._jumpQueued;
+        this._jumpQueued = false;
         return queued;
     }
 }
@@ -75,9 +75,17 @@ The physics controller calls `ConsumeJump()` from `FixedUpdate`; see the frame-t
 - **activeInputHandler -1**: if `ProjectSettings/ProjectSettings.asset` contains `activeInputHandler: -1`, the Input System throws `ArgumentException: Invalid value of 'activeInputHandler' setting: -1` on every update. Set it to `1` (New) or `2` (Both) with the Editor closed, or choose a value in Player Settings.
 - **Switching maps**: disable `Player` and enable `UI` for menus and cutscenes (`playerInput.SwitchCurrentActionMap("UI")`).
 
+## References
+
+- [references/input-actions-api.md](references/input-actions-api.md): read when editing assets or writing input code (asset structure, binding paths, composites, interactions, PlayerInput behaviours, rebinding).
+- [references/testing-and-simulation.md](references/testing-and-simulation.md): read when writing input tests or driving input from tools.
+
 ## Related skills
 
 - `physics-3d-collision`: applying buffered input to Rigidbodies in `FixedUpdate`.
 - `cinemachine-cameras`: `CinemachineInputAxisController` consuming Look actions.
 - `initialize-ai-navigation`: click-to-move with `Mouse.current`.
 - `ui-ugui`, `ui-uitk`: UI event handling on top of `InputSystemUIInputModule`.
+- `pc-settings-menu`: player-facing rebind screen and saving binding overrides.
+- `steam-deck-controller`: Steam Input vs the Input System and device-correct glyphs.
+- `interaction-system`: the `Interact` action and prompt glyphs.

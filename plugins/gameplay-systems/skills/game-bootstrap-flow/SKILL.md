@@ -1,6 +1,6 @@
 ---
 name: game-bootstrap-flow
-description: Builds the startup and top-level flow of a Unity 6 game - a persistent services prefab created by RuntimeInitializeOnLoadMethod (or a Boot scene) and kept with DontDestroyOnLoad, ordered async service init, SceneManager.LoadSceneAsync with allowSceneActivation and a loading screen, Addressables scenes, a Boot, MainMenu, Lobby, InGame, Results state machine, pause with Time.timeScale and AudioListener.pause (and why co-op must not freeze time), save-before-quit with Application.wantsToQuit, and static resets for Enter Play Mode Options. Use for "add a boot scene", services null after a scene change, playing from any scene in the Editor, loading screens stuck at 90%, duplicate managers, pause menus that freeze gameplay, "save on quit", or statics surviving between Play sessions. Not for networked scene loads (netcode-for-gameobjects), Steam init or overlay callbacks (steamworks-integration), save file format (save-system), menu page navigation (screen-navigator) or DI containers (vcontainer).
+description: "Builds the startup and top-level flow of a Unity 6 game: a persistent bootstrap prefab or Boot scene, ordered async service init, loading screens, a Boot/MainMenu/Lobby/InGame/Results state machine, reason-counted pause, save-before-quit and static resets for Enter Play Mode Options. Use when adding a boot scene or pause and quit flow. Triggers: \"add a boot scene\", \"services null after a scene change\", \"loading screen stuck at 90%\", \"duplicate managers\", \"save on quit\". Not for networked scene loads (netcode-for-gameobjects), save file format (save-system) or DI containers (vcontainer)."
 license: MIT
 metadata:
   category: gameplay-systems
@@ -22,7 +22,7 @@ metadata:
    - [scripts/GameStateMachine.cs](scripts/GameStateMachine.cs): read when adding or changing top-level states; transition table, queued requests, `SceneGameState`, `DelegateGameState`.
    - [scripts/PauseService.cs](scripts/PauseService.cs): read when adding a pause menu or overlay/focus pause; reason-counted pause, `SimulationPauseAllowed` for co-op.
    - [scripts/AddressableSceneLoading.cs](scripts/AddressableSceneLoading.cs): read when scenes are Addressable; `Addressables.LoadSceneAsync` with `activateOnLoad: false`, `PercentComplete`, `ActivateAsync`, unload.
-3. **Order service init** by hierarchy order under the prefab: settings first (see `pc-settings-menu`), then platform (Steam, see `steamworks-integration`), then save, audio, input. Each `InitializeAsync` finishes before the next starts.
+3. **Order service init** by hierarchy order under the prefab: settings (see `pc-settings-menu`), platform (Steam, see `steamworks-integration`), game data (see `game-data-pipeline`), save, audio, input. Game data loads before save because save DTOs store game-data ids. Each `InitializeAsync` finishes before the next starts.
 4. **Drive the flow** only through `GameBootstrap.Current.StateMachine.TryChangeAsync(...)`. Menus, lobby code and the results screen request states; they never call `SceneManager` directly.
 5. **Co-op:** once a netcode session runs, the host loads scenes with `NetworkManager.SceneManager.LoadScene` and clients follow (see `netcode-for-gameobjects`). Replace the `Lobby` and `InGame` states with `DelegateGameState` instances that start the session and ask the network scene manager, and set `PauseService.SimulationPauseAllowed = false` while connected.
 6. **Quit:** register save handlers with `RegisterQuitHandler`; every quit button calls `RequestQuit()`.
@@ -52,6 +52,20 @@ public sealed class MainMenuController : MonoBehaviour
 ```
 
 ```csharp
+public sealed class GameDataBootService : MonoBehaviour, IGameService
+{
+    private readonly GameDataService _gameData = new();
+
+    public GameDataService Data => this._gameData;
+
+    public async Awaitable InitializeAsync(CancellationToken cancellationToken)
+    {
+        await this._gameData.LoadAsync(cancellationToken);
+    }
+
+    private void OnDestroy() => this._gameData.Dispose();
+}
+
 public sealed class WorldSaveService : MonoBehaviour, IGameService
 {
     [SerializeField] private SaveController saves;
@@ -64,7 +78,7 @@ public sealed class WorldSaveService : MonoBehaviour, IGameService
 }
 ```
 
-`SaveController` stands for the project's save layer from `save-system`; `SaveNowAsync(CancellationToken)` must finish within the quit timeout (10 s by default) and skip the save when nothing changed or no world is loaded.
+`GameDataService.LoadAsync` returns a UniTask (UniTask is a dependency of `game-data-pipeline`); an `async Awaitable` method awaits it directly, so no adapter type is needed. `SaveController` is the sample from `save-system`; `SaveNowAsync(CancellationToken)` must finish within the quit timeout (10 s by default) and skip the save when nothing changed or no world is loaded.
 
 `async void` is used only for the UI callback, with its own `try/catch`. Everything else returns `Awaitable`.
 
@@ -84,12 +98,6 @@ public sealed class WorldSaveService : MonoBehaviour, IGameService
 - **`Application.wantsToQuit` returning `false` cancels the quit.** The return value is ignored when exiting Play Mode in the Editor and on iOS, and `Application.quitting` cannot cancel. Keep a synchronous save path for forced quits (see `save-system`).
 - **Statics with domain reload off.** Static fields and static event subscriptions survive between Play sessions. Reset them in a `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]` method in every class that has them, including `Application.wantsToQuit` subscribers.
 
-## References
-
-- [references/boot-architecture.md](references/boot-architecture.md): read when choosing prefab auto-load vs Boot scene vs an additive persistent scene, ordering service init, or adding a DI container.
-- [references/scene-loading.md](references/scene-loading.md): read when building a loading screen, loading additively, using Addressable scenes, or handing scene changes to netcode.
-- [references/pause-quit-playmode.md](references/pause-quit-playmode.md): read when implementing pause, the quit sequence, focus handling, or turning off domain reload.
-
 ## Pitfalls
 
 | Symptom | Fix |
@@ -105,14 +113,21 @@ public sealed class WorldSaveService : MonoBehaviour, IGameService
 | Event handlers fire twice on the second Play | Domain reload off; reset static events in `SubsystemRegistration` |
 | Players see old scene objects on clients | Scene changed with `SceneManager` during a session; use `NetworkSceneManager` |
 
+## References
+
+- [references/boot-architecture.md](references/boot-architecture.md): read when choosing prefab auto-load vs Boot scene vs an additive persistent scene, ordering service init, or adding a DI container.
+- [references/scene-loading.md](references/scene-loading.md): read when building a loading screen, loading additively, using Addressable scenes, or handing scene changes to netcode.
+- [references/pause-quit-playmode.md](references/pause-quit-playmode.md): read when implementing pause, the quit sequence, focus handling, or turning off domain reload.
+
 ## Related skills
 
 - `netcode-for-gameobjects`: `NetworkSceneManager`, session start and late join scene sync.
 - `steamworks-integration`: `SteamBootstrap` init order and the overlay callback.
 - `save-system`: the save that runs from the quit handler.
+- `game-data-pipeline`: `GameDataService`, loaded as the game-data step of service init.
 - `pc-settings-menu`: apply settings before the first scene.
 - `addressables-asset-loading`: groups, handle ownership and releasing Addressable scenes.
 - `screen-navigator`: menu pages and modals inside the MainMenu state.
 - `input-system-actions`: switching action maps when pausing.
 - `vcontainer`: DI alternative to `GameBootstrap.Current`.
-- `csharp-unity`: async and house style for the scripts.
+- `csharp-unity`: async and house style for the scripts; "Choosing an event style" in its `references/patterns.md` for the `Ready` event and other static events.

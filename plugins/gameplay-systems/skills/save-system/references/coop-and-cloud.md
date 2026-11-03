@@ -48,8 +48,8 @@ public sealed class PlayerSave
 
 ## Cloud sync
 
-- Keep every file under `Application.persistentDataPath`. Steam Auto-Cloud (configured in the Steamworks partner site, see `steamworks-integration`) can then sync that folder without code changes.
-- Sync only `*.json` and `*.json.bak`. Exclude `*.tmp` and `*.corrupt` from the cloud patterns so a half-written or broken file never uploads.
+- Keep save files in the `Saves/` subfolder of `Application.persistentDataPath` (the `SaveService` default). Steam Auto-Cloud (configured in the Steamworks partner site, see `steamworks-integration`) syncs only that subfolder, never the `persistentDataPath` root, so `settings.json` from `pc-settings-menu` stays local.
+- Within `Saves/`, sync only `*.json` and `*.json.bak`. Exclude `*.tmp` and `*.corrupt` from the cloud patterns so a half-written or broken file never uploads.
 - Cloud quotas are set per app in the partner site. Keep saves small: compact JSON (`Formatting.None`), no derived data, ids instead of copies of static data.
 - Cloud sync replaces files between launches. Load saves after the platform layer has initialized, and never cache file contents across a session boundary.
 - Two machines playing offline can produce conflicting saves. Conflict handling belongs to the cloud provider (check the current Steam Cloud documentation for how the client presents conflicts); do not try to merge files yourself.

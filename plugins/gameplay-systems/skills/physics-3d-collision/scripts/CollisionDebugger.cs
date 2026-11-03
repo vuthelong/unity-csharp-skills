@@ -1,9 +1,9 @@
 using UnityEngine;
 
 /// Attach to both objects in a suspect pair. Remove after diagnosis.
-public class CollisionDebugger : MonoBehaviour
+public sealed class CollisionDebugger : MonoBehaviour
 {
-    void Awake()
+    private void Awake()
     {
         var col = GetComponent<Collider>();
         var rb  = GetComponent<Rigidbody>();
@@ -16,17 +16,17 @@ public class CollisionDebugger : MonoBehaviour
             this);
     }
 
-    void OnCollisionEnter(Collision col)
+    private void OnCollisionEnter(Collision col)
         => Debug.Log(
             $"[Collision] {name} hit {col.gameObject.name} | contacts: {col.contactCount} | impulse: {col.impulse.magnitude:F3}",
             this);
 
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
         => Debug.Log(
             $"[Trigger] {name} entered by {other.gameObject.name} | other layer: {other.gameObject.layer}",
             this);
 
-    void OnCollisionEnter2D(Collision2D col)
+    private void OnCollisionEnter2D(Collision2D col)
         => Debug.Log(
             $"[2D Collision] {name} hit {col.gameObject.name}. This object is using 2D physics callbacks, not 3D.",
             this);

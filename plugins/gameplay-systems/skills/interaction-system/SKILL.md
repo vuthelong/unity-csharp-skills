@@ -1,6 +1,6 @@
 ---
 name: interaction-system
-description: Builds a player interaction system for Unity 6 3D games - an IInteractable interface, target detection by camera SphereCast or OverlapSphereNonAlloc with distance, angle, priority and line-of-sight scoring plus hysteresis, a world-anchored prompt with keyboard or gamepad glyphs from the Input System (onActionChange, GetBindingDisplayString control paths), press and hold-to-interact, interaction locks, and pickups, doors and containers that are server-authoritative in Netcode for GameObjects co-op ([Rpc(SendTo.Server)] requests validated for distance and state, NetworkVariable results, no prediction). Use for "press E to interact", picking up items, opening doors, hold to loot, interaction prompt glyphs, the wrong object highlighted, or two co-op players grabbing the same item. Not for item or inventory data and UI, combat targeting, Input System setup and rebinding (input-system-actions), general device glyph mapping (steam-deck-controller), or general NGO setup (netcode-for-gameobjects).
+description: "Builds a player interaction system for Unity 6 3D games: an IInteractable interface, camera-ray and proximity target scoring, world-anchored prompts with keyboard or gamepad glyphs, press and hold-to-interact, interaction locks, and server-authoritative pickups, doors and containers for NGO co-op. Use when the player interacts with world objects. Triggers: \"press E to interact\", \"pick up items\", \"open doors\", \"hold to loot\", \"wrong object highlighted\", \"two players grab the same item\". Not for Input System setup (input-system-actions), device glyph tables (steam-deck-controller) or revive rules (combat-damage-system)."
 license: MIT
 metadata:
   category: gameplay-systems
@@ -21,7 +21,7 @@ metadata:
    - [scripts/NetworkDoor.cs](scripts/NetworkDoor.cs), [scripts/NetworkPickup.cs](scripts/NetworkPickup.cs), [scripts/NetworkContainer.cs](scripts/NetworkContainer.cs): read when adding those object types; replicated open/locked state, server despawn after a successful hand-off, single-user occupancy lock.
 3. **Player prefab:** `Interactor` (+ `NetworkInteractor` in co-op) on the player root, `eye` at head height, `viewOrigin` left empty to use `Camera.main` (the output camera, not a `CinemachineCamera`).
 4. **Pick a detection mode:** `CameraRay` for first-person or tight over-the-shoulder, `Proximity` for third-person with a free camera, `CameraRayThenProximity` (default) when the player can both aim at objects and walk up to them.
-5. **Interact action:** a Button action `Interact` in the `Player` map, bound per control scheme (`Keyboard&Mouse`: E, `Gamepad`: buttonWest or buttonSouth). No Hold interaction on the action; hold timing is per object (`HoldDuration`) and done in `Interactor`. See `input-system-actions`.
+5. **Interact action:** if the project's actions asset already has `Player/Interact`, edit it and remove any Hold interaction; otherwise add a Button action `Interact` to the `Player` map. Bind it per control scheme (`Keyboard&Mouse`: E, `Gamepad`: a face button not used by Jump, such as buttonWest). Hold timing is per object (`HoldDuration`) and done in `Interactor`. See `input-system-actions`.
 6. **Prompt:** one Screen Space Overlay canvas, `InteractionPrompt` wired to the local player's `Interactor` after spawn. Gamepad glyph sprites keyed by control path (`buttonSouth`, `leftTrigger`). On Steam Deck pick the glyph set as described in `steam-deck-controller`.
 7. **Objects:** derive from `NetworkInteractable` for anything that changes shared world state; derive from `Interactable` only for purely local effects.
 8. **Test:** two Multiplayer Play Mode players grabbing one pickup in the same frame, opening one container together, a late joiner seeing doors already open, holding while walking away, and a client with 200 ms simulated latency.
@@ -60,12 +60,6 @@ public sealed class NetworkCampfire : NetworkInteractable
 - **Hold timing is client-side UX.** The server does not trust it. If a hold must cost time (lockpicking, harvesting), make it a server-side timed action that the server starts and cancels.
 - **Prompt text is a localization key** in shipping code (see `localization`); the samples use plain strings.
 
-## References
-
-- [references/detection-and-scoring.md](references/detection-and-scoring.md): read when choosing a detection mode, tuning scores and hysteresis, fixing the wrong object being picked, or profiling detection.
-- [references/prompt-and-glyphs.md](references/prompt-and-glyphs.md): read when building the prompt, switching glyphs between keyboard and gamepad, showing hold progress, or handling rebinding.
-- [references/coop-interactions.md](references/coop-interactions.md): read when making interactions networked, writing pickups, doors or containers for co-op, or debugging rejected or duplicated interactions.
-
 ## Pitfalls
 
 | Symptom | Fix |
@@ -81,9 +75,16 @@ public sealed class NetworkCampfire : NetworkInteractable
 | Glyph wrong on Steam Deck or PlayStation pad | Steam Input emulation presents an Xbox pad; choose the glyph table as in `steam-deck-controller` |
 | Interaction ignored right after another | Server rate limit (`minRequestInterval`) or the previous request still pending |
 
+## References
+
+- [references/detection-and-scoring.md](references/detection-and-scoring.md): read when choosing a detection mode, tuning scores and hysteresis, fixing the wrong object being picked, or profiling detection.
+- [references/prompt-and-glyphs.md](references/prompt-and-glyphs.md): read when building the prompt, switching glyphs between keyboard and gamepad, showing hold progress, or handling rebinding.
+- [references/coop-interactions.md](references/coop-interactions.md): read when making interactions networked, writing pickups, doors or containers for co-op, or debugging rejected or duplicated interactions.
+
 ## Related skills
 
 - `input-system-actions`: Interact action, control schemes, rebinding.
+- `combat-damage-system`: `ReviveInteractable` for reviving downed co-op players through this system.
 - `netcode-for-gameobjects`: RPC rules, `NetworkVariable`, spawning and ownership.
 - `steam-deck-controller`: Deck-correct glyph selection.
 - `physics-3d-collision`: layers, triggers and query misses.

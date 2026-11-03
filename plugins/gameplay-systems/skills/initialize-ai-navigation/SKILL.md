@@ -1,6 +1,6 @@
 ---
 name: initialize-ai-navigation
-description: Sets up, scripts and troubleshoots Unity AI Navigation (com.unity.ai.navigation 2.x) in Unity 6 - NavMeshSurface baking at edit time or runtime, NavMeshAgent, obstacle carving, NavMeshLink, modifiers, agent types, areas and costs. Use for pathfinding, patrol routes, click-to-move, jump or drop links, procedural-level navmesh or agent-driven animation, or when an agent will not move, a path is partial or invalid, or agents slide through obstacles. Not for enemy decision logic, aggro or perception (enemy-ai-behavior).
+description: "Sets up, scripts and troubleshoots Unity AI Navigation (com.unity.ai.navigation 2.x) in Unity 6: NavMeshSurface baking at edit time or runtime, NavMeshAgent movement, obstacle carving, NavMeshLink, modifiers, agent types, areas and costs. Use for pathfinding, click-to-move, waypoint movement, jump or drop links and procedural-level navmesh. Triggers: \"add navigation\", \"agent will not move\", \"path is partial or invalid\", \"agents slide through obstacles\", \"rebake the navmesh at runtime\". Not for enemy decisions such as chase, aggro or perception (enemy-ai-behavior), or spline-defined routes (splines-paths)."
 license: Unity Companion License
 metadata:
   category: gameplay-systems
@@ -18,7 +18,8 @@ Full component tables, recipes (move-to, click-to-move, patrol, corner speed, an
 |---|---|
 | "add navigation" / "set up nav" | Full setup: NavMeshSurface + bake + NavMeshAgent |
 | "make this character navigate" / "add pathfinding" | NavMeshAgent + movement script; ensure a baked surface |
-| "patrol between points" / "click to move" / "chase the player" | Agent + recipe script from the reference |
+| "patrol between points" / "click to move" | Agent + recipe script from the reference |
+| "enemy that chases / attacks the player", aggro, perception | Hand off to `enemy-ai-behavior` after the agent can walk to a clicked point |
 | "avoid obstacles" | NavMeshObstacle; carve for stationary blockers |
 | "connect two areas" / "jump across" / "drop down" | NavMeshLink, or Generate Links on the surface |
 | "different agent sizes" | Agent types + one NavMeshSurface per type |
@@ -70,9 +71,14 @@ List surfaces (GameObject, agent type, collect mode, bake status), agents (speed
 - Area costs must be at least 1. Agent priority: lower number = more important.
 - Click-to-move and other input in Unity 6 should use the Input System (see `input-system-actions`); legacy `Input` throws when only the new backend is active.
 
+## References
+
+- [references/navigation-system.md](references/navigation-system.md): read before writing navigation scripts or diagnosing a failure (component tables, recipes, troubleshooting tree).
+
 ## Related skills
 
 - `physics-3d-collision`: agent + Rigidbody/collider setups, ground raycasts.
 - `animation-authoring`: blend trees and root motion driven by `agent.velocity`.
 - `splines-paths`: spline-defined patrol routes sampled into agent destinations.
 - `unity-cli`: inspecting or editing a live scene.
+- `enemy-ai-behavior`: chase, aggro, perception and attack decisions on top of a working agent.

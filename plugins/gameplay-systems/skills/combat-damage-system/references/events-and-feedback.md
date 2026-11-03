@@ -104,7 +104,7 @@ Format the number into a cached `TMP_Text` inside `Show` with the numeric format
 
 - **Hit stop** (freeze frames): pause the attacker's and victim's Animators (`animator.speed = 0` for 50-100 ms), not `Time.timeScale`, so co-op peers and UI keep running. Never change `Time.timeScale` from combat code in multiplayer.
 - **Camera shake**: only for the local player's own hits and hurts; trigger a Cinemachine impulse (see `cinemachine-cameras`) from a listener that checks the victim or source is the local player.
-- **Hit flash**: a `MaterialPropertyBlock` color pulse on the victim's renderers from the `Damaged` event; no material instances.
+- **Hit flash**: a color pulse on the victim's renderers from the `Damaged` event. Under URP do not use a `MaterialPropertyBlock`: it takes the renderer out of the SRP Batcher and GPU Resident Drawer. Instead cache one material instance per renderer once at spawn (`renderer.material` in `Awake`, stored in a field), drive its color or emission from the listener, and `Destroy` the cached instances in `OnDestroy`. Pooled characters keep their instances across reuse.
 - **VFX**: spawn pooled impact effects at `DamageInfo.Point` oriented by `-DamageInfo.Direction` (see `unity-particle-system`).
 
 ## Co-op
