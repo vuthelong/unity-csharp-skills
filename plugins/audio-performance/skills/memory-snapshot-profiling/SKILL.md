@@ -1,6 +1,6 @@
 ---
 name: memory-snapshot-profiling
-description: Captures, compares and interprets Unity Memory Profiler snapshots (.snap) in Unity 6 to find leaks, duplicate or oversized assets, and memory growth, and reads live memory counters with ProfilerRecorder. Use when memory keeps growing or climbs across scene loads, an asset seems to stay loaded after release, the user works with com.unity.memoryprofiler or .snap files, or needs device memory numbers. Not for per-frame GC.Alloc hunting (cpu-performance-profiling).
+description: "Captures, compares and interprets Unity Memory Profiler snapshots (.snap) in Unity 6 to find leaks, duplicate or oversized assets and memory growth, and reads live memory counters with ProfilerRecorder. Use when memory climbs across scene loads, an asset stays loaded after release, or device memory numbers are needed. Triggers: \"memory keeps growing\", \"is this a leak\", \"compare two snapshots\", \"what is using all the memory\". Not for per-frame GC.Alloc hunting (cpu-performance-profiling), fixing texture or audio import settings (unity-texture-import, optimize-audio) or browser memory (optimize-web)."
 license: MIT
 metadata:
   category: audio-performance
@@ -66,9 +66,12 @@ Use for automated captures (soak tests, CI, a debug menu). Unity 6 API lives in 
 
 ## References
 
-- [references/capture-and-counters.md](references/capture-and-counters.md) — read when writing capture code or live memory counters.
+- [references/capture-and-counters.md](references/capture-and-counters.md): read when writing capture code or live memory counters.
 
-## See also
+## Related skills
 
-- `optimize-audio` — reducing AudioClip memory once a snapshot shows it.
-- `optimize-web` — Web-specific memory limits and browser memory tools.
+- cpu-performance-profiling: per-frame `GC.Alloc` and CPU spikes.
+- optimize-audio: reducing AudioClip memory once a snapshot shows it.
+- unity-texture-import: reducing texture memory (Read/Write, mipmaps, compression).
+- optimize-text-mesh-pro: oversized TMP atlases.
+- optimize-web: Web-specific memory limits and browser memory tools.

@@ -1,11 +1,11 @@
 ---
 name: optimize-web
-description: Audits and optimizes Unity 6 WebGL and WebGPU builds for download size, startup time, browser memory, and frame pacing. Use when a web build is too large or slow to load, Brotli/Gzip or server Content-Encoding is misconfigured, iOS Safari runs out of memory, the build stutters in one browser or drains battery, or textures need KTX2/Basis. Covers Player Settings, stripping, compression hosting, Addressables on a CDN, and browser profiling.
+description: "Audits and optimizes Unity 6 WebGL and WebGPU builds for download size, startup time, browser memory and frame pacing - Player Settings, stripping, Brotli/Gzip hosting, KTX2 textures, Addressables on a CDN and browser profiling. Use when a web build is too large, loads slowly, stutters in one browser or crashes on iOS Safari. Triggers: \"web build too large\", \"Brotli not working\", \"iOS Safari out of memory\", \"WebGL stutters\". Not for Unity-side memory snapshots (memory-snapshot-profiling), audio import recipes (optimize-audio) or general texture import (unity-texture-import)."
 license: Unity Companion License
 metadata:
   category: audio-performance
   sources: "https://github.com/Unity-Technologies/skills/tree/main/skills/optimize-web"
-  unity: "6000.0+ (live writes need the com.unity.pipeline eval command)"
+  unity: "6000.0+"
 ---
 
 # Optimize Web Builds
@@ -14,7 +14,7 @@ Be thorough; quality over speed. Measure in a browser, never in Editor Play Mode
 
 ## Execution path
 
-Player Settings reads and writes run in a live Editor through `unity command eval`. Eval syntax and prerequisites: see the `unity-cli` skill (unity-editor-tooling plugin) → Eval syntax.
+Player Settings reads and writes run in a live Editor through `unity command eval` (needs `com.unity.pipeline`). Eval syntax and prerequisites: see the `unity-cli` skill (unity-editor-tooling plugin) → Eval syntax.
 
 When `eval` is unavailable, do not stop:
 
@@ -133,9 +133,16 @@ Read [references/profiling-and-memory.md](references/profiling-and-memory.md) wh
 - Report download size delta, every setting changed with values, and server configuration status.
 - List follow-ups: CDN for Addressables remote groups, Safari device testing, Wasm 2023 once the browser baseline allows, `codeOptimization` in CI.
 
-## See also
+## References
 
-- `optimize-audio` — audio import settings; Web plays audio through the browser and skips mixer effects.
-- `memory-snapshot-profiling` — Unity-side memory snapshots from a development web build.
-- `unity-cli` (unity-editor-tooling plugin) — Editor connection, `eval` syntax and prerequisites.
-- Addressables package docs for remote groups; Graphics settings for shader stripping.
+- [references/player-settings.md](references/player-settings.md): read when running the pre-flight snippet, choosing release settings, compression and server rules, exception modes, or shader stripping.
+- [references/assets-and-delivery.md](references/assets-and-delivery.md): read when removing packages, using the Web Stripping Tool, setting quality levels, converting to KTX2, streaming with Addressables, or handling video and audio.
+- [references/profiling-and-memory.md](references/profiling-and-memory.md): read when diagnosing stutter, memory growth, Safari/iOS crashes, or unreadable Wasm stacks.
+
+## Related skills
+
+- optimize-audio: audio import settings; Web plays audio through the browser and skips mixer effects.
+- memory-snapshot-profiling: Unity-side memory snapshots from a development web build.
+- unity-texture-import: per-platform texture overrides behind the KTX2 choice.
+- addressables-asset-loading: remote groups and catalogs on a CDN.
+- unity-cli: Editor connection, `eval` syntax and prerequisites.

@@ -1,6 +1,6 @@
 ---
 name: cpu-performance-profiling
-description: Triages CPU-bound frames and hitches in Unity 6 with the Unity Profiler - profiling a development player instead of the Editor (Autoconnect Profiler, targeted Deep Profile), CPU Usage Timeline vs Hierarchy, main vs render thread, GC.Alloc samples with call stacks, ProfilerMarker and ProfilerRecorder instrumentation with an in-game stats overlay, Profile Analyzer (com.unity.performance.profile-analyzer) before/after comparison, and fixes for common hotspots (Update fan-out, LINQ/string/boxing allocations, GetComponent in hot paths, physics queries, Animator, Canvas rebuilds, Debug.Log in builds). Use for low FPS with a busy main thread, stutter or GC spikes, "the game hitches every few seconds", Steam Deck 30/60 fps budgets, or adding custom profiler markers. Not for GPU, draw-call or SetPass cost (optimize-3d-rendering), memory leaks or .snap captures (memory-snapshot-profiling), or network bandwidth and latency (network-debugging).
+description: "Triages CPU-bound frames and hitches in Unity 6 with the Unity Profiler - profiling a development player, Timeline vs Hierarchy, main vs render thread, GC.Alloc call stacks, ProfilerMarker and ProfilerRecorder instrumentation, before/after comparison, and fixes for common script hotspots. Use for low FPS with a busy main thread, stutter or GC spikes or custom markers. Triggers: \"the game hitches every few seconds\", \"GC spikes\", \"main thread too slow\", \"add profiler markers\". Not for GPU, draw-call or SetPass cost (optimize-3d-rendering), memory leaks (memory-snapshot-profiling) or network latency (network-debugging)."
 license: MIT
 metadata:
   category: audio-performance
@@ -16,14 +16,14 @@ Find out which CPU work makes a frame too long, change one thing, and prove the 
 
 | Target | Budget per frame | Aim for main thread under |
 |---|---|---|
-| 60 fps (desktop, Steam Deck 60 Hz) | 16.67 ms | about 13 ms |
-| 30 fps (Steam Deck battery / heavy scenes) | 33.33 ms | about 26 ms |
+| 60 fps | 16.67 ms | about 13 ms |
+| 30 fps (handhelds on battery, low-end mobile, heavy scenes) | 33.33 ms | about 26 ms |
 
-Keep roughly 20 % headroom for spikes, thermal throttling and the co-op host, which runs server logic for every player on top of its own client. Measure the Steam Deck separately; it is the low end of the PC target. Deck notes: [references/profiler-workflow.md](references/profiler-workflow.md#steam-deck).
+Keep roughly 20 % headroom for spikes and thermal throttling (and, in multiplayer, for a listen-server host running server logic on top of its own client). Measure the lowest-end target device separately (for a PC game often the Steam Deck; notes in [references/profiler-workflow.md](references/profiler-workflow.md#steam-deck)).
 
 ## Workflow
 
-1. **Fix the scenario.** Same save, same camera path, same player count (profile the host with clients connected, not a solo session). Write down the frame time you see now.
+1. **Fix the scenario.** Same save, same camera path, same player count. In a multiplayer game with a listen-server host, profile the host with clients connected, not a solo session. Write down the frame time you see now.
 2. **Build a development player.** File > Build Profiles > your platform > enable **Development Build** and **Autoconnect Profiler**. Leave **Deep Profiling Support** off for normal captures. Enable Player Settings > Resolution and Presentation > **Run In Background** so capture continues when the player loses focus.
 3. **Capture.** Window > Analysis > Profiler. With Autoconnect the player connects on launch; otherwise pick it in the target dropdown next to Record (or `<Enter IP>`). Record a few hundred frames of the problem, then stop and save the capture (`.data`).
 4. **CPU or GPU?** Switch the CPU Usage details pane to **Timeline** and look at the main and render threads together:
@@ -35,7 +35,7 @@ Keep roughly 20 % headroom for spikes, thermal throttling and the co-op host, wh
 6. **Spikes.** Click the spike in the chart. Typical causes: `GC.Collect`, a burst of `GC.Alloc`, `Instantiate`/`Destroy` waves, scene or asset loading, `Physics.Simulate` running several times in one frame, `Mono.JIT` on first use (Mono only).
 7. **Narrow it down.** Wrap suspects in `ProfilerMarker`s (below). Use Deep Profile only on a small, targeted repro; it slows everything and can run out of memory on a full game.
 8. **Fix one thing**, capture the same scenario again, and compare medians in Profile Analyzer (Window > Analysis > Profile Analyzer > **Compare**, **Pull Data** from each capture). Keep both `.data` files with the `.pdata`.
-9. **Verify on the Steam Deck** before calling it done.
+9. **Verify on the lowest-end target device** before calling it done.
 
 ## GC allocations
 
@@ -129,9 +129,9 @@ Fixes with code: [references/hotspots.md](references/hotspots.md).
 
 ## Related skills
 
-- `optimize-3d-rendering`: GPU-bound and render-thread-bound frames, draw calls, SetPass calls.
-- `memory-snapshot-profiling`: leaks and memory growth.
-- `network-debugging`: bandwidth and latency in co-op sessions.
-- `steam-deck-controller`: Deck input and Deck Verified checks.
-- `csharp-unity` and `review-unity-csharp`: GC-free patterns and code review.
-- `physics-3d-collision`, `animation-authoring`, `ui-ugui`, `optimize-text-mesh-pro`, `zlogger`: system-specific fixes.
+- optimize-3d-rendering: GPU-bound and render-thread-bound frames, draw calls, SetPass calls.
+- memory-snapshot-profiling: leaks and memory growth.
+- network-debugging: bandwidth and latency in multiplayer sessions.
+- steam-deck-controller: Deck input and Deck Verified checks when the Deck is a target.
+- csharp-unity and review-unity-csharp: GC-free patterns and code review.
+- physics-3d-collision, animation-authoring, ui-ugui, optimize-text-mesh-pro, zlogger: system-specific fixes.
