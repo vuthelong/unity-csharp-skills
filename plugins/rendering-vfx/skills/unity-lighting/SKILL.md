@@ -1,6 +1,6 @@
 ---
 name: unity-lighting
-description: Sets up, scripts, bakes, and debugs lighting in Unity 6 URP scenes - Light components and modes, shadows, ambient and skybox, fog, reflection and light probes, Adaptive Probe Volumes, and lightmap baking with LightingSettings. Use for shadow acne, light leaking, scenes that are too dark, lights not affecting objects, baked GI or lightmap problems. Runtime day-night cycles go to day-night-weather. For the frame cost of lights and shadows, use optimize-3d-rendering.
+description: "Sets up, scripts, bakes and debugs lighting in Unity 6 URP scenes - Light components and modes, shadows, ambient and skybox, fog, reflection and light probes, Adaptive Probe Volumes, and lightmap baking with LightingSettings. Use for lighting setup, baked GI and lightmap problems. Triggers: \"shadow acne\", \"light leaking through walls\", \"scene too dark\", \"light doesn't affect this object\", \"lightmap seams\". Not for runtime day-night cycles (day-night-weather), the frame cost of lights and shadows (optimize-3d-rendering) or exposure and tonemapping (urp-postprocessing)."
 license: MIT
 metadata:
   category: rendering-vfx
@@ -22,7 +22,7 @@ Lighting is split across four places. Know which one owns a setting before chang
 ## Workflow
 
 1. **Decide the GI strategy** before placing lights:
-   - Fully realtime (dynamic time of day, procedural levels): realtime lights + skybox ambient + APV or light probes baked for static geometry only if layout is fixed.
+   - Fully realtime (dynamic time of day, procedural levels): realtime lights, APV or light probes baked for static geometry only if layout is fixed, and ambient that can follow the sky cheaply: Trilight gradients, or skybox ambient refreshed by a throttled `DynamicGI.UpdateEnvironment()`. A time-of-day cycle belongs to `day-night-weather`.
    - Baked/mixed (static levels, mobile): Mixed or Baked lights, lightmaps on static geometry, APV or Light Probe Groups for dynamic objects.
 2. **Pick the rendering path** on the Universal Renderer asset (see "Rendering path and light limits").
 3. **Set the environment**: skybox material, ambient source, environment reflections, fog (see "Environment").
@@ -155,8 +155,14 @@ Read [references/baking.md](references/baking.md) when creating `LightingSetting
 | Reflections look wrong indoors | Missing box projection or probe blending on the URP Asset |
 | Lighting change lost after Editor restart | Scene not saved (RenderSettings and lighting-settings reference are scene data) |
 
+## References
+
+- [references/baking.md](references/baking.md): read when creating `LightingSettings` assets, baking from scripts or CI, choosing mixed lighting modes, sizing lightmaps, or debugging lightmap artifacts.
+
 ## Related skills
 
-- `urp-postprocessing` for exposure, tonemapping, and bloom that shape perceived brightness.
-- `migrate-birp-to-urp` for lighting parity after a pipeline switch.
-- `unity-texture-import` for cookie, HDRI, and lightmap texture settings.
+- day-night-weather: runtime time of day, moving sun, ambient and APV lighting scenarios.
+- optimize-3d-rendering: frame cost of lights, shadows and rendering paths.
+- urp-postprocessing: exposure, tonemapping and bloom that shape perceived brightness.
+- migrate-birp-to-urp: lighting parity after a pipeline switch.
+- unity-texture-import: cookie, HDRI and lightmap texture settings.

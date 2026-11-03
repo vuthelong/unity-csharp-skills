@@ -1,6 +1,6 @@
 ---
 name: unity-vfx-graph
-description: Builds, drives, and debugs GPU particle effects with Visual Effect Graph on Unity 6 URP - contexts and blocks, exposed properties and the VisualEffect C# API, events, property binders, GraphicsBuffer, Point Cache and SDF data, bounds, and GPU cost. Use when the user mentions VFX Graph, VisualEffect, .vfx assets, SendEvent, pCache, SDF baking, millions of particles, or effects that vanish off-screen. For CPU Shuriken particles use unity-particle-system.
+description: "Builds, drives and debugs GPU particle effects with Visual Effect Graph on Unity 6 URP - contexts and blocks, exposed properties and the VisualEffect C# API, events, property binders, GraphicsBuffer, Point Cache and SDF data, bounds and GPU cost. Use for VFX Graph, .vfx assets or millions of particles. Triggers: \"SendEvent does nothing\", \"VFX disappears off-screen\", \"bake an SDF\", \"set a VFX property from code\". Not for CPU Shuriken particles or WebGL/low-end targets (unity-particle-system) or weather state logic (day-night-weather)."
 license: MIT
 metadata:
   category: rendering-vfx
@@ -61,32 +61,32 @@ using UnityEngine.VFX;
 [RequireComponent(typeof(VisualEffect))]
 public sealed class ImpactVfx : MonoBehaviour
 {
-    static readonly int SpawnRateId = Shader.PropertyToID("SpawnRate");
-    static readonly int TintId = Shader.PropertyToID("Tint");
-    static readonly int OnImpactId = Shader.PropertyToID("OnImpact");
-    static readonly int PositionAttr = Shader.PropertyToID("position");
-    static readonly int VelocityAttr = Shader.PropertyToID("velocity");
+    private static readonly int SpawnRateId = Shader.PropertyToID("SpawnRate");
+    private static readonly int TintId = Shader.PropertyToID("Tint");
+    private static readonly int OnImpactId = Shader.PropertyToID("OnImpact");
+    private static readonly int PositionAttr = Shader.PropertyToID("position");
+    private static readonly int VelocityAttr = Shader.PropertyToID("velocity");
 
-    VisualEffect _vfx;
-    VFXEventAttribute _payload;
+    private VisualEffect _vfx;
+    private VFXEventAttribute _payload;
 
-    void Awake()
+    private void Awake()
     {
-        _vfx = GetComponent<VisualEffect>();
-        _payload = _vfx.CreateVFXEventAttribute();
+        this._vfx = GetComponent<VisualEffect>();
+        this._payload = this._vfx.CreateVFXEventAttribute();
     }
 
     public void SetIntensity(float rate, Color tint)
     {
-        if (_vfx.HasFloat(SpawnRateId)) _vfx.SetFloat(SpawnRateId, rate);
-        if (_vfx.HasVector4(TintId)) _vfx.SetVector4(TintId, tint);
+        if (this._vfx.HasFloat(SpawnRateId)) this._vfx.SetFloat(SpawnRateId, rate);
+        if (this._vfx.HasVector4(TintId)) this._vfx.SetVector4(TintId, tint);
     }
 
     public void Impact(Vector3 point, Vector3 normal)
     {
-        _payload.SetVector3(PositionAttr, point);
-        _payload.SetVector3(VelocityAttr, normal * 4f);
-        _vfx.SendEvent(OnImpactId, _payload);
+        this._payload.SetVector3(PositionAttr, point);
+        this._payload.SetVector3(VelocityAttr, normal * 4f);
+        this._vfx.SendEvent(OnImpactId, this._payload);
     }
 }
 ```
@@ -139,9 +139,16 @@ For property binders, custom `VFXBinderBase`, `GraphicsBuffer` data, output-even
 
 Enumerate effects with `AssetDatabase.FindAssets("t:VisualEffectAsset")` and read exposed property names and events from the `VisualEffectAsset` (code in [references/csharp-api.md](references/csharp-api.md)). That is the stable way to audit what C# can drive without opening the graph window.
 
+## References
+
+- [references/graph-authoring.md](references/graph-authoring.md): read when building a specific effect, wiring Point Cache or SDF data, using Shader Graph outputs, strips, or Timeline.
+- [references/csharp-api.md](references/csharp-api.md): read when using property binders, a custom `VFXBinderBase`, `GraphicsBuffer` data, output events, runtime SDF baking, or auditing exposed properties.
+
 ## Related skills
 
-- `unity-particle-system` for CPU particles, WebGL, and low-end targets.
-- `shader-graph-create-custom-node` for custom Shader Graph nodes used in VFX outputs.
-- `urp-postprocessing` for Bloom/tonemapping that sells HDR effects.
-- `unity-texture-import` for flipbook and noise texture import settings.
+- unity-particle-system: CPU particles, WebGL and low-end targets.
+- day-night-weather: driving rain and snow effects from the weather state through a binder.
+- shader-graph-create-custom-node: custom Shader Graph nodes used in VFX outputs.
+- urp-postprocessing: Bloom and tonemapping that sell HDR effects.
+- unity-texture-import: flipbook and noise texture import settings.
+- build-gtk: custom node-based Editor tools with Graph Toolkit (not VFX Graph itself).

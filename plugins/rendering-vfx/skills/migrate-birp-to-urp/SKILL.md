@@ -1,6 +1,6 @@
 ---
 name: migrate-birp-to-urp
-description: Plans and runs a phased, verified migration of a Unity 6 project from the Built-in Render Pipeline to URP - URP asset setup, Render Pipeline Converter, material and particle conversion that keeps textures, PPv2 to Volume profiles, lighting rebakes, and custom shader triage. Use when the user wants to switch a project, scene, or material to URP, sees pink/magenta materials after switching, or wants a migration risk audit first. Needs a live Editor with eval.
+description: "Plans and runs a phased, verified migration of a Unity 6 project from the Built-in Render Pipeline to URP - URP asset setup, Render Pipeline Converter, material and particle conversion that keeps textures, PPv2 to Volume profiles, lighting rebakes, and custom shader triage. Needs a live Editor with eval. Use when switching a project, scene or material to URP, or for a migration risk audit. Triggers: \"upgrade this project to URP\", \"materials turned pink\", \"convert PPv2 to URP\". Not for projects already on URP needing Volume setup (urp-postprocessing) or new hand-written shaders (urp-hlsl-shaders)."
 license: Unity Companion License
 metadata:
   category: rendering-vfx
@@ -12,18 +12,7 @@ metadata:
 
 Classify the request, inspect the project, migrate in phases, and claim only what saved project state proves. Unity has announced deprecation of the Built-in Render Pipeline in the 6000.x line, so new work should target URP.
 
-## Reference loading
-
-| Read | When |
-|---|---|
-| [references/migration-workflow.md](references/migration-workflow.md) | Always, on activation |
-| [references/implementation-patterns.md](references/implementation-patterns.md) | **Mandatory** before the first `eval` that edits settings, materials, post-processing, lighting, probes, or scenes, and when resuming a partial migration |
-| [references/custom-shader-triage.md](references/custom-shader-triage.md) | Materials, shaders, magenta, custom rendering, image effects |
-| [references/complex-shader-situations.md](references/complex-shader-situations.md) | Surface Shaders, `GrabPass`, `OnRenderImage`, replacement shaders, multi-pass/deferred, package shaders, foliage |
-| [references/quality-settings-map.md](references/quality-settings-map.md) | Shadows, quality levels, lighting/lightmaps/probes, visual mismatch, performance |
-| [references/capturing-the-editor.md](references/capturing-the-editor.md) | Capturing Scene/Game view images for validation |
-
-If `implementation-patterns.md` cannot be loaded, use the rules here and lower confidence: never claim PPv2 conversion, lighting/probe refresh, or completion from intent or tool logs.
+Read [references/migration-workflow.md](references/migration-workflow.md) on activation and [references/implementation-patterns.md](references/implementation-patterns.md) before the first `eval` that edits anything (see References). If `implementation-patterns.md` cannot be loaded, use the rules here and lower confidence: never claim PPv2 conversion, lighting/probe refresh, or completion from intent or tool logs.
 
 ## Phases
 
@@ -166,11 +155,22 @@ Iterate at most 3 repair rounds per phase, then report remaining blockers.
 
 State: path used; pipeline state (Built-in / partial / URP); converters run; what was fixed; what remains manual; scenes/materials/cameras validated; post-processing migrated vs partial vs documented; Quality levels explicit vs Graphics fallback; particle/VFX and foliage materials status; baked lighting preserved / cleared / rebaked / manual; exposure balanced or partial. If any item is partial or manual, call the overall migration **partial** and name the phases that passed.
 
+## References
+
+- [references/migration-workflow.md](references/migration-workflow.md): read always, on activation.
+- [references/implementation-patterns.md](references/implementation-patterns.md): read (mandatory) before the first `eval` that edits settings, materials, post-processing, lighting, probes or scenes, and when resuming a partial migration.
+- [references/custom-shader-triage.md](references/custom-shader-triage.md): read when dealing with materials, shaders, magenta, custom rendering or image effects.
+- [references/complex-shader-situations.md](references/complex-shader-situations.md): read for Surface Shaders, `GrabPass`, `OnRenderImage`, replacement shaders, multi-pass/deferred, package shaders or foliage.
+- [references/quality-settings-map.md](references/quality-settings-map.md): read for shadows, quality levels, lighting/lightmaps/probes, visual mismatch or performance.
+- [references/capturing-the-editor.md](references/capturing-the-editor.md): read when capturing Scene/Game view images for validation.
+
 ## Related skills
 
-- `unity-cli` for Editor access; `unity-package-management` for installing URP.
-- `urp-postprocessing` for Volume setup details.
-- `unity-lighting` for rebaking, APV, and probe settings.
-- `validate-urp-render-graph-renderer-feature` for ported fullscreen effects.
-- `shader-graph-create-custom-node` for rebuilding simple custom shaders in Shader Graph.
-- `unity-particle-system` for particle material and renderer settings.
+- unity-cli: Editor access and `eval`.
+- unity-package-management: installing URP.
+- urp-postprocessing: Volume setup details.
+- unity-lighting: rebaking, APV and probe settings.
+- urp-hlsl-shaders: hand-porting custom Built-in shaders to URP HLSL with all required passes.
+- shader-graph-create-custom-node: rebuilding simple custom shaders in Shader Graph.
+- validate-urp-render-graph-renderer-feature: ported fullscreen effects.
+- unity-particle-system: particle material and renderer settings.

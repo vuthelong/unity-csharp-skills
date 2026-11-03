@@ -1,6 +1,6 @@
 ---
 name: unity-texture-import
-description: Configures and audits Unity 6 texture import settings with TextureImporter, per-platform overrides, Presets, and AssetPostprocessor rules - texture type, sRGB vs linear data, ASTC/BC compression, max size, mipmaps, and Read/Write cost. Use when a normal map looks wrong, a texture is blurry or uses too much memory, or import rules should be enforced by folder. Pixel-art import belongs to 2d-pixel-perfect and atlas compression to manage-sprite-atlas.
+description: "Configures and audits Unity 6 texture import settings with TextureImporter, per-platform overrides, Presets and AssetPostprocessor rules - texture type, sRGB vs linear data, ASTC/BC compression, max size, mipmaps and Read/Write cost. Use when enforcing import rules by folder or fixing texture quality or memory. Triggers: \"normal map looks wrong\", \"texture is blurry\", \"textures use too much memory\", \"set ASTC for Android\". Not for pixel-art import (2d-pixel-perfect), atlas compression (manage-sprite-atlas) or web KTX2 delivery (optimize-web)."
 license: MIT
 metadata:
   category: rendering-vfx
@@ -102,8 +102,15 @@ public static class TextureImportTools
 
 Read [references/import-automation.md](references/import-automation.md) for the folder-rule `AssetPostprocessor`, Presets, and an audit script that lists oversize, uncompressed, readable, or sRGB-mismatched textures.
 
+## References
+
+- [references/import-automation.md](references/import-automation.md): read when writing a folder-rule `AssetPostprocessor`, Presets, or an audit of oversize, uncompressed, readable or sRGB-mismatched textures.
+
 ## Related skills
 
-- `optimize-web` for WebGL/WebGPU texture formats and download size.
-- `unity-vfx-graph`, `unity-particle-system` for flipbook and noise usage.
-- `unity-lighting` for cookies, HDRIs, and lightmap memory.
+- optimize-web: WebGL/WebGPU texture formats and download size.
+- optimize-3d-rendering: texture memory and mipmap streaming as part of frame cost.
+- memory-snapshot-profiling: confirming texture memory on device.
+- unity-vfx-graph, unity-particle-system: flipbook and noise usage.
+- unity-lighting: cookies, HDRIs and lightmap memory.
+- 2d-pixel-perfect, manage-sprite-atlas: pixel-art import and sprite atlases.

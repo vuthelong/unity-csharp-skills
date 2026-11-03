@@ -1,6 +1,6 @@
 ---
 name: urp-hlsl-shaders
-description: "Writes, fixes and verifies hand-written HLSL/ShaderLab shaders for URP on Unity 6: UniversalForward, ShadowCaster, DepthOnly and DepthNormals passes that agree, SRP Batcher CBUFFERs, main and additional lights under Forward and Forward+, keywords (shader_feature vs multi_compile vs dynamic_branch), variant stripping, PSO warm-up for first-use hitches, and GPU cost measured in ms. Use for foliage, terrain, water, wind, snow or wetness shaders, or when a material turns pink or invisible, casts no shadow or the full unclipped shadow, ignores extra lights, breaks SSAO, loses the SRP Batcher, or a build bloats with variants. Not for Shader Graph node authoring (shader-graph-create-custom-node), renderer features (validate-urp-render-graph-renderer-feature) or post effects (urp-postprocessing)."
+description: "Writes, fixes and verifies hand-written HLSL/ShaderLab shaders for URP on Unity 6 - matching UniversalForward, ShadowCaster, DepthOnly and DepthNormals passes, SRP Batcher CBUFFERs, Forward+ lights, keywords and variant budgets, PSO warm-up and GPU cost. Use for foliage, terrain, water, wind, snow or wetness shaders. Triggers: \"material turns pink\", \"cut-out leaves cast full shadows\", \"shader ignores extra lights\", \"lost SRP Batcher\", \"variant count exploded\". Not for Shader Graph nodes (shader-graph-create-custom-node), renderer features (validate-urp-render-graph-renderer-feature) or post effects (urp-postprocessing)."
 license: MIT
 metadata:
   category: rendering-vfx
@@ -72,10 +72,16 @@ Score the result with [references/shader-checklist.md](references/shader-checkli
 | Judging cost by instruction count, or `half` on desktop | "optimized" shader no faster | GPU ms A/B; profile `half` on the device |
 | `MaterialPropertyBlock` for per-object tint | SRP Batcher and GRD fall back | material instances, `SetShaderUserValue`, DOTS instanced props |
 
+## References
+
+- [references/urp-pass-template.md](references/urp-pass-template.md): read when authoring a shader: shared `HLSLINCLUDE`, the four passes and the Forward+ light loop.
+- [references/shader-checklist.md](references/shader-checklist.md): read before calling a shader done, to score it.
+
 ## Related skills
 
-- `shader-graph-create-custom-node` - wrapping this HLSL as Custom Function nodes for artists.
-- `validate-urp-render-graph-renderer-feature` - full-screen passes and renderer features on Render Graph.
-- `optimize-3d-rendering` - GPU-bound frames, draw calls, variant stripping settings, GPU Resident Drawer.
-- `day-night-weather` - the global wetness, snow and wind values these shaders read.
-- `unity-editor-safety` - confirming the compile in Editor.log after edits.
+- shader-graph-create-custom-node: wrapping this HLSL as Custom Function nodes for artists.
+- validate-urp-render-graph-renderer-feature: full-screen passes and renderer features on Render Graph.
+- optimize-3d-rendering: frame-level GPU triage, project-wide stripping settings, GPU Resident Drawer.
+- migrate-birp-to-urp: porting Built-in surface and CG shaders to URP.
+- day-night-weather: the global wetness, snow and wind values these shaders read.
+- unity-editor-safety: confirming the compile in Editor.log after edits.

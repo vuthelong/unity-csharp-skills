@@ -1,6 +1,6 @@
 ---
 name: shader-graph-create-custom-node
-description: Turns HLSL into reusable Shader Graph nodes for URP on Unity 6 - Custom Function nodes (File or String mode, _float/_half suffixes, SHADERGRAPH_PREVIEW guards), Sub Graphs, and reflected function nodes with UNITY_EXPORT_REFLECTION (Shader Graph 17.5+). Use when the user wants a custom Shader Graph node, to call existing HLSL from a graph, to package node clusters for reuse, or to fix 'undeclared identifier' or '_float' errors in a Custom Function node.
+description: "Turns HLSL into reusable Shader Graph nodes for URP on Unity 6 - Custom Function nodes (File or String mode, _float/_half suffixes, SHADERGRAPH_PREVIEW guards), Sub Graphs, and reflected function nodes with UNITY_EXPORT_REFLECTION (Shader Graph 17.5+). Use when the user wants a custom Shader Graph node, to call existing HLSL from a graph, or to package node clusters for reuse. Triggers: \"make a custom Shader Graph node\", \"undeclared identifier in Custom Function\", \"_float error\". Not for hand-written .shader files (urp-hlsl-shaders) or fullscreen renderer features (validate-urp-render-graph-renderer-feature)."
 license: Unity Companion License
 metadata:
   category: rendering-vfx
@@ -90,7 +90,7 @@ void SampleTinted_float(UnityTexture2D Tex, UnitySamplerState SS, float2 UV, flo
 ```
 
 - Texture ports arrive as `UnityTexture2D` / `UnityTexture2DArray` / `UnityTexture3D` / `UnityTextureCube`; samplers as `UnitySamplerState`. Use `Tex.Sample(SS, uv)` or `SAMPLE_TEXTURE2D(Tex.tex, SS.samplerstate, uv)`. Do not declare `sampler2D`.
-- Main-light shadows in Unlit graphs need the `_MAIN_LIGHT_SHADOWS` / `_MAIN_LIGHT_SHADOWS_CASCADE` / `_SHADOWS_SOFT` keywords added as multi_compile keywords on the graph, otherwise `shadowAttenuation` is always 1.
+- Main-light shadows in Unlit graphs need the main-light shadow and soft-shadow keywords added as Multi Compile keywords on the graph, otherwise `shadowAttenuation` is always 1. Copy the exact set from the installed `Lit.shader` because it changes between URP minors (for example `_MAIN_LIGHT_SHADOWS`, `_MAIN_LIGHT_SHADOWS_CASCADE`, `_MAIN_LIGHT_SHADOWS_SCREEN`, and `_SHADOWS_SOFT` plus `_SHADOWS_SOFT_LOW/_MEDIUM/_HIGH` on recent versions); see `urp-hlsl-shaders`.
 - Common errors: "undeclared identifier MyFunc_float" -> Name field includes the suffix, or precision mismatch; "redefinition" -> missing include guard; works in game but preview is pink -> missing `SHADERGRAPH_PREVIEW` fallback.
 
 ## Shader Graph structure (for context)
@@ -108,8 +108,14 @@ void SampleTinted_float(UnityTexture2D Tex, UnitySamplerState SS, float2 UV, flo
 - The editor graph API (`UnityEditor.ShaderGraph.GraphData`, `AbstractMaterialNode`) is partly internal and changes between versions. Do not build graphs by reflection or by writing JSON by hand; small mistakes produce graphs that fail to load. Create assets from the *Assets > Create > Shader Graph* templates, wire nodes in the window, and keep custom logic in HLSL files referenced by nodes.
 - The compiled result is inspectable at runtime: `Shader.Find`, `shader.GetPropertyCount()`, `GetPropertyName(i)`, `GetPropertyType(i)`, and `ShaderUtil.GetShaderMessages(shader)` in the Editor for compile errors.
 
+## References
+
+- [references/reflection-hints.md](references/reflection-hints.md): read when writing `<funchints>`/`<paramhints>` tags for reflected function nodes.
+
 ## Related skills
 
-- `unity-vfx-graph` for Shader Graph outputs in VFX.
-- `validate-urp-render-graph-renderer-feature` for fullscreen passes that use these shaders.
-- `migrate-birp-to-urp` when porting Built-in surface shaders into Shader Graph.
+- urp-hlsl-shaders: hand-written shaders, keyword blocks and pass agreement.
+- unity-vfx-graph: Shader Graph outputs in VFX.
+- validate-urp-render-graph-renderer-feature: fullscreen passes that use these shaders.
+- migrate-birp-to-urp: porting Built-in surface shaders into Shader Graph.
+- build-gtk: custom node-based Editor tools with Graph Toolkit (not Shader Graph itself).

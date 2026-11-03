@@ -87,7 +87,7 @@ The official URP guide shows a typical direction for simple shader rewrites:
 - add the URP render pipeline tag
 - rewrite incompatible Built-in pipeline code instead of expecting compatibility
 
-Do not assume this is enough for lit, multi-pass, or effect-heavy shaders.
+Do not assume this is enough for lit, multi-pass, or effect-heavy shaders. For a hand port, follow `urp-hlsl-shaders`: ShadowCaster, DepthOnly and DepthNormals passes that match the forward pass, one `UnityPerMaterial` CBUFFER, and the keyword block copied from the installed `Lit.shader`.
 
 Do not generalize one sample shader rewrite across an entire project.
 

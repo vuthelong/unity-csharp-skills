@@ -1,6 +1,6 @@
 ---
 name: urp-postprocessing
-description: Sets up, scripts, and debugs URP post-processing with the Volume framework on Unity 6 - global and local Volumes, VolumeProfile overrides such as Bloom, Tonemapping, Color Adjustments, Depth of Field, and Vignette, profile vs sharedProfile, and camera post-processing flags. Use for bloom, color grading, exposure, 'post-processing not showing', PPv2 effect equivalents, or animating effects from C#. Converting an existing PPv2 project goes to migrate-birp-to-urp; custom fullscreen passes go to validate-urp-render-graph-renderer-feature.
+description: "Sets up, scripts and debugs URP post-processing with the Volume framework on Unity 6 - global and local Volumes, VolumeProfile overrides such as Bloom, Tonemapping, Color Adjustments, Depth of Field and Vignette, profile vs sharedProfile, and camera post-processing flags. Use for bloom, color grading, exposure or animating effects from C#. Triggers: \"post-processing not showing\", \"add bloom\", \"PPv2 equivalent in URP\", \"damage vignette\". Not for converting a PPv2 project (migrate-birp-to-urp), custom fullscreen passes (validate-urp-render-graph-renderer-feature) or time-of-day grading logic (day-night-weather)."
 license: Unity Companion License
 metadata:
   category: rendering-vfx
@@ -60,7 +60,7 @@ return report.Length == 0 ? "Post-processing setup looks correct." : report.ToSt
 ## Volumes
 
 - **Global Volume**: `isGlobal = true`; affects every camera whose mask includes its layer.
-- **Local Volume**: `isGlobal = false` plus a trigger `Collider`. `priority` (higher wins when overlapping), `blendDistance` (world units of fade outside the collider), `weight` (0-1 influence). The camera's *Volume Trigger* transform (default: the camera) decides "inside".
+- **Local Volume**: `isGlobal = false` plus a `Collider` on the same GameObject (Is Trigger is optional; enable it so the collider does not take part in physics). `priority` (higher wins when overlapping), `blendDistance` (world units of fade outside the collider), `weight` (0-1 influence). The camera's *Volume Trigger* transform (default: the camera) decides "inside".
 - **Volume Update Mode** (camera `volumeFrameworkUpdateMode`, default from the URP Asset): `EveryFrame` or `ViaScripting`. With `ViaScripting` the camera only re-blends when you call `camera.UpdateVolumeStack()` (extension in `UnityEngine.Rendering.Universal`), which saves CPU on mobile but makes runtime changes appear frozen if forgotten.
 
 ## Overrides
@@ -78,22 +78,22 @@ using UnityEngine.Rendering.Universal;
 
 public sealed class DamageVignette : MonoBehaviour
 {
-    [SerializeField] Volume _volume;
-    Vignette _vignette;
+    [SerializeField] private Volume volume;
 
-    void Awake()
+    private Vignette _vignette;
+
+    private void Awake()
     {
-        if (!_volume.profile.TryGet(out _vignette))
-            _vignette = _volume.profile.Add<Vignette>();
-        _vignette.intensity.overrideState = true;
+        if (!this.volume.profile.TryGet(out this._vignette)) this._vignette = this.volume.profile.Add<Vignette>();
+        this._vignette.intensity.overrideState = true;
     }
 
-    public void SetDamage(float normalized) => _vignette.intensity.value = Mathf.Lerp(0f, 0.5f, normalized);
-
-    void OnDestroy()
+    private void OnDestroy()
     {
-        if (_volume != null && _volume.HasInstantiatedProfile()) Destroy(_volume.profile);
+        if (this.volume != null && this.volume.HasInstantiatedProfile()) Destroy(this.volume.profile);
     }
+
+    public void SetDamage(float normalized) => this._vignette.intensity.value = Mathf.Lerp(0f, 0.5f, normalized);
 }
 ```
 
@@ -156,9 +156,17 @@ Post-Processing Setup Complete
 View in the Game view.
 ```
 
+## References
+
+- [references/effect-reference.md](references/effect-reference.md): read when you need property names, types, ranges and defaults for an effect.
+- [references/code-templates.md](references/code-templates.md): read when creating volumes, enabling camera post-processing, editing saved profiles, or using undo through `eval`.
+
 ## Related skills
 
-- `unity-cli` to reach a live Editor.
-- `migrate-birp-to-urp` for converting PPv2 projects.
-- `unity-lighting` for exposure problems that are really lighting problems.
-- `validate-urp-render-graph-renderer-feature` for custom fullscreen effects.
+- migrate-birp-to-urp: converting PPv2 projects.
+- validate-urp-render-graph-renderer-feature: custom fullscreen effects.
+- day-night-weather: night and storm Volumes blended by weight.
+- accessibility: motion blur, depth of field and camera comfort options.
+- unity-lighting: exposure problems that are really lighting problems.
+- optimize-3d-rendering: post-processing cost per quality tier.
+- unity-cli: reaching a live Editor.

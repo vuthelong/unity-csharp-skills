@@ -1,6 +1,6 @@
 ---
 name: unity-particle-system
-description: Creates, tunes, scripts, and optimizes the built-in CPU Particle System (Shuriken) on Unity 6 with URP particle shaders - the module struct API, bursts, Emit with EmitParams, sub-emitters, collision and trigger callbacks, trails, pooling, and overdraw. Use when the user mentions ParticleSystem, Shuriken, OnParticleCollision, or fire, smoke, or explosion effects that must run on WebGL or low-end mobile. For GPU particles at scale use unity-vfx-graph.
+description: "Creates, tunes, scripts and optimizes the built-in CPU Particle System (Shuriken) on Unity 6 with URP particle shaders - the module struct API, bursts, Emit with EmitParams, sub-emitters, collision and trigger callbacks, trails, pooling and overdraw. Use for ParticleSystem work or effects that must run on WebGL or low-end mobile. Triggers: \"make a fire effect\", \"OnParticleCollision not called\", \"particles are pink in URP\", \"explosion burst\". Not for GPU particles at scale (unity-vfx-graph) or weather state logic (day-night-weather)."
 license: MIT
 metadata:
   category: rendering-vfx
@@ -143,9 +143,14 @@ Read [references/scripting.md](references/scripting.md) when handling `OnParticl
 | Sparks | speed 6-10, size 0.03-0.06, gravity 1 | Burst 20, Cone or Hemisphere | Renderer Stretched Billboard (speed scale 0.05), Collision Planes with bounce 0.3 |
 | Magic aura | Local space, lifetime 1, speed 0 | rate 30, Circle edge | Orbital velocity via Velocity over Lifetime, Additive Unlit |
 
+## References
+
+- [references/scripting.md](references/scripting.md): read when handling `OnParticleCollision`, `OnParticleTrigger`, sub-emitters, per-particle reads/writes, or particle jobs.
+
 ## Related skills
 
-- `unity-vfx-graph` for GPU-scale effects.
-- `unity-texture-import` for flipbook sheets and particle textures.
-- `urp-postprocessing` for Bloom on HDR particle colors.
-- `migrate-birp-to-urp` for converting legacy particle materials.
+- unity-vfx-graph: GPU-scale effects.
+- day-night-weather: driving rain and snow systems from the weather state.
+- unity-texture-import: flipbook sheets and particle textures.
+- urp-postprocessing: Bloom on HDR particle colors.
+- migrate-birp-to-urp: converting legacy particle materials.

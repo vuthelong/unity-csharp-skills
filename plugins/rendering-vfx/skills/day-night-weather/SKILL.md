@@ -1,6 +1,6 @@
 ---
 name: day-night-weather
-description: Builds a dynamic day-night cycle and weather system for Unity 6 URP - a normalized time-of-day clock with day length, time scale and sunrise/sunset/new-day events, sun and moon directional lights driven by Gradient and AnimationCurve, Trilight or skybox ambient with throttled DynamicGI.UpdateEnvironment, procedural skybox properties, fog, night Volume weight, a clear/overcast/rain/storm/snow state machine with timed blends, wetness and snow cover via Shader.SetGlobalFloat, and host-owned time and weather for Netcode for GameObjects co-op synced through NetworkVariable anchors and NetworkManager.ServerTime. Use for "add a day/night cycle", "make it rain", sun rotation, nights too dark, skybox ambient not updating, wet surfaces, sleep-until-morning, or clients seeing a different time of day. Not for static lighting and baking (unity-lighting), Volume overrides (urp-postprocessing), authoring rain or snow effects (unity-vfx-graph, unity-particle-system) or general NGO setup (netcode-for-gameobjects).
+description: "Builds a dynamic day-night cycle and weather system for Unity 6 URP - a time-of-day clock with sunrise/sunset events, curve-driven sun and moon lights, throttled ambient and skybox updates, a rain/snow/storm state machine with wetness globals, and host-owned time and weather for Netcode for GameObjects co-op. Use when adding time of day or weather. Triggers: \"add a day/night cycle\", \"make it rain\", \"nights are too dark\", \"skip to morning\", \"clients see a different time of day\". Not for static lighting and baking (unity-lighting), Volume overrides (urp-postprocessing) or authoring rain/snow effects (unity-vfx-graph, unity-particle-system)."
 license: MIT
 metadata:
   category: rendering-vfx
@@ -51,7 +51,7 @@ public sealed class SleepSystem : MonoBehaviour
 
 - **Clock source.** Default is `Time.timeAsDouble` (scaled game time, so `Time.timeScale = 0` pauses the sky in single player). In co-op the sync script switches every peer to `NetworkManager.ServerTime.Time`. Keep `TimeAnchor` in `double`; a `float` clock loses sub-second precision after a few hours of uptime.
 - **Sun direction.** `transform.forward` of a directional light is the light direction. The driver maps sunrise to pitch 0, noon to 90 and sunset to 180, then applies `azimuth` and `orbitTilt`. Moon = sun + 180.
-- **One shadowed directional light.** The driver enables whichever of sun/moon is above the horizon and assigns it to `RenderSettings.sun` (the light the procedural skybox uses). URP treats a single directional light as the main light; how it chooses one when several are enabled is not documented on the pages this skill used, so keep exactly one enabled.
+- **One shadowed directional light.** The driver enables whichever of sun/moon is above the horizon and assigns it to `RenderSettings.sun` (the light the procedural skybox uses). URP uses the `RenderSettings.sun` light as the main light when it is set and enabled, otherwise the brightest directional light, so keep exactly one enabled and assigned.
 - **Skybox material.** The driver instantiates `skyboxTemplate` and assigns the copy to `RenderSettings.skybox`, so Play Mode never edits the asset. It writes `_Exposure`, `_AtmosphereThickness` and `_SkyTint` only when `Material.HasProperty` confirms them. Those are the built-in Procedural skybox property names as commonly found in its shader source; confirm them in the material's Debug Inspector, and adjust ids for a custom sky shader.
 - **`DynamicGI.UpdateEnvironment()` cost.** The 6000.0 docs say it schedules a cubemap update; with `SystemInfo.supportsAsyncGPUReadback` it reads back asynchronously and may lag one or more frames, extra requests beyond what it can process are ignored, and without async readback it stalls the calling thread. Never call it per frame. Trilight ambient avoids it entirely.
 - **Reflections.** Environment reflections come from the skybox capture; changing the sky does not update baked reflection probes. See [references/gi-and-cost.md](references/gi-and-cost.md).
@@ -80,10 +80,11 @@ public sealed class SleepSystem : MonoBehaviour
 
 ## Related skills
 
-- `unity-lighting`: Light components, shadows, probes, baking.
-- `urp-postprocessing`: night and storm grading overrides on the Volume.
-- `unity-vfx-graph`, `unity-particle-system`: authoring the precipitation effects.
-- `netcode-for-gameobjects`: NetworkObject spawning, NetworkVariable rules.
-- `save-system`: host-owned world save that stores time and weather.
-- `optimize-3d-rendering`: shadow distance, cascades and quality tiers.
-- `audio-playback-system`: rain and thunder ambience driven from `WeatherController.Current`.
+- unity-lighting: Light components, shadows, probes, baking.
+- urp-postprocessing: night and storm grading overrides on the Volume.
+- unity-vfx-graph, unity-particle-system: authoring the precipitation effects.
+- netcode-for-gameobjects: NetworkObject spawning, NetworkVariable rules.
+- save-system: host-owned world save that stores time and weather.
+- optimize-3d-rendering: shadow distance, cascades and quality tiers.
+- audio-playback-system: rain and thunder ambience driven from `WeatherController.Current`.
+- urp-hlsl-shaders: shaders that read the wetness, snow and wind globals.

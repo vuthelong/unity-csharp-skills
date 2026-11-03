@@ -1,6 +1,6 @@
 ---
 name: validate-urp-render-graph-renderer-feature
-description: Writes, reviews, and fixes Unity 6 URP ScriptableRendererFeature and ScriptableRenderPass code built on the Render Graph API (RecordRenderGraph, AddRasterRenderPass, AddBlitPass, TextureHandle, PassData). Use when the user wants to author a custom renderer feature or fullscreen pass, port Execute() code to Render Graph, or review an existing feature, or reports a custom pass that renders black, does nothing, or errors in the Render Graph Viewer.
+description: "Writes, reviews and fixes Unity 6 URP ScriptableRendererFeature and ScriptableRenderPass code built on the Render Graph API (RecordRenderGraph, AddRasterRenderPass, AddBlitPass, TextureHandle, PassData). Use when authoring a custom renderer feature or fullscreen pass, porting Execute() code to Render Graph, or reviewing an existing feature. Triggers: \"custom pass renders black\", \"renderer feature does nothing\", \"Render Graph Viewer error\", \"port Execute to RecordRenderGraph\". Not for Volume overrides (urp-postprocessing) or shader code inside the pass (urp-hlsl-shaders, shader-graph-create-custom-node)."
 license: Unity Companion License
 metadata:
   category: rendering-vfx
@@ -31,8 +31,6 @@ Ask for what is missing:
 6. **Missing Information**: what would raise confidence.
 
 Distinguish confirmed from likely. Never invent APIs. Prefer targeted fixes over rewrites. Do not validate shader internals except where they affect binding.
-
-For reference implementations of a correct blit feature, a raster pass with `PassData`, depth/normals input, and an Execute() -> Render Graph port, read [references/render-graph-patterns.md](references/render-graph-patterns.md).
 
 ## Checklist
 
@@ -120,8 +118,14 @@ TextureHandle target = renderGraph.CreateTexture(desc);
 - Explain why each issue matters (black screen, stale data, extra copies, broken on back-buffer cameras, culled pass).
 - Flag hidden coupling and unnecessary global state.
 
+## References
+
+- [references/render-graph-patterns.md](references/render-graph-patterns.md): read when you need a reference implementation of a correct blit feature, a raster pass with `PassData`, depth/normals input, or an Execute() -> Render Graph port.
+
 ## Related skills
 
-- `urp-postprocessing` when a Volume override or Full Screen Pass Renderer Feature is enough.
-- `migrate-birp-to-urp` for porting `OnRenderImage` effects.
-- `shader-graph-create-custom-node` for the shader side of a fullscreen effect.
+- urp-postprocessing: when a Volume override or Full Screen Pass Renderer Feature is enough.
+- urp-hlsl-shaders: the shader the pass draws with.
+- shader-graph-create-custom-node: Fullscreen Shader Graph side of an effect.
+- migrate-birp-to-urp: porting `OnRenderImage` effects.
+- optimize-3d-rendering: pass cost, copies and native render pass merging.

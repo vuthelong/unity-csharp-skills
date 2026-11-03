@@ -98,7 +98,7 @@ public sealed class TimeOfDay : MonoBehaviour
 
     #endregion
 
-    #region Public API
+    #region Clock Control
 
     public void SetClockSource(Func<double> clock)
     {

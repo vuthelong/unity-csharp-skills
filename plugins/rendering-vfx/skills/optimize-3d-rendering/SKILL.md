@@ -1,6 +1,6 @@
 ---
 name: optimize-3d-rendering
-description: Diagnoses and reduces the frame cost of 3D URP scenes on Unity 6 - CPU vs GPU triage with the Frame Debugger and Profiler, SRP Batcher and GPU Resident Drawer batching, culling and LOD, shader variant stripping, and per-platform URP quality tiers. Use for low FPS, high draw or SetPass calls, GPU-bound or overheating mobile frames, or long variant builds. To set up lights, texture imports, or post effects themselves, use unity-lighting, unity-texture-import, or urp-postprocessing. Script, GC and main-thread CPU hotspots go to cpu-performance-profiling.
+description: "Diagnoses and reduces the frame cost of 3D URP scenes on Unity 6 - CPU vs GPU triage with the Frame Debugger and Profiler, SRP Batcher and GPU Resident Drawer batching, culling and LOD, shader variant stripping settings, and per-platform URP quality tiers. Use for low FPS from rendering or long variant builds. Triggers: \"too many SetPass calls\", \"GPU bound on mobile\", \"phone overheats\", \"shader variant build takes hours\". Not for writing or fixing shader code (urp-hlsl-shaders), script and GC hotspots (cpu-performance-profiling) or setting up lights and post effects (unity-lighting, urp-postprocessing)."
 license: MIT
 metadata:
   category: rendering-vfx
@@ -52,15 +52,6 @@ Work top-down; earlier items are cheaper to try and usually pay more.
 - Every URP Asset reachable from the build platform's quality levels adds shader variants.
 - Flag 6000.x minor-specific features as "verify in your editor version": Deferred+ (6000.1+), Mesh LOD (6000.2+), PSO prewarming via `GraphicsStateCollection`, Mipmap Streaming renames, Render Graph Compatibility Mode removal.
 
-## References
-
-- [references/diagnostics.md](references/diagnostics.md): read first; Profiler, Stats, Frame Debugger, Rendering Debugger, GPU module, Render Graph Viewer.
-- [references/batching.md](references/batching.md): read when SetPass calls or render-thread time are high, or before enabling the GPU Resident Drawer.
-- [references/culling-lod.md](references/culling-lod.md): read when triangle counts or culling time are high; includes a `layerCullDistances` script.
-- [references/lighting-cost.md](references/lighting-cost.md): read when lights, shadows or the rendering path dominate GPU time.
-- [references/assets-and-variants.md](references/assets-and-variants.md): read for mesh/texture budgets, mipmap streaming, and shader variant stripping (includes an `IPreprocessShaders` example).
-- [references/quality-tiers-mobile.md](references/quality-tiers-mobile.md): read when setting up URP quality tiers or targeting mobile (render scale, MSAA vs FXAA, HDR, depth/opaque texture, post cost).
-
 ## Pitfalls
 
 | Symptom | Likely cause |
@@ -76,11 +67,23 @@ Work top-down; earlier items are cheaper to try and usually pay more.
 | Blurry textures after enabling streaming | Memory budget below non-streaming texture memory |
 | Hitch the first time an effect appears | Shader/PSO compilation; prewarm variants |
 
+## References
+
+- [references/diagnostics.md](references/diagnostics.md): read first; Profiler, Stats, Frame Debugger, Rendering Debugger, GPU module, Render Graph Viewer.
+- [references/batching.md](references/batching.md): read when SetPass calls or render-thread time are high, or before enabling the GPU Resident Drawer.
+- [references/culling-lod.md](references/culling-lod.md): read when triangle counts or culling time are high; includes a `layerCullDistances` script.
+- [references/lighting-cost.md](references/lighting-cost.md): read when lights, shadows or the rendering path dominate GPU time.
+- [references/assets-and-variants.md](references/assets-and-variants.md): read for mesh/texture budgets, mipmap streaming, and shader variant stripping (includes an `IPreprocessShaders` example).
+- [references/quality-tiers-mobile.md](references/quality-tiers-mobile.md): read when setting up URP quality tiers or targeting mobile (render scale, MSAA vs FXAA, HDR, depth/opaque texture, post cost).
+
 ## Related skills
 
-- `urp-postprocessing`: Volume setup and per-effect settings.
-- `unity-lighting`: light setup, baking, probes and APV.
-- `unity-texture-import`: compression formats and import settings.
-- `level-geometry-authoring`: LODGroup, terrain and ProBuilder authoring.
-- `memory-snapshot-profiling`: GPU and texture memory captures.
-- `validate-urp-render-graph-renderer-feature`: custom renderer feature correctness and pass merging.
+- urp-hlsl-shaders: making a hand-written shader SRP Batcher compatible, keyword budgets and PSO warm-up per shader.
+- cpu-performance-profiling: main-thread script and GC cost.
+- urp-postprocessing: Volume setup and per-effect settings.
+- unity-lighting: light setup, baking, probes and APV.
+- unity-texture-import: compression formats and import settings.
+- level-geometry-authoring: LODGroup, terrain and ProBuilder authoring.
+- memory-snapshot-profiling: GPU and texture memory captures.
+- pc-settings-menu: player-facing quality, render scale and frame cap options built on these tiers.
+- validate-urp-render-graph-renderer-feature: custom renderer feature correctness and pass merging.
