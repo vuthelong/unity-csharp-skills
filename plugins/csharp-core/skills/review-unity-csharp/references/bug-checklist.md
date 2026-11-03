@@ -14,6 +14,18 @@ if (this.target != null) this.target.TakeDamage(10);
 
 The first line is the bug; the second is the fix. Plain C# objects and interfaces that are not implemented by a `UnityEngine.Object` are safe with `?.`. An interface field holding a MonoBehaviour is not safe: cast or compare via `(this.damageable as Object) != null`.
 
+Destruction is not the only source of fake null. In the Editor, an empty `[SerializeField]` reference and a `GetComponent<T>()` that finds nothing both return a fake-null object, so these lazy caches break in the Editor:
+
+```csharp
+this.detectRange ??= GetComponent<RangeDetector>();
+var batch = GetComponent<Batcher>() ?? gameObject.AddComponent<Batcher>();
+
+if (this.detectRange == null) this.detectRange = GetComponent<RangeDetector>();
+var batch = GetComponent<Batcher>().OrNull() ?? gameObject.AddComponent<Batcher>();
+```
+
+The first pair is the bug, because `AddComponent` never runs in the Editor; the second pair is the fix. `OrNull()` is `obj ? obj : null` as an extension, and it keeps the operator form inside expressions (`=> _x = _x.OrNull() ?? Find()`). A local just returned by `Instantiate`, a native getter that returns a true null (`GetTexture(...) as Texture2D`), and a private field caching a loaded config asset are low risk; report them as Low, not High. For a project-wide sweep, rewrite rules and triage, see [unity-null-sweep.md](unity-null-sweep.md).
+
 ## Missing component check
 
 ```csharp

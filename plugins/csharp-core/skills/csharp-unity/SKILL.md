@@ -169,7 +169,15 @@ public void TakeDamage(int amount)
 
 ### Unity null semantics
 
-`UnityEngine.Object` overrides `==` so destroyed objects compare equal to `null`. `?.`, `??`, `??=`, `is null` and `is not null` bypass that override and will touch destroyed objects. On Unity objects use `if (this.target != null)` or `if (this.target)`.
+`UnityEngine.Object` overrides `==` so destroyed objects compare equal to `null`. `?.`, `??`, `??=`, `is null` and `is not null` bypass that override and will touch destroyed objects. On Unity objects use `if (this.target != null)` or `if (this.target)`. Keep `?.` on plain C# types, events and delegates.
+
+The Editor also hands out fake nulls for an empty `[SerializeField]` and for a `GetComponent` that finds nothing, so write lazy caches as `if (this._x == null) this._x = GetComponent<X>();`, never `this._x ??= GetComponent<X>();`. Inside an expression, use an `OrNull()` extension (`public static T OrNull<T>(this T o) where T : Object => o ? o : null;`): `this._x.OrNull()?.Play()`, `GetComponent<X>().OrNull() ?? gameObject.AddComponent<X>()`.
+
+An interface-typed field can hold a MonoBehaviour, and the interface hides the `==` override. Compare it through `Object`: `if ((this.damageable as Object) != null) this.damageable.TakeDamage(10);`.
+
+In `OnDisable`/`OnDestroy`, a singleton may already be destroyed, because teardown order on scene unload and quit is undefined. Guard teardown calls with `if (EventBus.Instance != null) EventBus.Instance.Unsubscribe(...)`. Never touch a lazy-creating `Instance` getter during teardown, because it spawns a new GameObject while quitting ("Some objects were not cleaned up when closing the scene"). Expose a non-creating accessor (`HasInstance`, `TryGetInstance`) for teardown paths.
+
+Enforce these rules in the IDE: add `dotnet_diagnostic.UNT0007.severity = error` (`??`), `UNT0008` (`?.`), `UNT0023` (`??=`) and `UNT0029` (`is null`/`is not null`) to the project's `.editorconfig`. Microsoft.Unity.Analyzers runs in Rider and Visual Studio, not in Unity's own compiler.
 
 ### Physics and timing
 

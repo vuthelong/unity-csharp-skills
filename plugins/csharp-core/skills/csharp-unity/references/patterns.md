@@ -247,6 +247,15 @@ public sealed class GameManager : MonoBehaviour
 }
 ```
 
+Other objects' `OnDestroy` can run after this one on scene unload or quit, so callers unregister behind a check:
+
+```csharp
+private void OnDestroy()
+{
+    if (GameManager.Instance != null) GameManager.Instance.Unregister(this);
+}
+```
+
 `DontDestroyOnLoad` only works on root GameObjects.
 
 ## Logic / view split

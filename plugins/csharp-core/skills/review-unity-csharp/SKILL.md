@@ -26,7 +26,7 @@ Read every in-scope file completely. Leaks and lifecycle bugs are found by pairi
 
 Details and before/after code: [references/bug-checklist.md](references/bug-checklist.md).
 
-- `?.`, `??`, `??=`, `is null`, `is not null` on a `UnityEngine.Object` (bypass the destroyed-object check)
+- `?.`, `??`, `??=`, `is null`, `is not null` on a `UnityEngine.Object` (bypass the destroyed-object check; in the Editor also an empty `[SerializeField]` or a failed `GetComponent`). Project-wide type-aware sweep without Editor or IDE: [references/unity-null-sweep.md](references/unity-null-sweep.md)
 - `GetComponent` result used without null check or `[RequireComponent]`
 - `Time.fixedDeltaTime` used in `Update`; physics forces or `Rigidbody.MovePosition` in `Update`
 - Mutating a copy of a struct (`foreach` variable, property getter returning a struct, `List<struct>[i].x = ...`)
@@ -34,7 +34,7 @@ Details and before/after code: [references/bug-checklist.md](references/bug-chec
 - Cross-object `Awake`/`Start` ordering assumptions without `[DefaultExecutionOrder]` or explicit init
 - `async void` other than a `try/catch`-wrapped UI handler with a fixed `void` signature (Unity messages should be `async Awaitable` or call a `UniTaskVoid`); discarded `Task`; awaits without a lifetime token; same `Awaitable` awaited twice
 - `UnityEngine` API from a background thread (`Task.Run`, thread callbacks, `Awaitable.BackgroundThreadAsync` sections, job `Execute`)
-- Singleton without duplicate guard, or not cleared in `OnDestroy`
+- Singleton without duplicate guard, or not cleared in `OnDestroy`; `OnDisable`/`OnDestroy` calling `Singleton.Instance` without a `!= null` guard, or through a lazy-creating getter
 - `StopCoroutine("Name")` for a coroutine started by `IEnumerator`; coroutine expected to stop when only the component is disabled
 - Static state not reset when domain reload is disabled ("works the first Play, breaks the second")
 - Multi-step state mutation in a callback that can throw half-way
