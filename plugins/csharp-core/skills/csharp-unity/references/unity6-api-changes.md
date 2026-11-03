@@ -64,7 +64,7 @@ Notes:
 
 ## Language
 
-- C# 9.0. No C# 10+ syntax. `record`/`init` need the `IsExternalInit` shim (see SKILL.md).
+- C# 9.0 by default. No C# 10+ syntax unless the assembly's asmdef folder (or `Assets/` for `Assembly-CSharp`) has a `csc.rsp` with `-langVersion:10` or `preview`. `record`/`init` need the `IsExternalInit` shim (see SKILL.md).
 - .NET Standard 2.1 API profile by default; `.NET Framework` profile is available in Player Settings but rarely needed.
 
 ## Detecting obsolete usage

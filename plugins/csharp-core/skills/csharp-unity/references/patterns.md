@@ -72,6 +72,19 @@ public sealed class EnemyAI : MonoBehaviour
 
 Allocate states once and reuse them; do not `new` a state on every transition.
 
+## Choosing an event style
+
+| Situation | Use |
+|---|---|
+| Owner-local: a component notifies whoever holds a reference to it | C# `event Action<T>` on the owner |
+| Designer-wired in the Inspector, scene to scene or prefab to UI | ScriptableObject event channel (below) or `UnityEvent` |
+| Decoupled game-wide messages with a DI container | `messagepipe` (when installed) |
+| Decoupled messages without DI, ordered async handlers | `zbase-pubsub` (when installed) |
+| Streams that need operators (throttle, combine, switch) or reactive values | `r3` (when installed) |
+| Static event bus | Only with a `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]` reset that clears every handler |
+
+Whatever the style, unsubscribe in the counterpart of where you subscribed (`OnEnable` → `OnDisable`, `Awake`/`Start` → `OnDestroy`).
+
 ## Event channel (ScriptableObject observer)
 
 ```csharp
@@ -169,6 +182,8 @@ For Editor tooling use Unity's `Undo` API instead of a custom history.
 
 ## Service locator
 
+Use this only when the project has no DI container. With VContainer installed, register services in a `LifetimeScope` instead (see `vcontainer`).
+
 ```csharp
 public static class Services
 {
@@ -207,6 +222,8 @@ public static class Services
 Statics take no `this.`. The reset hook keeps the registry clean when domain reload is disabled. Resolve services in `Start` or later, not in `Awake`, unless registration order is guaranteed (bootstrap scene, `[DefaultExecutionOrder]`).
 
 ## Singleton MonoBehaviour
+
+Same rule: with a DI container, register a single instance instead of a static `Instance`.
 
 ```csharp
 public sealed class GameManager : MonoBehaviour

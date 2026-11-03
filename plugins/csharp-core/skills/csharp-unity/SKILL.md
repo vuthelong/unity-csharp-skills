@@ -1,6 +1,6 @@
 ---
 name: csharp-unity
-description: "Writes and refactors Unity 6 C# (MonoBehaviours, ScriptableObjects, editor scripts, game systems, UniTask/Awaitable async, serialization, pooling, tests) with GC-free, lifecycle-correct patterns and Unity 6 API fixes. Use when writing or refactoring Unity C# and no more specific skill applies; it defers to the project's .editorconfig and CLAUDE.md/AGENTS.md conventions. Triggers: \"write a MonoBehaviour\", \"refactor this script\", \"add an object pool\", \"replace FindObjectOfType\"."
+description: "Writes and refactors Unity 6 C# (MonoBehaviours, ScriptableObjects, editor scripts, async, serialization, pooling, tests) with GC-free, lifecycle-correct patterns and Unity 6 API fixes, deferring to project conventions. Use when writing or refactoring Unity C# and no more specific skill applies. Triggers: \"write a MonoBehaviour\", \"refactor this script\", \"add an object pool\", \"replace FindObjectOfType\". Not for reviewing existing code (review-unity-csharp), whole-project audits (audit-unity-codebase), library-specific APIs such as UniTask or VContainer (unitask, vcontainer)."
 license: MIT
 metadata:
   category: csharp-core
@@ -14,13 +14,15 @@ metadata:
 
 1. Detect the project context before writing code:
    - Unity version in `ProjectSettings/ProjectVersion.txt` (API availability differs across 6000.x minors).
-   - Async library: `com.cysharp.unitask` in `Packages/manifest.json` means UniTask; otherwise use the built-in `Awaitable`.
+   - Async library: `com.cysharp.unitask` in `Packages/manifest.json` (or a required package that depends on it) means UniTask; otherwise use the built-in `Awaitable`.
+   - Libraries: check `Packages/manifest.json`, `packages-lock.json` and `Assets/Packages` (NuGetForUnity) and load the matching skill before writing code that touches it: `com.cysharp.unitask` (unitask), `jp.hadashikick.vcontainer` (vcontainer), `com.cysharp.messagepipe` (messagepipe), `com.zbase.foundation.pubsub` (zbase-pubsub), `com.zbase.foundation.pooling` (zbase-pooling), R3 (r3), ObservableCollections (observable-collections), ZString (zstring), ZLogger (zlogger), MemoryPack (memorypack), MessagePack (messagepack-csharp), MasterMemory (mastermemory). With a DI container installed, register services there instead of using the service locator or singleton patterns.
+   - Language version: a `csc.rsp` next to the asmdef (or in `Assets/` for `Assembly-CSharp`) with `-langVersion:10` or `preview` raises the C# version for that assembly only.
    - Input handling: `activeInputHandler` in `ProjectSettings/ProjectSettings.asset` (0 = legacy, 1 = Input System, 2 = both).
    - Style: project config wins. Follow `.editorconfig`, `CLAUDE.md`/`AGENTS.md` and the style of surrounding files first; apply the house style below only to new files or projects with no established convention.
    - Assembly definitions: put new code in the asmdef that owns the folder; editor code goes in an `Editor` folder or an Editor-only asmdef.
 2. Write the code following the rules below. Prefer the smallest set of components with one responsibility each.
 3. Check Unity 6 API drift against [references/unity6-api-changes.md](references/unity6-api-changes.md) before using any API you are not sure about.
-4. Make sure it compiles: Unity 6 compiles with C# 9. See "Language version" below.
+4. Make sure it compiles: Unity 6 compiles with C# 9 unless the assembly opts in with `csc.rsp`. See "Language version" below.
 5. After saving `.cs` files, verify the Editor recompiled cleanly (see `unity-editor-safety`).
 
 ## Core principles
@@ -162,7 +164,7 @@ public void TakeDamage(int amount)
 ### Lookups and caching
 
 - Cache `GetComponent` results in `Awake`. Use `TryGetComponent(out this._rb)` and fail loudly (`Debug.LogError(..., this)` + `enabled = false`) when a required component is missing, or add `[RequireComponent(typeof(Rigidbody))]`.
-- Inject dependencies via `[SerializeField]` references, constructors on plain C# classes, or a DI container. Use `FindAnyObjectByType<T>()` (fastest, any instance) or `FindFirstObjectByType<T>()` only at startup. `FindObjectOfType` / `FindObjectsOfType` are obsolete in Unity 6.
+- Inject dependencies via `[SerializeField]` references, constructors on plain C# classes, or a DI container (`vcontainer` when installed). Use `FindAnyObjectByType<T>()` (fastest, any instance) or `FindFirstObjectByType<T>()` only at startup. `FindObjectOfType` / `FindObjectsOfType` are obsolete in Unity 6.
 - `Camera.main` is cached by Unity since 2020.2; calling it per frame is fine.
 - Use `CompareTag(Tags.Player)` with string constants, never `tag == "Player"`.
 - Cache `Animator.StringToHash` / `Shader.PropertyToID` results in `static readonly int` fields.
@@ -209,14 +211,15 @@ Coroutines stop when the GameObject is deactivated or destroyed, but not when on
 
 Prefer async over coroutines for new code that returns values or chains work. Full guide with both libraries, cancellation and threading: [references/async.md](references/async.md).
 
-- With UniTask: `UniTask`/`UniTask<T>` when awaited, `UniTaskVoid` + `.Forget()` for fire-and-forget.
+- With UniTask: `UniTask`/`UniTask<T>` when awaited, `UniTaskVoid` + `.Forget()` for fire-and-forget. Details: `unitask`.
 - Without UniTask: `Awaitable`/`Awaitable<T>` (Unity 6 built-in). Never await the same `Awaitable` instance twice; instances are pooled.
-- Never `async void`, including Unity message methods: use `async Awaitable Start()` (Awaitable) or a synchronous `Start()` that calls a `UniTaskVoid` method with `.Forget()` (UniTask). The only exception is a UI event handler that must match a `void` signature, and its body is wrapped in `try/catch`.
+- An `async Awaitable` method can `await` a `UniTask` directly, so an Awaitable-based interface can wrap UniTask services without an adapter type.
+- Never `async void`, including Unity message methods. Use `async Awaitable Start()`; with UniTask installed, `async UniTaskVoid Start()` is also allowed; otherwise a synchronous `Start()` calls an async method and handles its exceptions. The only exception is a UI event handler that must match a `void` signature: wrap its body in `try/catch`, or with UniTask use `UniTask.UnityAction(...)`.
 - Pass `destroyCancellationToken` into every await that can outlive the object.
 
 ### Object pooling
 
-Use `UnityEngine.Pool.ObjectPool<T>` for anything spawned repeatedly:
+Use `UnityEngine.Pool.ObjectPool<T>` for anything spawned repeatedly (use `zbase-pooling` only when the project already uses ZBase):
 
 ```csharp
 private ObjectPool<Bullet> _pool;
@@ -237,8 +240,8 @@ Reset all per-use state in `actionOnGet`/`actionOnRelease`. Pooled objects never
 
 ### Events
 
-- Prefer C# `event Action<T>` for code-to-code subscriptions; `UnityEvent` only when designers wire it in the Inspector.
-- Every `+=` / `AddListener` in `OnEnable` has a matching `-=` / `RemoveListener` in `OnDisable`.
+- Prefer C# `event Action<T>` for owner-local code-to-code subscriptions; `UnityEvent` only when designers wire it in the Inspector. For cross-system events see "Choosing an event style" in [references/patterns.md](references/patterns.md) (`messagepipe`, `zbase-pubsub`, `r3` when installed).
+- Unsubscribe in the counterpart of where you subscribed: `OnEnable` → `OnDisable` (stops events while disabled), or `Awake`/`Start` → `OnDestroy` / `destroyCancellationToken` (keeps receiving while disabled). Pick one per subscription on purpose.
 - Never poll a flag in `Update` that a state change could raise as an event.
 
 ### Runtime-created assets
@@ -276,7 +279,7 @@ Rules, callbacks (`ISerializationCallbackReceiver`, `OnValidate`) and Scriptable
 | Rule | Detail |
 |---|---|
 | No `Find*`, `GetComponent` in `Update` | Cache in `Awake` |
-| No per-frame `new List<>`, closures, string concatenation, boxing | Preallocate, reuse, `ListPool<T>`, `StringBuilder` |
+| No per-frame `new List<>`, closures, string concatenation, boxing | Preallocate, reuse, `ListPool<T>`; for text a cached `StringBuilder` + `Clear()`, or ZString / TMP `SetText` when ZString is installed (`zstring`) |
 | No LINQ in hot paths | Plain loops in per-frame code |
 | `CompareTag` | No string alloc |
 | Non-alloc physics queries | Reused buffers |
@@ -286,7 +289,7 @@ Rules, callbacks (`ISerializationCallbackReceiver`, `OnValidate`) and Scriptable
 
 ## Language version
 
-Unity 6 compiles C# 9.0. These do not compile: file-scoped namespaces, `global using`, `record struct`, `required` members, raw string literals, list patterns, primary constructors on classes. `record` and `init` accessors need a shim:
+Unity 6 compiles C# 9.0 by default. An assembly whose asmdef folder (or `Assets/` for `Assembly-CSharp`) has a `csc.rsp` with `-langVersion:10` or `preview` may use C# 10+ syntax (required by `zlogger`). Without that file, these do not compile: file-scoped namespaces, `global using`, `record struct`, `required` members, raw string literals, list patterns, primary constructors on classes. `record` and `init` accessors need a shim:
 
 ```csharp
 namespace System.Runtime.CompilerServices
@@ -345,15 +348,20 @@ public sealed class Mover : MonoBehaviour
 
 ## References
 
-- [references/unity6-api-changes.md](references/unity6-api-changes.md) - read when touching any API that may be obsolete or renamed in 6000.x.
-- [references/async.md](references/async.md) - read when writing async code, cancellation, background threads or replacing coroutines.
-- [references/serialization.md](references/serialization.md) - read when designing serialized data, ScriptableObjects, or renaming fields.
-- [references/patterns.md](references/patterns.md) - read when implementing a state machine, event channel, command/undo, service locator, or a logic/MonoBehaviour split.
-- [references/editor-scripting.md](references/editor-scripting.md) - read when writing custom inspectors, editor windows, menu items or asset-processing scripts.
-- [references/testing.md](references/testing.md) - read when writing EditMode/PlayMode tests.
+- [references/unity6-api-changes.md](references/unity6-api-changes.md): read when touching any API that may be obsolete or renamed in 6000.x.
+- [references/async.md](references/async.md): read when writing async code, cancellation, background threads or replacing coroutines.
+- [references/serialization.md](references/serialization.md): read when designing serialized data, ScriptableObjects, or renaming fields.
+- [references/patterns.md](references/patterns.md): read when choosing an event style or implementing a state machine, event channel, command/undo, service locator, or a logic/MonoBehaviour split.
+- [references/editor-scripting.md](references/editor-scripting.md): read when writing custom inspectors, editor windows, menu items or asset-processing scripts.
+- [references/testing.md](references/testing.md): read when writing EditMode/PlayMode tests.
 
 ## Related skills
 
-- `review-unity-csharp` - audit existing code for bugs, leaks and these conventions.
-- `unity-editor-safety` - compile-error recovery, domain reload, safe edits of scenes/prefabs/.meta.
-- `ui-uitk`, `ui-ugui`, `ui-imgui` - UI-specific code.
+- review-unity-csharp: review existing code for bugs, leaks and these conventions.
+- audit-unity-codebase: whole-project audit.
+- unity-editor-safety: compile-error recovery, domain reload, safe edits of scenes/prefabs/.meta.
+- unitask, vcontainer, messagepipe, zbase-pubsub, r3, observable-collections: when the project has that package installed.
+- zbase-pooling: pooling when the project already uses ZBase.
+- zstring, zlogger: zero-GC strings and structured logging.
+- memorypack, messagepack-csharp, mastermemory: binary serialization and master data.
+- ui-uitk, ui-ugui, ui-imgui: UI-specific code.

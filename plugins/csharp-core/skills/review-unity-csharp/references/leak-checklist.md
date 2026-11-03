@@ -34,6 +34,12 @@ Review technique: find each allocation/subscription, then its cleanup. No cleanu
 | Tween (`DOTween .DO*`, LeanTween, PrimeTween) on a target | `Kill()` / `SetLink(gameObject)` | `OnDestroy` |
 | `SceneManager.LoadSceneAsync(..., Additive)` | `SceneManager.UnloadSceneAsync` | when content is done |
 | `GCHandle.Alloc` | `GCHandle.Free` | immediately after use |
+| R3 `observable.Subscribe(...)` (`r3`) | `.AddTo(this)`, `AddTo(ref bag)` + `bag.Clear()`/`Dispose()`, or `RegisterTo(token)` | `OnDisable` / `OnDestroy` |
+| MessagePipe `subscriber.Subscribe(...)` (`messagepipe`) | `Dispose()` the returned `IDisposable` (or a `DisposableBag`) | `OnDestroy` / owner `Dispose` |
+| ZBase PubSub `Subscribe` (`zbase-pubsub`) | `ISubscription.Dispose()` or an `unsubscribeToken` | `OnDestroy` |
+| ObservableCollections `CreateView` / `ToViewList` / `ToNotifyCollectionChanged` (`observable-collections`) | `Dispose()` | `OnDestroy` |
+| `new NativeMemoryArray<T>` (`native-memory-array`) | `Dispose()` | `OnDestroy` / `using` |
+| ZBase `ComponentPool<T>` / `GameObjectPool` (`zbase-pooling`) | `ReleaseInstances(0)` then `Dispose()` | `OnDestroy` |
 | Global state changes (`Time.timeScale`, `Cursor.lockState`, `Physics.simulationMode`, `QualitySettings`) | restore | `OnDisable` |
 
 `Resources.UnloadUnusedAssets()` frees unreferenced assets but cannot free objects still referenced from managed code, and it is expensive. It is not a fix for missing `Destroy` calls.

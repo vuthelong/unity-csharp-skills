@@ -1,6 +1,6 @@
 ---
 name: audit-unity-codebase
-description: "Audits a whole Unity 6 project or folder in one pass: bugs, lifecycle and native leaks, what breaks at the target frame budget or object count, risky code without tests, slow per-frame paths, and code to delete, merge or split. Ranked, numbered findings in plain English, each with a concrete failure case. One-shot report, changes nothing. Triggers: \"audit this codebase\", \"review the whole repo\", \"find bloat\", \"what can I delete\", \"is this project healthy\". Not for a single diff or script (use review-unity-csharp) or Project Auditor CSVs (use project-auditor-fixes)."
+description: "Audits a whole Unity 6 project or folder in one pass (bugs, leaks, scale limits at the target load, untested risky code, slow per-frame paths, code to delete, merge or split) as a ranked plain-English report that changes nothing. Use when the user wants a health check of a project, assembly or folder. Triggers: \"audit this codebase\", \"review the whole repo\", \"find bloat\", \"what can I delete\", \"is this project healthy\". Not for a single diff or script (review-unity-csharp), Project Auditor CSVs (project-auditor-fixes)."
 license: MIT
 metadata:
   category: csharp-core
@@ -33,7 +33,7 @@ Audit like the developer who just inherited the project and must ship it. Order 
    - delete: dead code, unused options, serialized fields nobody sets, speculative features
    - reuse: two helpers doing the same thing (keep one, name the path)
    - engine / stdlib: Unity or .NET already does it (`Mathf`, `Physics.OverlapSphereNonAlloc`, `ObjectPool<T>`, `JsonUtility`); a package doing what a few lines can
-   - yagni: interface with one implementation, factory with one product, manager that only forwards calls
+   - yagni: interface with one implementation (unless it is a DI registration, a test seam or an assembly boundary), factory with one product, manager that only forwards calls
    - merge: near-copies that must change together (two shaders or scripts drifting apart)
    - split: one class doing several unrelated jobs, so it is hard to read or test. Split by job, never by line count.
 
@@ -81,6 +81,7 @@ One-shot report, changes no code. Apply fixes only when the user picks findings,
 
 ## Related skills
 
-- `review-unity-csharp` - full bug, leak and convention checklists for a diff or a few scripts.
-- `project-auditor-fixes` - Unity Project Auditor static analysis and fixes.
-- `cpu-performance-profiling`, `memory-snapshot-profiling` - confirm scale and leak findings with real captures.
+- review-unity-csharp: full bug, leak and convention checklists for a diff or a few scripts.
+- project-auditor-fixes: Unity Project Auditor static analysis and fixes.
+- cpu-performance-profiling, memory-snapshot-profiling: confirm scale and leak findings with real captures.
+- csharp-unity, unity-editor-safety: applying the fixes the user picks and verifying the compile.

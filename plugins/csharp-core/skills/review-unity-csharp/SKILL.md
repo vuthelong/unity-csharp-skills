@@ -1,6 +1,6 @@
 ---
 name: review-unity-csharp
-description: "Reviews existing Unity C# for correctness bugs, lifecycle mistakes, memory and native-resource leaks and Unity 6 obsolete APIs, reporting file:line findings with severity and minimal fixes. Use to review a script, diff or branch, or to vet AI-generated Unity code. Triggers: \"review this script\", \"check for leaks\", \"works the first Play but not the second\". Style is checked only against the project's own conventions. Not for writing new code (use csharp-unity)."
+description: "Reviews existing Unity C# for correctness bugs, lifecycle mistakes, memory and native-resource leaks and Unity 6 obsolete APIs, reporting file:line findings with severity and minimal fixes; style is checked only against the project's own conventions. Use to review a script, diff or branch, or to vet AI-generated Unity code. Triggers: \"review this script\", \"check for leaks\", \"works the first Play but not the second\". Not for writing new code (csharp-unity), whole-project audits (audit-unity-codebase), Project Auditor CSVs (project-auditor-fixes)."
 license: MIT
 metadata:
   category: csharp-core
@@ -15,7 +15,7 @@ Read every in-scope file completely. Leaks and lifecycle bugs are found by pairi
 ## Workflow
 
 1. **Scope.** Confirm the files. For "my changes" / "this branch", list changed `.cs` files with `git diff --name-only` against the base branch instead of guessing.
-2. **Context.** Read `ProjectSettings/ProjectVersion.txt` (API drift), `Packages/manifest.json` (UniTask, Addressables, DOTween, Input System), and whether Enter Play Mode Options disable domain reload (`m_EnterPlayModeOptions` in `ProjectSettings/EditorSettings.asset`, plus `m_EnterPlayModeOptionsEnabled` where that key is present).
+2. **Context.** Read `ProjectSettings/ProjectVersion.txt` (API drift), `Packages/manifest.json` (UniTask, Addressables, DOTween, Input System, and library packages: when one is present, also apply the Pitfalls of its skill, such as `r3`, `messagepipe`, `zbase-pubsub`, `zbase-pooling`, `observable-collections`, `native-memory-array`), any `csc.rsp` next to the asmdefs (C# version), and whether Enter Play Mode Options disable domain reload (`m_EnterPlayModeOptions` in `ProjectSettings/EditorSettings.asset`, plus `m_EnterPlayModeOptionsEnabled` where that key is present).
 3. **Read fully** every in-scope file, plus the declarations of any events, singletons or managers they subscribe to.
 4. **Widen the net.** Use IDE diagnostics if an IDE integration is available, otherwise grep the project with the sweep patterns in [references/leak-checklist.md](references/leak-checklist.md). Use `git log -p` / `git blame` to tell new problems from pre-existing ones.
 5. **Pair lifecycles.** For every subscribe/allocate/register, find its cleanup. Missing cleanup is a finding.
@@ -32,7 +32,7 @@ Details and before/after code: [references/bug-checklist.md](references/bug-chec
 - Mutating a copy of a struct (`foreach` variable, property getter returning a struct, `List<struct>[i].x = ...`)
 - Collection modified while iterating with `foreach`
 - Cross-object `Awake`/`Start` ordering assumptions without `[DefaultExecutionOrder]` or explicit init
-- `async void` other than a `try/catch`-wrapped UI handler with a fixed `void` signature (Unity messages should be `async Awaitable` or call a `UniTaskVoid`); discarded `Task`; awaits without a lifetime token; same `Awaitable` awaited twice
+- `async void` other than a `try/catch`-wrapped (or `UniTask.UnityAction`) UI handler with a fixed `void` signature (Unity messages should be `async Awaitable`, or `async UniTaskVoid` with UniTask installed); discarded `Task`; awaits without a lifetime token; same `Awaitable` awaited twice
 - `UnityEngine` API from a background thread (`Task.Run`, thread callbacks, `Awaitable.BackgroundThreadAsync` sections, job `Execute`)
 - Singleton without duplicate guard, or not cleared in `OnDestroy`; `OnDisable`/`OnDestroy` calling `Singleton.Instance` without a `!= null` guard, or through a lazy-creating getter
 - `StopCoroutine("Name")` for a coroutine started by `IEnumerator`; coroutine expected to stop when only the component is disabled
@@ -45,7 +45,7 @@ Details and before/after code: [references/bug-checklist.md](references/bug-chec
 - `UnityEngine.Input` used while the project is Input System only (throws)
 - Runtime script referencing `UnityEditor` without `#if UNITY_EDITOR` (breaks player builds)
 - Obsolete Unity 6 APIs: `FindObjectOfType`, `FindObjectsOfType`, `Rigidbody.velocity`/`drag`, `GetInstanceID` (CS0619 on 6000.5+; use `GetEntityId()`, guarded with `UNITY_6000_5_OR_NEWER` in code shared with older minors). Full list: `csharp-unity` reference `unity6-api-changes.md`
-- C# 10+ syntax (file-scoped namespace, `global using`, `record struct`, `required`) that Unity 6's C# 9 compiler rejects
+- C# 10+ syntax (file-scoped namespace, `global using`, `record struct`, `required`) in an assembly without a `csc.rsp` raising `-langVersion` (Unity 6 defaults to C# 9); check for `csc.rsp` next to the asmdef (or in `Assets/` for `Assembly-CSharp`) before flagging
 
 ## Checklist 2: memory and resource leaks
 
@@ -61,6 +61,7 @@ Details, pairing table, grep sweep and profiler confirmation: [references/leak-c
 - Registry/cache collections that only grow; static collections holding scene objects
 - Lambdas capturing `this` registered with long-lived owners and never removed
 - Async/UniTask/Awaitable work with no cancellation tied to the object's lifetime
+- Library subscriptions and buffers without an owner: R3 `Subscribe` without `AddTo`/`RegisterTo`, MessagePipe `Subscribe` result discarded, ZBase PubSub `ISubscription` never disposed, ObservableCollections views never disposed, `NativeMemoryArray` never disposed, ZBase pools never `ReleaseInstances(0)` + `Dispose`d
 - Cleanup placed only in `OnDestroy` for objects that may never have been active (Unity skips `OnDestroy` if `Awake` never ran) or that are pooled instead of destroyed
 
 ## Checklist 3: conventions
@@ -77,7 +78,7 @@ The table below shows violations of the house style:
 | `#region` | Regions split by access modifier (`Public Methods` / `Private Methods` / `Unity Callbacks`) instead of feature or purpose; Unity message methods (`Awake` … `OnDestroy`) outside a `Unity Lifecycle` region; a feature region with 1-2 methods while another small group could be merged with it (`Unity Lifecycle` is exempt); members of one cohesive interface or base-class contract (e.g. `IState`, drag handlers, `ScriptableRendererFeature` overrides) scattered across regions, or single-method infrastructure interfaces (`IDisposable`, `IStartable`, `ITickable`) and unrelated overrides (`ToString`, `Equals`) given their own region instead of joining the feature they serve; region order other than Fields, Properties, Unity Lifecycle, feature regions; inside a feature region, private methods before public ones or Unity callbacks before either; empty or nested regions; zero or 2+ blank lines before or after `#region` / `#endregion` (except next to the type's braces) |
 | LINQ | LINQ in `Update`, per-frame or allocation-sensitive runtime code (editor tooling, build scripts, tests and one-off init are fine) |
 | Comments | "What" comments, commented-out code; missing *why* on a real workaround |
-| Async | `async void Start()` instead of `async Awaitable Start()` or a `UniTaskVoid` call; missing cancellation token |
+| Async | `async void Start()` instead of `async Awaitable Start()` or (with UniTask) `async UniTaskVoid Start()`; missing cancellation token |
 | `[SerializeField]` | Missing `private`, or `public` field used for Inspector exposure |
 | Caching | `GetComponent`/`Find*` in per-frame code |
 
@@ -108,9 +109,17 @@ Never bury a leak under a list of convention nits; order findings by severity.
 - Prefer minimal fixes; do not rewrite files for style unless asked.
 - When applying fixes, do not restyle unrelated code.
 
+## References
+
+- [references/bug-checklist.md](references/bug-checklist.md): read for details and before/after code for checklist 1.
+- [references/leak-checklist.md](references/leak-checklist.md): read for the pairing table, grep sweep and profiler confirmation for checklist 2.
+- [references/unity-null-sweep.md](references/unity-null-sweep.md): read when sweeping a whole project for `?.`/`??` on Unity objects without an Editor or IDE.
+
 ## Related skills
 
-- `csharp-unity` - the style rules and correct patterns.
-- `unity-editor-safety` - recompiling and verifying after fixes; serialized-data safety.
-- `validate-urp-render-graph-renderer-feature` - Render Graph renderer features.
-- `project-auditor-fixes` - project-wide static analysis with Project Auditor.
+- csharp-unity: the style rules and correct patterns.
+- audit-unity-codebase: whole-project audit instead of a diff or a few scripts.
+- unity-editor-safety: recompiling and verifying after fixes; serialized-data safety.
+- validate-urp-render-graph-renderer-feature: Render Graph renderer features.
+- project-auditor-fixes: project-wide static analysis with Project Auditor.
+- r3, messagepipe, zbase-pubsub, zbase-pooling, observable-collections, unitask: library-specific leak and lifecycle pitfalls.

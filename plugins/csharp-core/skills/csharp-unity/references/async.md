@@ -4,7 +4,7 @@
 
 | Project has | Use |
 |---|---|
-| `com.cysharp.unitask` in `Packages/manifest.json` | UniTask everywhere; do not mix in `Awaitable` |
+| `com.cysharp.unitask` in `Packages/manifest.json`, or a required package depends on it | UniTask everywhere; do not mix in `Awaitable` (an `async Awaitable` method may still `await` a UniTask when an Awaitable-based interface wraps a UniTask service) |
 | No UniTask | Built-in `Awaitable` (UnityEngine namespace, Unity 2023.1+) |
 | Pure C# library with no Unity dependency | `Task`/`ValueTask`, but marshal back to the main thread before touching Unity objects |
 
@@ -77,7 +77,7 @@ Pitfalls:
 
 1. Every await that can outlive its object takes a token: `destroyCancellationToken` for component-bound work, `Application.exitCancellationToken` for app-wide work.
 2. After every await, assume the object may have been destroyed or disabled if no token was passed. Check `if (this == null) return;` when you cannot pass a token.
-3. Never `async void`, including Unity message methods: use `async Awaitable Start()` or a synchronous `Start()` that calls a `UniTaskVoid` method with `.Forget()`. The only exception is a UI callback with a fixed `void` signature; wrap its body in `try/catch` and log with `Debug.LogException(e, this)`. With UniTask installed, wrap the handler with `UniTask.UnityAction(...)` instead of writing `async void`.
+3. Never `async void`, including Unity message methods: use `async Awaitable Start()`; with UniTask installed, `async UniTaskVoid Start()` is also allowed; otherwise a synchronous `Start()` calls an async method and handles its exceptions. The only exception is a UI callback with a fixed `void` signature; wrap its body in `try/catch` and log with `Debug.LogException(e, this)`. With UniTask installed, wrap the handler with `UniTask.UnityAction(...)` instead of writing `async void`.
 4. A `Task` that nobody awaits drops its exception silently. Never discard a `Task` with `_ = DoAsync();`.
 5. Plain `Task` continuations keep running after you exit Play Mode in the Editor. Tie them to `Application.exitCancellationToken`.
 6. Never block the main thread on async work: no `.Result`, `.Wait()`, `GetAwaiter().GetResult()`, or spin-waits. Unity continuations run on the main thread, so this deadlocks the Editor or player.
