@@ -20,7 +20,7 @@ Skill names are unique across the whole repo, kebab-case, and match the folder n
    ```yaml
    ---
    name: skill-name
-   description: What it does and when to trigger. Third person. Name concrete triggers (APIs, package ids, file types, user phrasings). Under 1024 chars.
+   description: "<What it does>. Use when <situations>. Triggers: \"<phrase>\", \"<phrase>\". Not for <X> (<skill>), <Y> (<skill>)."
    license: MIT   # or exactly: Unity Companion License
    metadata:
      category: <category>
@@ -29,11 +29,12 @@ Skill names are unique across the whole repo, kebab-case, and match the folder n
    ---
    ```
 
-2. Body under ~500 lines. Move long tables, API listings and recipes to `references/` and link them from SKILL.md with a one-line "read when" trigger.
-3. Imperative voice. Lead with the workflow, then rules and pitfalls. No marketing copy.
-4. Target Unity 6 (6000.x). Flag APIs removed or obsoleted across 6000.x minors, e.g. `Object.GetInstanceID()` becomes CS0619 on 6000.5+ (use `GetEntityId()`), `FindObjectOfType` becomes `FindFirstObjectByType` / `FindAnyObjectByType`.
-5. No dependency on a specific MCP server's tool names unless the skill is explicitly about that server.
-6. Cross-link related skills by name (for example "see `ui-uitk`") instead of duplicating content.
+2. Description: third person, at most ~600 chars, user-phrased triggers, ends with one "Not for ... (skill)." sentence naming real skills. Boundaries are two-way: the named skill points back. Keep API inventories in the body.
+3. Body under ~500 lines. Move long tables, API listings and recipes to `references/` and link them from SKILL.md with a one-line "read when" trigger.
+4. Imperative voice. Lead with the workflow, then rules and pitfalls. No marketing copy.
+5. Target Unity 6 (6000.x). Flag APIs removed or obsoleted across 6000.x minors, e.g. `Object.GetInstanceID()` becomes CS0619 on 6000.5+ (use `GetEntityId()`), `FindObjectOfType` becomes `FindFirstObjectByType` / `FindAnyObjectByType`.
+6. No dependency on a specific MCP server's tool names unless the skill is explicitly about that server.
+7. Cross-link related skills by name (for example "see `ui-uitk`") instead of duplicating content. End every SKILL.md with `## References` (if it has `references/`) then `## Related skills` (`- skill-name: when`).
 
 ## Licensing
 
