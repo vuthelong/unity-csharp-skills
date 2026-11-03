@@ -70,16 +70,13 @@ public class SteamLobbyService : MonoBehaviour
 
     private void OnEnable()
     {
-        this._gameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(this.OnGameLobbyJoinRequested);
-        this._richPresenceJoinRequested = Callback<GameRichPresenceJoinRequested_t>.Create(this.OnRichPresenceJoinRequested);
-        this._lobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(this.OnLobbyChatUpdate);
-        this._lobbyCreated = CallResult<LobbyCreated_t>.Create(this.OnLobbyCreated);
-        this._lobbyEntered = CallResult<LobbyEnter_t>.Create(this.OnLobbyEntered);
         this.networkManager.OnClientStopped += this.OnClientStopped;
+        this.EnsureCallbacks();
     }
 
     private void Start()
     {
+        this.EnsureCallbacks();
         if (!this.joinFromLaunchArgumentsOnStart || !IsSteamReady) return;
         if (TryGetLaunchLobby(out var lobbyId)) this.Join(lobbyId);
     }
@@ -115,6 +112,7 @@ public class SteamLobbyService : MonoBehaviour
             return;
         }
 
+        this.EnsureCallbacks();
         this._isBusy = true;
         this._lobbyCreated.Set(SteamMatchmaking.CreateLobby(this.lobbyType, this.maxPlayers));
     }
@@ -131,6 +129,7 @@ public class SteamLobbyService : MonoBehaviour
         if (!this.CanStartRequest()) return;
         if (this.InLobby || this.networkManager.IsListening) this.Leave();
 
+        this.EnsureCallbacks();
         this._isBusy = true;
         this._lobbyEntered.Set(SteamMatchmaking.JoinLobby(lobbyId));
     }
@@ -257,6 +256,17 @@ public class SteamLobbyService : MonoBehaviour
     #endregion
 
     #region Helpers
+
+    private void EnsureCallbacks()
+    {
+        if (!IsSteamReady || this._lobbyCreated != null) return;
+
+        this._gameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(this.OnGameLobbyJoinRequested);
+        this._richPresenceJoinRequested = Callback<GameRichPresenceJoinRequested_t>.Create(this.OnRichPresenceJoinRequested);
+        this._lobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(this.OnLobbyChatUpdate);
+        this._lobbyCreated = CallResult<LobbyCreated_t>.Create(this.OnLobbyCreated);
+        this._lobbyEntered = CallResult<LobbyEnter_t>.Create(this.OnLobbyEntered);
+    }
 
     private bool CanStartRequest()
     {

@@ -1,6 +1,6 @@
 ---
 name: steamworks-integration
-description: Integrates Steamworks into a Unity 6 PC game with Steamworks.NET (com.rlabrecque.steamworks.net) - UPM git install, steam_appid.txt, SteamAPI.RestartAppIfNecessary, SteamAPI.InitEx and ESteamAPIInitResult, a persistent bootstrap that pumps SteamAPI.RunCallbacks and calls Shutdown, Callback<T>/CallResult<T> lifetime and an offline fallback, plus achievements and stats, Steam Cloud and Auto-Cloud, rich presence, overlay pause, DLC checks and game language. Use when adding Steam to a project, or when SteamAPI init fails, callbacks never fire, achievements do not pop, the game relaunches itself through Steam, or saves do not sync between PCs. Not for lobbies, invites and P2P transport (steam-lobbies-p2p), builds and SteamPipe upload (steam-build-release), Steam Deck, Steam Input and gamepad text input (steam-deck-controller), the save file format (save-system) or netcode (netcode-for-gameobjects).
+description: "Integrates Steamworks into a Unity 6 PC game with Steamworks.NET: UPM install, steam_appid.txt, RestartAppIfNecessary, SteamAPI.InitEx, a persistent bootstrap that pumps callbacks, an offline fallback, achievements and stats, Steam Cloud, rich presence, overlay pause, DLC and language. Use when adding Steam to a project or when Steam init or callbacks fail. Triggers: \"add Steam achievements\", \"SteamAPI init fails\", \"callbacks never fire\", \"saves don't sync between PCs\". Not for lobbies and P2P (steam-lobbies-p2p), SteamPipe uploads (steam-build-release) or Steam Deck and Steam Input (steam-deck-controller)."
 license: MIT
 metadata:
   category: pc-steam
@@ -27,7 +27,7 @@ Steamworks.NET is a 1:1 C# wrapper of the Steamworks C++ SDK, so the partner.ste
    - pumps `SteamAPI.RunCallbacks()` in `Update` and calls `SteamAPI.Shutdown()` in `OnDestroy`;
    - exposes `SteamBootstrap.IsInitialized`, `InitResult`, `InitError` and `OverlayToggled`.
 4. Gate every Steam call on `SteamBootstrap.IsInitialized`. When init fails (Steam not running, not owned, other OS user, no `steam_appid.txt` in a loose build) the game keeps running without Steam features. Set `quitWhenInitFails` only if the shipped game must refuse to run without Steam.
-5. Create callbacks only after init succeeds and keep them in fields. Dispose them in `OnDestroy`.
+5. Create callbacks only after `SteamBootstrap.IsInitialized` is true and keep them in fields. Dispose them in the counterpart of where you created them (`OnEnable` → `OnDisable`, `Awake`/`Start` → `OnDestroy`).
 6. Add features: achievements and stats with [scripts/SteamAchievements.cs](scripts/SteamAchievements.cs) (read when unlocking achievements or writing stats from gameplay code), then cloud saves, rich presence, overlay, DLC and language from the references.
 7. Test with the Steam client running and logged into an account that owns the AppID (or 480). Test once with Steam closed to confirm the offline path.
 
@@ -82,12 +82,6 @@ Old tutorials that call `SteamUserStats.RequestCurrentStats()` and wait for `Use
 - AppID 480 is fine for init, overlay, friends, lobbies and rich presence tests. Its achievements and stats belong to Spacewar, so test your own definitions with your own AppID.
 - In co-op, do not pause the simulation on `OverlayToggled`. Pause only single-player sessions, or only the local input.
 
-## References
-
-- [references/achievements-stats.md](references/achievements-stats.md): read when defining achievements and stats on the partner site, choosing when to call `StoreStats`, showing progress, or resetting them while testing.
-- [references/cloud-save.md](references/cloud-save.md): read when setting up Steam Cloud, choosing Auto-Cloud roots for `Application.persistentDataPath`, setting quotas, or deciding whether to use `ISteamRemoteStorage`.
-- [references/presence-overlay-dlc.md](references/presence-overlay-dlc.md): read when adding rich presence (`steam_display`, `connect`), opening overlay dialogs or the store page, pausing on overlay, checking DLC ownership, or picking the game language from Steam.
-
 ## Pitfalls
 
 | Symptom | Fix |
@@ -102,12 +96,19 @@ Old tutorials that call `SteamUserStats.RequestCurrentStats()` and wait for `Use
 | `CS0117 ... 'RequestCurrentStats'` | Remove the call; stats are already loaded |
 | `SteamManager` throws "Tried to Initialize the SteamAPI twice", or init/shutdown happen twice | An old `SteamManager` and `SteamBootstrap` both in the project; keep exactly one owner of init and shutdown |
 
+## References
+
+- [references/achievements-stats.md](references/achievements-stats.md): read when defining achievements and stats on the partner site, choosing when to call `StoreStats`, showing progress, or resetting them while testing.
+- [references/cloud-save.md](references/cloud-save.md): read when setting up Steam Cloud, choosing Auto-Cloud roots for `Application.persistentDataPath`, setting quotas, or deciding whether to use `ISteamRemoteStorage`.
+- [references/presence-overlay-dlc.md](references/presence-overlay-dlc.md): read when adding rich presence (`steam_display`, `connect`), opening overlay dialogs or the store page, pausing on overlay, checking DLC ownership, or picking the game language from Steam.
+
 ## Related skills
 
-- `steam-lobbies-p2p`: lobbies, invites, `connect` rich presence join flow, Steam networking transport.
-- `steam-build-release`: build script, depot VDF, removing `steam_appid.txt`, SteamPipe upload.
-- `steam-deck-controller`: Steam Deck detection, on-screen keyboard, Steam Input vs the Input System.
-- `save-system`: save file format, atomic writes and slots that Auto-Cloud then syncs.
-- `pc-settings-menu`: per-device settings that should stay out of Steam Cloud.
-- `netcode-for-gameobjects`: the co-op netcode layer on top of the Steam transport.
-- `csharp-unity`: house style for the scripts.
+- steam-lobbies-p2p: lobbies, invites, `connect` rich presence join flow, Steam networking transport.
+- build-live-game: signing in to Unity Gaming Services with a Steam session ticket (`SignInWithSteamAsync`).
+- steam-build-release: build script, depot VDF, removing `steam_appid.txt`, SteamPipe upload.
+- steam-deck-controller: Steam Deck detection, on-screen keyboard, Steam Input vs the Input System.
+- save-system: save file format, atomic writes and slots that Auto-Cloud then syncs.
+- pc-settings-menu: per-device settings that should stay out of Steam Cloud.
+- netcode-for-gameobjects: the co-op netcode layer on top of the Steam transport.
+- csharp-unity: house style for the scripts.

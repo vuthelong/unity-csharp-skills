@@ -1,6 +1,6 @@
 ---
 name: steam-deck-controller
-description: Makes a Unity 6 Steam game work well on Steam Deck and with gamepads - Deck detection through Steamworks.NET (IsSteamRunningOnSteamDeck on SDK 1.64, IsRunningOnSteamHardware on 1.65), 1280x800 defaults and text legibility, the on-screen keyboard with ShowFloatingGamepadTextInput and ShowGamepadTextInput, full gamepad UI navigation, device-correct button glyphs for any gamepad, Steam Input gamepad emulation vs the ISteamInput action API, Proton vs a native Linux build, and the Deck Verified review criteria. Use when targeting Steam Deck or Deck Verified, when text fields cannot be typed into with a controller, glyphs show Xbox buttons on a Deck, UI cannot be reached without a mouse, or when choosing between Steam Input and the Input System. Not for general Input System setup or rebinding (input-system-actions), Steamworks init and achievements (steamworks-integration), graphics options (pc-settings-menu), UI and text scaling options (accessibility), or Steam builds (steam-build-release).
+description: "Makes a Unity 6 Steam game work well on Steam Deck and with gamepads: Deck detection through Steamworks.NET, 1280x800 defaults and text legibility, the on-screen keyboard, full gamepad UI navigation, device-correct button glyphs, Steam Input vs the ISteamInput API, Proton vs native Linux, and Deck Verified criteria. Use when targeting Steam Deck or Deck Verified. Triggers: \"can't type into text fields with a controller\", \"Xbox glyphs on the Deck\", \"UI needs a mouse\", \"Steam Input or Input System?\". Not for Input System setup and rebinding (input-system-actions), Steamworks init (steamworks-integration) or graphics options (pc-settings-menu)."
 license: MIT
 metadata:
   category: pc-steam
@@ -73,11 +73,6 @@ public class DeckTextField : MonoBehaviour, ISelectHandler
 - Accumulate camera rotation from mouse and stick in the same frame instead of switching sources, because Deck users often combine the trackpad (mouse) with the right stick.
 - Graphics settings stay per device and out of Steam Cloud (`steamworks-integration` cloud reference).
 
-## References
-
-- [references/deck-verified-checklist.md](references/deck-verified-checklist.md): read before submitting for Deck review, when a review comes back Playable or Unsupported, or when planning Deck work.
-- [references/steam-input-vs-input-system.md](references/steam-input-vs-input-system.md): read when choosing between Steam Input emulation and the `ISteamInput` action API, configuring Steam Input opt-in on the partner site, or showing correct glyphs.
-
 ## Pitfalls
 
 | Symptom | Fix |
@@ -91,10 +86,15 @@ public class DeckTextField : MonoBehaviour, ISelectHandler
 | Tiny unreadable text | UI authored for 1080p+ only; check 9 px minimum at 1280x800 |
 | `CS0117 IsSteamRunningOnSteamDeck` | SDK 1.65; add `STEAMWORKS_SDK_165_OR_NEWER` |
 
+## References
+
+- [references/deck-verified-checklist.md](references/deck-verified-checklist.md): read before submitting for Deck review, when a review comes back Playable or Unsupported, or when planning Deck work.
+- [references/steam-input-vs-input-system.md](references/steam-input-vs-input-system.md): read when choosing between Steam Input emulation and the `ISteamInput` action API, configuring Steam Input opt-in on the partner site, or showing correct glyphs.
+
 ## Related skills
 
-- `input-system-actions`: action maps, control schemes, rebinding, `PlayerInput`.
-- `steamworks-integration`: `SteamBootstrap`, callbacks, overlay, Cloud.
-- `pc-settings-menu`: resolution, quality presets, per-device settings, rebinding UI.
-- `ui-ugui`, `ui-uitk`: navigation, selection and scaling in each framework.
-- `steam-build-release`: shipping Windows and optional Linux depots.
+- input-system-actions: action maps, control schemes, rebinding, `PlayerInput`.
+- steamworks-integration: `SteamBootstrap`, callbacks, overlay, Cloud.
+- pc-settings-menu: resolution, quality presets, per-device settings, rebinding UI.
+- ui-ugui, ui-uitk: navigation, selection and scaling in each framework.
+- steam-build-release: shipping Windows and optional Linux depots.

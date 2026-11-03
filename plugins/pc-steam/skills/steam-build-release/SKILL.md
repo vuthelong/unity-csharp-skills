@@ -1,6 +1,6 @@
 ---
 name: steam-build-release
-description: Builds a Unity 6 game for Steam and uploads it with SteamPipe - a batch-mode Editor build script (BuildPipeline.BuildPlayer or a Build Profile, nonzero exit on failure, strips steam_appid.txt and Burst/IL2CPP debug folders), ContentBuilder app_build and depot_build VDF files, FileMapping and FileExclusion, steamcmd +login / +run_app_build uploads, SetLive on beta branches, a dedicated builder account, Steam Guard and config.vdf in CI, and a pre-release checklist. Use for "upload build to Steam", SteamPipe, steamcmd, app_build vdf, depot setup, branches, GitHub Actions Steam deploys, or a Steam build that ships debug files or steam_appid.txt. Not for generic headless builds, Editor licensing or tests (use unity-cli), Steamworks API calls such as achievements or overlay (use steamworks-integration), or Steam Deck and controller support (use steam-deck-controller).
+description: "Builds a Unity 6 game for Steam and uploads it with SteamPipe: a batch-mode build script that fails on errors and strips steam_appid.txt and debug folders, app_build and depot_build VDF files, steamcmd uploads, SetLive on beta branches, a builder account and Steam Guard in CI, and a pre-release checklist. Use when shipping a build to Steam. Triggers: \"upload build to Steam\", \"set up SteamPipe\", \"app_build vdf\", \"GitHub Actions Steam deploy\", \"build ships steam_appid.txt\". Not for generic headless builds and tests (unity-cli), Steamworks API calls (steamworks-integration) or Steam Deck support (steam-deck-controller)."
 license: MIT
 metadata:
   category: pc-steam
@@ -106,16 +106,13 @@ Both run `steamcmd +@ShutdownOnFailedCommand 1 +@NoPromptForPassword 1 [+set_ste
 - [references/vdf-templates.md](references/vdf-templates.md): read when writing or debugging `app_build` / `depot_build` VDF files, depot mapping, exclusions or Preview builds.
 - [references/ci-upload.md](references/ci-upload.md): read when uploading from CI, setting up the builder account, Steam Guard, `config.vdf` caching or GitHub Actions.
 - [references/release-checklist.md](references/release-checklist.md): read before the first upload, before setting a build live on `default`, or when a Steam build behaves differently from the local one.
-
-## Scripts
-
 - [scripts/Editor/SteamBuildScript.cs](scripts/Editor/SteamBuildScript.cs): read when building the player for Steam in batch mode or from the Tools menu.
 - [scripts/upload.sh](scripts/upload.sh): read when uploading from Linux or macOS shells and Linux CI runners.
 - [scripts/upload.ps1](scripts/upload.ps1): read when uploading from Windows or a self-hosted Windows runner.
 
 ## Related skills
 
-- `unity-cli`: `unity build`, headless runs, Editor install and licensing on CI runners, tests.
-- `steamworks-integration`: Steamworks.NET init, `steam_appid.txt` during development, achievements, cloud saves.
-- `steam-deck-controller`: Deck Verified checks, gamepad input, Proton vs native Linux.
-- `unity-editor-safety`: confirming the build script compiled before a batch run.
+- unity-cli: `unity build`, headless runs, Editor install and licensing on CI runners, tests.
+- steamworks-integration: Steamworks.NET init, `steam_appid.txt` during development, achievements, cloud saves.
+- steam-deck-controller: Deck Verified checks, gamepad input, Proton vs native Linux.
+- unity-editor-safety: confirming the build script compiled before a batch run.

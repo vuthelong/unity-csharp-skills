@@ -1,6 +1,6 @@
 ---
 name: steam-lobbies-p2p
-description: Builds friends-only Steam lobbies, invites and join flows for host-client co-op in Unity 6 with Steamworks.NET, and connects them to Netcode for GameObjects over Steam P2P (SteamNetworkingSockets transport, Steam Datagram Relay). Covers SteamMatchmaking.CreateLobby, LobbyCreated_t, LobbyEnter_t, SetLobbyData, ActivateGameOverlayInviteDialog, GameLobbyJoinRequested_t, GameRichPresenceJoinRequested_t, +connect_lobby launch arguments, build-version checks and host-quit handling. Use for "invite a Steam friend", "join through the Steam overlay", "host a co-op game on Steam", or a client that cannot reach the host by SteamID. Not for NGO RPCs, NetworkVariables or spawning (netcode-for-gameobjects), Unity Gaming Services sessions, Relay or join codes (setup-multiplayer-services), SteamAPI init, achievements or Steam Cloud (steamworks-integration), Steam builds and uploads (steam-build-release), saving the host's world (save-system) or voice chat (setup-vivox-voice-chat).
+description: "Builds friends-only Steam lobbies, invites and join flows for host-client co-op in Unity 6 with Steamworks.NET, and connects them to Netcode for GameObjects over Steam P2P (SteamNetworkingSockets transport, Steam Datagram Relay), including launch-argument joins, build-version checks and host-quit handling. Use when hosting or joining co-op through Steam. Triggers: \"invite a Steam friend\", \"join through the Steam overlay\", \"host a co-op game on Steam\", \"client cannot reach the host by SteamID\". Not for UGS sessions and Relay (setup-multiplayer-services), NGO RPCs and spawning (netcode-for-gameobjects) or SteamAPI init (steamworks-integration)."
 license: MIT
 metadata:
   category: pc-steam
@@ -22,7 +22,7 @@ Topology: one player hosts (listen server), 2-4 friends join, no dedicated serve
 ## Workflow
 
 1. **Host**: `SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, maxPlayers)` and register the returned `SteamAPICall_t` with a `CallResult<LobbyCreated_t>`. On `k_EResultOK` the host is already inside the lobby. Then:
-   - `SetLobbyData(lobby, "host_steam_id", SteamUser.GetSteamID())` and `SetLobbyData(lobby, "build_version", Application.version)`. Only the owner can write lobby data.
+   - `SetLobbyData(lobby, "host_steam_id", SteamUser.GetSteamID().m_SteamID.ToString(CultureInfo.InvariantCulture))` and `SetLobbyData(lobby, "build_version", Application.version)`. Lobby data values are strings. Only the owner can write lobby data.
    - `SteamFriends.SetRichPresence("connect", "+connect_lobby <lobbyId>")` so friends can join from the friends list.
    - `NetworkManager.StartHost()`. If it fails, `LeaveLobby` and report.
 2. **Invite**: `SteamFriends.ActivateGameOverlayInviteDialog(lobbyId)`. Needs the Steam overlay; it often does not appear in the Editor, so test invites from a build launched through Steam.
@@ -44,7 +44,7 @@ lobbyService.BeforeStartClient += hostId => steamTransport.ConnectToSteamID = ho
 
 ## Rules
 
-- Keep every `Callback<T>` and `CallResult<T>` in a field for as long as it must fire; a local is collected and the callback silently stops. Dispose them in `OnDisable`.
+- Keep every `Callback<T>` and `CallResult<T>` in a field for as long as it must fire; a local is collected and the callback silently stops. Create them only once `SteamBootstrap.IsInitialized` is true (the reference script creates them lazily from `OnEnable`, `Start` and before each request) and dispose them in the counterpart of where they were created (`OnEnable` → `OnDisable`, `Awake`/`Start` → `OnDestroy`).
 - `CreateLobby` and `JoinLobby` are asynchronous. Never read lobby data or start NGO on the line after the call.
 - Guard Steam calls with `SteamBootstrap.IsInitialized` so the game still runs without Steam (offline dev builds, Multiplayer Play Mode clones).
 - Lobby data is public to anyone who can see the lobby. Never store tokens or IPs there.
@@ -52,12 +52,6 @@ lobbyService.BeforeStartClient += hostId => steamTransport.ConnectToSteamID = ho
 - `k_ELobbyTypePrivate` lobbies are invite-only; `FriendsOnly` lets friends join from the friends list; `Public` shows in `RequestLobbyList` (use it only with a matchmaking UI and filters).
 - Wrap Steamworks code in `#if !DISABLESTEAMWORKS` and define `DISABLESTEAMWORKS` for platforms Steamworks.NET does not support, as the reference script does.
 - `async void` only on UI button handlers, with try/catch. Lobby calls are callback-based, not `Task`-based.
-
-## References
-
-- [references/lobby-api.md](references/lobby-api.md): read when choosing a lobby type, reading or writing lobby or member data, sending lobby chat, listing lobbies, or mapping a callback to its struct fields.
-- [references/transport-setup.md](references/transport-setup.md): read when installing or configuring the SteamNetworkingSockets or Facepunch transport, checking NGO 2.x compatibility, or planning a custom Steam transport.
-- [references/testing.md](references/testing.md): read when testing co-op locally without Steam, testing real Steam invites, or debugging a client that never connects.
 
 ## Pitfalls
 
@@ -72,11 +66,18 @@ lobbyService.BeforeStartClient += hostId => steamTransport.ConnectToSteamID = ho
 | Host overlay shows no invite dialog | Overlay disabled, game launched outside Steam, or running in the Editor |
 | Lobby rejoined after quitting | `LeaveLobby` and rich presence clearing missing on the quit path |
 
+## References
+
+- [references/lobby-api.md](references/lobby-api.md): read when choosing a lobby type, reading or writing lobby or member data, sending lobby chat, listing lobbies, or mapping a callback to its struct fields.
+- [references/transport-setup.md](references/transport-setup.md): read when installing or configuring the SteamNetworkingSockets or Facepunch transport, checking NGO 2.x compatibility, or planning a custom Steam transport.
+- [references/testing.md](references/testing.md): read when testing co-op locally without Steam, testing real Steam invites, or debugging a client that never connects.
+
 ## Related skills
 
-- `steamworks-integration`: SteamAPI init, `RunCallbacks`, rich presence display strings, overlay pause.
-- `netcode-for-gameobjects`: NetworkManager, connection approval, authority, RPCs, NetworkVariables, scenes.
-- `setup-multiplayer-services`: Unity Gaming Services sessions, Relay and join codes when the game is not Steam-only.
-- `save-system`: host-owned world saves for co-op.
-- `setup-vivox-voice-chat`: in-game voice chat.
-- `steam-build-release`: builds for testing invites through a Steam branch.
+- steamworks-integration: SteamAPI init, `RunCallbacks`, rich presence display strings, overlay pause.
+- network-debugging: Steam P2P connection failures, relay vs direct routes, drops and fake lag.
+- netcode-for-gameobjects: NetworkManager, connection approval, authority, RPCs, NetworkVariables, scenes.
+- setup-multiplayer-services: Unity Gaming Services sessions, Relay and join codes when the game is not Steam-only.
+- save-system: host-owned world saves for co-op.
+- setup-vivox-voice-chat: in-game voice chat.
+- steam-build-release: builds for testing invites through a Steam branch.
