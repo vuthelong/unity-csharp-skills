@@ -1,6 +1,6 @@
 ---
 name: unity-particle-system
-description: "Creates, tunes, scripts and optimizes the built-in CPU Particle System (Shuriken) on Unity 6 with URP particle shaders - the module struct API, bursts, Emit with EmitParams, sub-emitters, collision and trigger callbacks, trails, pooling and overdraw. Use for ParticleSystem work or effects that must run on WebGL or low-end mobile. Triggers: \"make a fire effect\", \"OnParticleCollision not called\", \"particles are pink in URP\", \"explosion burst\". Not for GPU particles at scale (unity-vfx-graph) or weather state logic (day-night-weather)."
+description: "Creates, tunes, scripts and optimizes the built-in CPU Particle System (Shuriken) on Unity 6 with URP particle shaders - the module struct API, bursts, Emit with EmitParams, sub-emitters, collision and trigger callbacks, trails, pooling and overdraw. Use for ParticleSystem work or effects that must run on WebGL or low-end mobile. Triggers: \"make a fire effect\", \"OnParticleCollision not called\", \"particles are pink in URP\", \"explosion burst\". Not for GPU particles at scale (unity-vfx-graph), spec-driven effect design (particle-vfx-authoring), atlas batching (particle-atlas-batching) or weather state logic (day-night-weather)."
 license: MIT
 metadata:
   category: rendering-vfx
@@ -150,6 +150,8 @@ Read [references/scripting.md](references/scripting.md) when handling `OnParticl
 ## Related skills
 
 - unity-vfx-graph: GPU-scale effects.
+- particle-vfx-authoring: designing a new effect from a JSON spec with rendered contact sheets and a mobile budget check.
+- particle-atlas-batching: packing many particle systems into one atlas material and draw call, and keeping packed prefabs in sync.
 - day-night-weather: driving rain and snow systems from the weather state.
 - unity-texture-import: flipbook sheets and particle textures.
 - urp-postprocessing: Bloom on HDR particle colors.

@@ -21,7 +21,7 @@
     {
       "name": "unity-rendering-vfx",
       "source": "./plugins/rendering-vfx",
-      "description": "URP, Render Graph, post-processing, Shader Graph, HLSL shaders, VFX Graph, lighting, day-night and weather."
+      "description": "URP, Render Graph, post-processing, Shader Graph, HLSL shaders, VFX Graph, particle VFX authoring and atlas batching, lighting, day-night and weather."
     },
     {
       "name": "unity-ui",

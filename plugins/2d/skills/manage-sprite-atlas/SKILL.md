@@ -1,6 +1,6 @@
 ---
 name: manage-sprite-atlas
-description: "Creates, configures and loads Sprite Atlas V2 assets from editor C#, by default through a prebuild generator: packables, packing and per-platform texture settings, HD/SD variants, Addressables late binding and runtime GetSprite caching. Use when creating or optimizing sprite atlases. Triggers: \"create a sprite atlas\", \"cut draw calls for 2D or UI sprites\", \"sprites missing at runtime because of atlases\", \"load atlases on demand\", \"atlas does nothing\". Not for slicing sprite sheets (sprite-editor), source texture import settings (unity-texture-import) or Spine atlases (spine-unity)."
+description: "Creates, configures and loads Sprite Atlas V2 assets from editor C#, by default through a prebuild generator: packables, packing and per-platform texture settings, HD/SD variants, Addressables late binding and runtime GetSprite caching. Use when creating or optimizing sprite atlases. Triggers: \"create a sprite atlas\", \"cut draw calls for 2D or UI sprites\", \"sprites missing at runtime because of atlases\", \"load atlases on demand\", \"atlas does nothing\". Not for slicing sprite sheets (sprite-editor), source texture import settings (unity-texture-import) Spine atlases (spine-unity) or particle VFX atlases (particle-atlas-batching)."
 license: Unity Companion License
 metadata:
   category: 2d
@@ -69,3 +69,4 @@ Manual one-off authoring (atlas assets committed to the repo, created once) is f
 - `addressables-asset-loading`: shipping atlases as Addressables and `AssetReferenceAtlasedSprite`.
 - `spine-unity`: Spine atlases are separate; never pack Spine pages into a SpriteAtlas.
 - `ui-ugui`: UI Image constraints on rotated or tight-packed sprites.
+- `particle-atlas-batching`: atlases for ParticleSystem materials, not sprites.

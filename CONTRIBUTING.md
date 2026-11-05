@@ -39,6 +39,6 @@ Skill names are unique across the whole repo, kebab-case, and match the folder n
 ## Licensing
 
 - Content derived from Unity-Technologies/skills keeps `license: Unity Companion License` and stays in Unity-dependent use.
-- Content derived from Unity-Open-MCP, a5c-ai/babysitter, DietrichGebert/ponytail or scenario-labs/skills is MIT; keep the source in `metadata.sources`.
+- Content derived from Unity-Open-MCP, a5c-ai/babysitter, DietrichGebert/ponytail, scenario-labs/skills or patch-gg/pixelfx is MIT; keep the source in `metadata.sources`.
 - A skill that merges several sources takes the most restrictive license among them.
 - Original content is MIT.
