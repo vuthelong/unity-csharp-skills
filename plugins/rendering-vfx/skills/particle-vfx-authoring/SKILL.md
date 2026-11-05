@@ -16,7 +16,7 @@ Treat a particle VFX as a spec. Each effect is one JSON file. The editor tool in
 - one child system per layer, all `scalingMode = Hierarchy`;
 - shared materials (one per texture and blend mode) on the packable `ParticleVfx/Legacy Additive` / `Legacy Alpha Blended` shaders.
 
-Nothing is painted: every texture already exists in the project.
+Textures come from the project. When a needed shape is missing (glow, ring, spark, streak, slash, smoke puff, noise, cells, pixel noise, gradient, ring or smoke flipbook), generate it with `scripts/texgen.py`; hand-painted looks (detailed fire, stylized slashes) still need an artist or an asset pack.
 
 The method comes from pixelfx and Hugo Duprez: a spec is clay, trust your eyes, feed your references. One-shot specs make mediocre effects. Drafts you render, look at and refine make good ones.
 
@@ -59,6 +59,22 @@ sh <skill>/scripts/vfxgen.sh compile    # after editing the editor scripts
 - `check` prints `FAIL` / `WARN` findings with numbers, or `PASS no findings`. Defaults are mobile budgets: ≤ 60 alive particles at peak (FAIL > 120), quad cover ≤ 12 unit areas (FAIL > 30), textures ≤ 512 px, noise quality Low, ≤ 3 atlas renderer groups. Raise them for PC or console with the options above.
 - `build` refuses to overwrite a prefab it did not generate (the `.meta` `userData` starts with `vfxgen:`); `force` overrides that.
 
+## Procedural textures
+
+`python -I <skill>/scripts/texgen.py <kind> <out.png> [options]` writes an RGBA PNG with the standard library only (no Unity, no numpy). Kinds: `glow`, `ring`, `star`, `streak`, `slash`, `smoke`, `noise`, `cells`, `pixel`, `gradient`. `demo <out.png>` renders every kind on one sheet; `--help` lists the options.
+
+```bash
+python -I <skill>/scripts/texgen.py glow Assets/VFX/Textures/Gen/tex_glow_core.png --size 128 --core 0.6
+python -I <skill>/scripts/texgen.py ring Assets/VFX/Textures/Gen/tex_ring_thin.png --width 0.05
+python -I <skill>/scripts/texgen.py smoke Assets/VFX/Textures/Gen/tex_smoke_4x4.png --size 128 --frames 16
+python -I <skill>/scripts/texgen.py pixel Assets/VFX/Textures/Gen/tex_pixel_mess.png --size 64 --levels 3
+```
+
+- Default output is white RGB with the shape in alpha, so particle color tints it and both `add` and `alpha` blends work. `--rgb mask` also writes the shape into RGB (black background, `add` only).
+- `--frames N` makes a flipbook (`glow`, `ring`, `smoke` and `noise` animate over it); put the printed `tiles` into the layer's `sheet.tiles`.
+- Keep sizes small: 64–128 for sparks and dots, 128–256 for glows, rings and smoke, 512 only for big ground marks. The atlas halves them again.
+- Import settings and the per-kind options: [references/texgen.md](references/texgen.md).
+
 ## 1. Brief
 
 Write the brief as one line with art direction before you touch anything. Find out (ask if it matters and is unknown):
@@ -77,6 +93,7 @@ Example: "Frost nova at the feet: white flash on the hit, an ice ring racing out
 - Preview 2–3 existing VFX of the same character or element to match the game's look, scale and brightness. If one is close, read its layer setup from the prefab.
 - Pick textures with `catalog` and look at the sheet. `no-alpha` textures have a black background: use `blend: add` only.
 - Typical picks: soft round glows for cores and flashes, thin rings for shockwaves, stars and flares for glints, small soft dots for sparks (stretched), smoke puffs for volumes, flipbook sheets for fire and explosions (`sheet.tiles`).
+- Nothing fits? Generate it with `texgen.py` (below) into the project's texture folder, then `catalog` it like any other texture.
 
 ## 3. Draft
 
@@ -103,7 +120,7 @@ Fix the worst thing, rebuild, and look again. Do **three rounds minimum**; a sho
    - the `ParticleVfxLifetime` despawn time, or that it loops (the caller stops it);
    - the spawn point (feet, center, muzzle).
 4. If the game's other VFX are atlas-batched, pack this one with `particle-atlas-batching` (`PlanRepack`, then `Optimize`). After packing, `build` would overwrite the packed prefab: edit the spec, rebuild, then repack.
-5. Commit the spec, the prefab and any new `M_gen_*.mat`. Never commit `Temp/`.
+5. Commit the spec, the prefab, any new `M_gen_*.mat` and any texture made with `texgen.py`. Never commit `Temp/`.
 
 ## Pitfalls
 
@@ -122,6 +139,7 @@ Fix the worst thing, rebuild, and look again. Do **three rounds minimum**; a sho
 
 - [references/spec.md](references/spec.md): read when writing or editing a spec (every key, defaults, shapes, color math, an example).
 - [references/craft.md](references/craft.md): read before judging a preview (the quality bar, choreography, the look-judge-fix table, element palettes).
+- [references/texgen.md](references/texgen.md): read when generating a texture (kinds, options, import settings).
 
 ## Related skills
 
